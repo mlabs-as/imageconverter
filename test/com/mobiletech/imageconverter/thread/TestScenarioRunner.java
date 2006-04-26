@@ -81,7 +81,7 @@ public class TestScenarioRunner implements Runnable{
         }
         if(out != null){
             try {
-                out.writeImage(image,ts.getName(),fil.substring(fil.lastIndexOf("\\")+1));
+                out.writeImage(image,ts.getName(),fil.substring(fil.lastIndexOf("\\")+1, fil.lastIndexOf(".")+1)+ts.getParams().getFormat());
             } catch (RuntimeException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

@@ -60,9 +60,9 @@ public class ImageConverter {
             imageParams.resetInternal();
             //Validate input parameters
             imageParams = validateParams(imageParams);
-            // Read all images into BufferedImage objects for processing
+            // Read all images into BufferedImage objects for processing           
             BufferedImage [] images  = ImageDecoder.readImages(imageParams.getImage(),imageParams);            
-            // Run the processing pipeline for each image and retrieve the processed image
+            // Run the processing pipeline for each image and retrieve the processed image            
             for(int i = 0; i<images.length ;i++){
                 imageParams = doPipeline(images[i],imageParams);
                 images[i] = imageParams.getInternalVariables().getBufferedImage();

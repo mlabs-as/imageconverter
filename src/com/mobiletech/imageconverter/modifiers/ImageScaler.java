@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.awt.image.renderable.ParameterBlock;
+import java.io.IOException;
 
 import javax.media.jai.InterpolationBicubic;
 import javax.media.jai.InterpolationBicubic2;
@@ -53,7 +54,6 @@ public class ImageScaler {
         if(type == 0){
             type = BufferedImage.TYPE_INT_RGB;
         } 
-        
         if(hasTransparency){
             inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type);
         } else if (scale <= 0.7) {
@@ -62,8 +62,7 @@ public class ImageScaler {
             inImage = scaleImageWithAfflineTransformOp(inImage,scale,newWidth,newHeight,type);            
         } else {
             inImage = scaleImageWithGetScaledInstance(inImage,newWidth,newHeight,type);
-        }
-                        
+        }                         
         return inImage;               
     }   
     
