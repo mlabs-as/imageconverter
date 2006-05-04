@@ -39,7 +39,8 @@ public class ImageScaler {
         return resizeImage(inImage,scale,noEnlargement,hasTransparency,params);
     }   
     
-    public static BufferedImage resizeImage(BufferedImage inImage,double scale,boolean noEnlargement, boolean hasTransparency, ImageConverterParams params){                
+    public static BufferedImage resizeImage(BufferedImage inImage,double scale,boolean noEnlargement, boolean hasTransparency, ImageConverterParams params){  
+        long start = System.currentTimeMillis();
         if(noEnlargement){
             if(scale > 1.0){
                 return null;
@@ -63,6 +64,7 @@ public class ImageScaler {
         } else {
             inImage = scaleImageWithGetScaledInstance(inImage,newWidth,newHeight,type);
         }                         
+        System.out.println("Time to resize: " + (System.currentTimeMillis()-start)/1000);
         return inImage;               
     }   
     

@@ -26,6 +26,7 @@ import javax.media.jai.PlanarImage;
 import javax.media.jai.operator.ColorQuantizerDescriptor;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
+import com.mobiletech.imageconverter.modifiers.ImageColorModifier;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGEncodeParam;
@@ -61,7 +62,9 @@ public class ImageEncoder {
             buffered = null;            
         }   
         if(format.compareToIgnoreCase("gif")==0 && inImage.getType() != BufferedImage.TYPE_BYTE_INDEXED && !params.isGrayscale()){   
-            inImage = toIndexColorModel(inImage,params);          
+            long start = System.currentTimeMillis();
+            inImage = toIndexColorModel(inImage,params); 
+            System.out.println("Time toindexcolormodel: " + (System.currentTimeMillis()-start)/1000);
         } 
         if(params.getFormat().compareToIgnoreCase("wbmp")==0){
             int bwWidth = inImage.getWidth(); 
@@ -205,10 +208,10 @@ public class ImageEncoder {
     
     private static BufferedImage toIndexColorModel(BufferedImage image, ImageConverterParams params) throws ImageConverterException{  
         if(params.getInternalVariables().getCm() == null){
-            //image = colorChange(image,255);
+            long start = System.currentTimeMillis();
             PlanarImage surrogateImage = PlanarImage.wrapRenderedImage(image);
             ParameterBlock pb = new ParameterBlock();
-    
+            System.out.println("Time 213: " + (System.currentTimeMillis()-start)/1000);
             int w = surrogateImage.getWidth();
             int h = surrogateImage.getHeight();
     
@@ -223,7 +226,7 @@ public class ImageEncoder {
     
             pb.removeParameters();
             pb.removeSources();
-    
+            System.out.println("Time 228: " + (System.currentTimeMillis()-start)/1000);
             if(params.getInternalVariables().getOldFormat().equalsIgnoreCase("gif")){
                 pb.addSource(surrogateImage);
             } else {
@@ -249,7 +252,7 @@ public class ImageEncoder {
             KernelJAI ditherMask = KernelJAI.ERROR_FILTER_FLOYD_STEINBERG;
             
             ColorModel cm = null;
-            
+            System.out.println("Time 254: " + (System.currentTimeMillis()-start)/1000);
             if(params.getInternalVariables().getTransparentColor() != null){
                 int transIndex = getIndexOfColor(colorMap, tableLength,params.getInternalVariables().getTransparentColor());
                 if(transIndex == 256){
@@ -257,13 +260,14 @@ public class ImageEncoder {
                 }
                 GIFImageMetadata [] metaDataTable = params.getInternalVariables().getImageMetadata();
                 for(int i = 0; i < metaDataTable.length; i++){
-                    metaDataTable[i].transparentColorIndex = transIndex;
+                    metaDataTable[i].transparentColorIndex = transIndex;                    
                 }                
                 params.getInternalVariables().setImageMetadata(metaDataTable);
                 cm = new IndexColorModel(8, colorMap.getByteData()[0].length, colorMap.getByteData()[0], colorMap.getByteData()[1], colorMap.getByteData()[2], transIndex);
             } else {
                 cm = new IndexColorModel(8, colorMap.getByteData()[0].length, colorMap.getByteData()[0], colorMap.getByteData()[1], colorMap.getByteData()[2]);
             }    
+            System.out.println("Time 269: " + (System.currentTimeMillis()-start)/1000);
             PlanarImage op = PlanarImage.wrapRenderedImage(new BufferedImage(w, h, BufferedImage.TYPE_BYTE_INDEXED,(IndexColorModel) cm));
 
             ImageLayout layout = new ImageLayout();
@@ -279,10 +283,13 @@ public class ImageEncoder {
             pb.addSource(surrogateImage);
             pb.add(colorMap);
             pb.add(ditherMask);
+            System.out.println("Time 285: " + (System.currentTimeMillis()-start)/1000);
             op= JAI.create("errordiffusion",pb,rh);
-            
-            surrogateImage=(PlanarImage)op;           
+            System.out.println("Time 287: " + (System.currentTimeMillis()-start)/1000);
+            surrogateImage=(PlanarImage)op;   
+            System.out.println("Time 289: " + (System.currentTimeMillis()-start)/1000);
             image = surrogateImage.getAsBufferedImage();
+            System.out.println("Time 290: " + (System.currentTimeMillis()-start)/1000);
             params.getInternalVariables().setCm(image.getColorModel());
             pb = null;
             wr = null;
