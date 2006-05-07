@@ -1,5 +1,8 @@
 package com.mobiletech.imageconverter;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -20,11 +23,11 @@ public class ImageConverterTestEngine extends TestCase{
     public ImageConverterTestEngine(){        
         //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/problem images");
         //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif images");
-        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/animated gifs");
+        sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/animated gifs");
         //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite");
-        sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/Single Run");
+        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/Single Run");
         //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif transparency");
-        testScenarioSourceDirectory = new TestDirectory("C:/data/work/workspace/dextella_frame/test/com/mobiletech/mcf/core/content/image/imageconv/test/data");
+        testScenarioSourceDirectory = new TestDirectory("C:/data/work/workspace/imageconverter/test/testdata/routine");
         // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
         targetDirectory = new TestDirectory("C:/temp/imagetest"); // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
         // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
@@ -41,11 +44,16 @@ public class ImageConverterTestEngine extends TestCase{
         scenarios = runGui();
         runTest(scenarios);
     }
-    public void testMain(){
+    public void testMain(){        
         Vector<TestScenario> scenarios = testScenarioSourceDirectory.getAllTestScenariosScanSubdirs();
         runTest(scenarios);
     }
     private void runTest(Vector<TestScenario> scenarios){
+        InputStreamReader stdin =
+            new InputStreamReader(System.in);
+            BufferedReader console =
+            new BufferedReader(stdin);
+                    
         HashMap images = sourceDirectory.getAllSupportedImagesRecursive();
         printSourceImageSummary(images);        
         printTestScenarioSummary(scenarios);
@@ -61,6 +69,7 @@ public class ImageConverterTestEngine extends TestCase{
         Iterator<TestScenario> ite = scenarios.iterator();
         TestScenario currentScenario = null;
         Vector statVector = new Vector();
+        
         while(ite.hasNext()){
             currentScenario = ite.next();
             TestScenarioRunner tsc = new TestScenarioRunner(currentScenario, images, targetDirectory);

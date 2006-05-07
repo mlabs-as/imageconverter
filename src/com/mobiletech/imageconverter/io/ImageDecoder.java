@@ -17,6 +17,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
+import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.sun.imageio.plugins.gif.GIFImageMetadata;
 import com.sun.imageio.plugins.gif.GIFStreamMetadata;
@@ -47,6 +48,9 @@ public class ImageDecoder {
             if(!imageParams.getFormat().equalsIgnoreCase("gif") || !reader.getFormatName().equalsIgnoreCase("gif")){
                 finishedImages = new BufferedImage[1];
                 finishedImages[0] = reader.read(0);
+                if(finishedImages[0].getType() == 0){
+                    finishedImages[0] = ImageUtil.toBuffImageRGBorARGB(finishedImages[0]);
+                }
             } else {                         
                 Iterator iioimages = reader.readAll(null);
                 

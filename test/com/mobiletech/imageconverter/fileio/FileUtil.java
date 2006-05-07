@@ -34,7 +34,10 @@ public class FileUtil {
         return true;
     }
     public static byte [] readFileAsByte(String path){
-        File file = new File(path);
+        File file = new File(path);               
+        return readFileAsByte(file);
+    }
+    public static byte [] readFileAsByte(File file){        
         byte[] fileContents = new byte[Long.valueOf(file.length()).intValue()];
         FileInputStream in = null;
         
