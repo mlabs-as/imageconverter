@@ -21,6 +21,7 @@ import javax.media.jai.InterpolationNearest;
 import javax.media.jai.JAI;
 import javax.media.jai.RenderedOp;
 
+import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 
 public class ImageScaler {
@@ -39,8 +40,7 @@ public class ImageScaler {
         return resizeImage(inImage,scale,noEnlargement,hasTransparency,params);
     }   
     
-    public static BufferedImage resizeImage(BufferedImage inImage,double scale,boolean noEnlargement, boolean hasTransparency, ImageConverterParams params){  
-        long start = System.currentTimeMillis();
+    public static BufferedImage resizeImage(BufferedImage inImage,double scale,boolean noEnlargement, boolean hasTransparency, ImageConverterParams params){          
         if(noEnlargement){
             if(scale > 1.0){
                 return null;
@@ -49,7 +49,7 @@ public class ImageScaler {
         int newWidth = (int) (inImage.getWidth() * scale); 
         int newHeight = (int) (inImage.getHeight() * scale); 
                
-        inImage = toBuffImageRGBorARGB(inImage,params);
+        inImage = ImageUtil.toBuffImageRGBorARGB(inImage);
         int type = inImage.getType();
         
         if(type == 0){
@@ -64,7 +64,6 @@ public class ImageScaler {
         } else {
             inImage = scaleImageWithGetScaledInstance(inImage,newWidth,newHeight,type);
         }                         
-        System.out.println("Time to resize: " + (System.currentTimeMillis()-start)/1000);
         return inImage;               
     }   
     
@@ -134,27 +133,7 @@ public class ImageScaler {
         blurredImg = blurOp.filter(img, blurredImg);        
         img = null;
         return blurredImg;
-    }
-    
-    
-    private static final BufferedImage toBuffImageRGBorARGB(BufferedImage source, ImageConverterParams params) {
-        if (source.getType() != BufferedImage.TYPE_INT_RGB && source.getType() != BufferedImage.TYPE_INT_ARGB) {
-            int type = BufferedImage.TYPE_INT_RGB;
-            if (source.getColorModel().hasAlpha())
-                type = BufferedImage.TYPE_INT_ARGB;
-            BufferedImage bi = new BufferedImage(source.getWidth(), source.getHeight(), type);
-            Graphics2D graphics2D = null;
-            try {
-                graphics2D = bi.createGraphics();
-                graphics2D.drawImage(source, null, 0, 0);
-            } finally {
-                if (graphics2D != null)
-                    graphics2D.dispose();
-            }
-            return bi;
-        }
-        return source;
-    }
+    }    
     
     private static final BufferedImage scaleUsingJAI(BufferedImage image, double scale, int newWidth, int newHeight, int type){
         ParameterBlock scalePb = new ParameterBlock();

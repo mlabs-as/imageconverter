@@ -9,12 +9,18 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
+import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
+
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
 import com.mobiletech.imageconverter.util.ImageUtil;
@@ -24,7 +30,6 @@ import com.sun.imageio.plugins.gif.GIFStreamMetadata;
 
 public class ImageDecoder {
     public static BufferedImage [] readImages(byte [] inByteArray,ImageConverterParams imageParams) throws ImageConverterException{
-        long start = System.currentTimeMillis();
         ByteArrayInputStream imageStream = null;                
         ImageInputStream iis = null;        
         ImageReader reader = null;
@@ -45,125 +50,26 @@ public class ImageDecoder {
             
             reader.setInput(iis,false); 
 
+            // for all formats except gif
             if(!imageParams.getFormat().equalsIgnoreCase("gif") || !reader.getFormatName().equalsIgnoreCase("gif")){
                 finishedImages = new BufferedImage[1];
                 finishedImages[0] = reader.read(0);
+                // this is for some known problem images that have been processed in photoshop
+                // they will cause crashes and/or get wrong colors unless they are converted to
+                // have a known image type, this conversion can be quite time consuming for some of these
+                // images and will reduce the filesize in some cases
                 if(finishedImages[0].getType() == 0){
                     finishedImages[0] = ImageUtil.toBuffImageRGBorARGB(finishedImages[0]);
-                }
-            } else {                         
+                }                
+            } else { // GIF specific processing (gif is not well supported in java so we need to do some things manually)                         
                 Iterator iioimages = reader.readAll(null);
-                
-                GIFStreamMetadata  streamMetaData = (GIFStreamMetadata)reader.getStreamMetadata();
-
                 int numImages = reader.getNumImages(true);
-                IIOImage [] images = new IIOImage[numImages];
-                finishedImages = new BufferedImage[numImages];
-
-                for(int counter = 0; iioimages.hasNext(); counter++) {
-                    images[counter] = (IIOImage)iioimages.next();
-                }
-
-                BufferedImage resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);            
-          
-                Color backgroundColor = Color.white; 
-                Color transparentColor = null;
-                
-                BufferedImage previousImage = null;
-                if(numImages > 1){
-                    previousImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);
-                }
-                imageParams.getInternalVariables().setImageMetadata(new GIFImageMetadata[images.length]);
-                
-                // Storing metadata for later use
-                GIFImageMetadata [] metaTable = imageParams.getInternalVariables().getImageMetadata();                               
-                GIFImageMetadata metaData = (GIFImageMetadata)images[0].getMetadata(); 
-                
-                if(streamMetaData.globalColorTable != null){
-                    int numEntries = streamMetaData.globalColorTable.length/3;
-                    byte [] colorTable = streamMetaData.globalColorTable;
-                    int found = 0;
-                    for (int e = 0; e < numEntries; e++) {
-                        if(e == streamMetaData.backgroundColorIndex) {
-                            int r = colorTable[3*e] & 0xff; 
-                            int g = colorTable[3*e + 1] & 0xff; 
-                            int b = colorTable[3*e + 2] & 0xff; 
-                            backgroundColor = new Color(r,g,b);   
-                            found++; 
-                        }
-                        if(e == metaData.transparentColorIndex) {
-                            int r1 = colorTable[3*e] & 0xff; 
-                            int g1 = colorTable[3*e + 1] & 0xff; 
-                            int b1 = colorTable[3*e + 2] & 0xff; 
-                            transparentColor = new Color(r1,g1,b1);   
-                            imageParams.getInternalVariables().setTransparentColor(transparentColor);  
-                            found++; 
-                        }
-                        if(found == 2){
-                            break;
-                        }
-                    }
-                }
-                
-                RenderedImage r = null;
-                Graphics2D resG = null;
-                
-                for(int i = 0; i < images.length; i++){  
-                    if(numImages > 1){
-                        previousImage.flush();
-                        previousImage.setData(resultImage.copyData(null));
-                    }
-                
-                     r = images[i].getRenderedImage();
-                     metaData = (GIFImageMetadata)images[i].getMetadata();                                                                                                                                      
-                                                                           
-                     // Disposal of gif animation frames
-                     if(images.length > 1){
-                         switch(metaData.disposalMethod){
-                         case 0: // "None"
-                             // Do Nothing
-                             break;
-                         case 1: // "doNotDispose"
-                             //resultImage.setData(previousImage.copyData(null));
-                             break;
-                         case 2: // "restoreToBackgroundColor"                             
-                             resultImage = null;
-                             resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);
-                             Graphics2D g = resultImage.createGraphics(); 
-                             g.setPaintMode(); 
-    
-                             if(metaData.transparentColorFlag && streamMetaData.backgroundColorIndex == metaData.transparentColorIndex) {    
-                                 g.setColor(transparentColor); 
-                             } else {                      
-                                 g.setColor(backgroundColor); 
-                                 //g.setColor(transparentColor); 
-                             }
-                             g.fillRect(0,0, streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight);
-                             break;
-                         case 3: // "restoreToPrevious"
-                             resultImage.setData(previousImage.copyData(null));
-                             break;                             
-                         }
-                     }
-                
-                     resG = resultImage.createGraphics();
-                     if(metaData.imageLeftPosition != 0 || metaData.imageTopPosition != 0){
-                         resG.drawRenderedImage(r, AffineTransform.getTranslateInstance(metaData.imageLeftPosition, metaData.imageTopPosition));
-                     } else {
-                         resG.drawRenderedImage(r,null);
-                     }
-                     
-                     resG.dispose();
-                     resG = null;                     
-                                          
-                     finishedImages[i] = resultImage;
-                     
-                     metaData.imageLeftPosition = 0;
-                     metaData.imageTopPosition = 0;
-                     metaTable[i] = metaData;
-                     metaData = null;
-                }   
-                imageParams.getInternalVariables().setImageMetadata(metaTable);
+                GIFStreamMetadata  streamMetaData = (GIFStreamMetadata)reader.getStreamMetadata();
+                if(numImages == 1){ // Normal Gif
+                    finishedImages = readGif(iioimages, imageParams, streamMetaData);
+                } else { // Animated Gif 
+                    finishedImages = readAnimatedGif(iioimages, numImages, imageParams, streamMetaData);
+                }                               
             }
         } catch(IOException ioe){
             throw new ImageConverterException(ImageConverterException.Types.IO_ERROR,"IOException thrown when reading from InputByteStream",ioe);
@@ -177,10 +83,9 @@ public class ImageDecoder {
            iis = null;
            imageStream = null;
         }   
-        System.out.println("Time to read: " + (System.currentTimeMillis()-start)/1000);
         return finishedImages;
     }          
-    
+        
     public static BufferedImage getBufferedImage(byte [] inByteArray) throws ImageConverterException{
         ByteArrayInputStream imageStream = new ByteArrayInputStream(inByteArray);
         ImageInputStream iis = null;
@@ -214,6 +119,170 @@ public class ImageDecoder {
         return image;
     }
 
+    private static BufferedImage[] readGif(Iterator iioimages, ImageConverterParams imageParams, GIFStreamMetadata  streamMetaData){        
+        IIOImage [] images = new IIOImage[1];
+        BufferedImage [] finishedImages = new BufferedImage[1];
+        
+        images[0] = (IIOImage)iioimages.next();        
+
+        BufferedImage resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);            
+  
+        Color transparentColor = null;
+      
+        imageParams.getInternalVariables().setImageMetadata(new GIFImageMetadata[1]);
+        
+        // Storing metadata for later use
+        GIFImageMetadata [] metaTable = imageParams.getInternalVariables().getImageMetadata();                               
+        metaTable[0] = (GIFImageMetadata)images[0].getMetadata(); 
+        
+        RenderedImage r = images[0].getRenderedImage();         
+        
+        if(metaTable[0].transparentColorFlag){
+            if(streamMetaData.globalColorTable != null){           
+                int numEntries = streamMetaData.globalColorTable.length/3;
+                byte [] colorTable = streamMetaData.globalColorTable;
+                for (int e = 0; e < numEntries; e++) {
+                    if(e == metaTable[0].transparentColorIndex) {
+                        int r1 = colorTable[3*e] & 0xff; 
+                        int g1 = colorTable[3*e + 1] & 0xff; 
+                        int b1 = colorTable[3*e + 2] & 0xff; 
+                        transparentColor = new Color(r1,g1,b1);   
+                        imageParams.getInternalVariables().setTransparentColor(transparentColor);  
+                        break; 
+                    }                
+                }
+            }
+        }                                                                                                                                                               
+                                                                                    
+         Graphics2D resG = resultImage.createGraphics();
+         if(metaTable[0].imageLeftPosition != 0 || metaTable[0].imageTopPosition != 0){
+             resG.drawRenderedImage(r, AffineTransform.getTranslateInstance(metaTable[0].imageLeftPosition, metaTable[0].imageTopPosition));
+         } else {
+             resG.drawRenderedImage(r,null);
+         }
+         
+         resG.dispose();
+         resG = null;                     
+                              
+         finishedImages[0] = resultImage;
+         
+         metaTable[0].imageLeftPosition = 0;
+         metaTable[0].imageTopPosition = 0;
+         r = null;
+        imageParams.getInternalVariables().setImageMetadata(metaTable);
+        return finishedImages;
+    }
+    
+    private static BufferedImage[] readAnimatedGif(Iterator iioimages, int numImages, ImageConverterParams imageParams, GIFStreamMetadata  streamMetaData){
+        IIOImage [] images = new IIOImage[numImages];
+        BufferedImage [] finishedImages = new BufferedImage[numImages];
+
+        for(int counter = 0; iioimages.hasNext(); counter++) {
+            images[counter] = (IIOImage)iioimages.next();
+        }
+
+        BufferedImage resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);            
+  
+        Color backgroundColor = Color.white; 
+        Color transparentColor = null;
+        
+        BufferedImage previousImage = null;
+        if(numImages > 1){
+            previousImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);
+        }
+        imageParams.getInternalVariables().setImageMetadata(new GIFImageMetadata[images.length]);
+        
+        // Storing metadata for later use
+        GIFImageMetadata [] metaTable = imageParams.getInternalVariables().getImageMetadata();                               
+        GIFImageMetadata metaData = (GIFImageMetadata)images[0].getMetadata(); 
+        
+        if(streamMetaData.globalColorTable != null){
+            int numEntries = streamMetaData.globalColorTable.length/3;
+            byte [] colorTable = streamMetaData.globalColorTable;
+            int found = 0;
+            for (int e = 0; e < numEntries; e++) {
+                if(e == streamMetaData.backgroundColorIndex) {
+                    int r = colorTable[3*e] & 0xff; 
+                    int g = colorTable[3*e + 1] & 0xff; 
+                    int b = colorTable[3*e + 2] & 0xff; 
+                    backgroundColor = new Color(r,g,b);   
+                    found++; 
+                }
+                if(e == metaData.transparentColorIndex) {
+                    int r1 = colorTable[3*e] & 0xff; 
+                    int g1 = colorTable[3*e + 1] & 0xff; 
+                    int b1 = colorTable[3*e + 2] & 0xff; 
+                    transparentColor = new Color(r1,g1,b1);   
+                    imageParams.getInternalVariables().setTransparentColor(transparentColor);  
+                    found++; 
+                }
+                if(found == 2){
+                    break;
+                }
+            }
+        }
+        
+        RenderedImage r = null;
+        Graphics2D resG = null;
+        
+        for(int i = 0; i < images.length; i++){  
+            if(numImages > 1){
+                previousImage.flush();
+                previousImage.setData(resultImage.copyData(null));
+            }
+        
+             r = images[i].getRenderedImage();
+             metaData = (GIFImageMetadata)images[i].getMetadata();                                                                                                                                      
+                                                                  
+             // Disposal of gif animation frames
+             if(images.length > 1){
+                 switch(metaData.disposalMethod){
+                 case 0: // "None"
+                     // Do Nothing
+                     break;
+                 case 1: // "doNotDispose"
+                     //resultImage.setData(previousImage.copyData(null));
+                     break;
+                 case 2: // "restoreToBackgroundColor"                             
+                     resultImage = null;
+                     resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);
+                     Graphics2D g = resultImage.createGraphics(); 
+                     g.setPaintMode(); 
+
+                     if(metaData.transparentColorFlag){// && streamMetaData.backgroundColorIndex == metaData.transparentColorIndex) {    
+                         g.setColor(transparentColor); 
+                     } else {                      
+                         g.setColor(backgroundColor); 
+                         //g.setColor(transparentColor); 
+                     }
+                     g.fillRect(0,0, streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight);
+                     break;
+                 case 3: // "restoreToPrevious"
+                     resultImage.setData(previousImage.copyData(null));
+                     break;                             
+                 }
+             }
+        
+             resG = resultImage.createGraphics();
+             if(metaData.imageLeftPosition != 0 || metaData.imageTopPosition != 0){
+                 resG.drawRenderedImage(r, AffineTransform.getTranslateInstance(metaData.imageLeftPosition, metaData.imageTopPosition));
+             } else {
+                 resG.drawRenderedImage(r,null);
+             }
+             
+             resG.dispose();
+             resG = null;                     
+                                  
+             finishedImages[i] = resultImage;
+             
+             metaData.imageLeftPosition = 0;
+             metaData.imageTopPosition = 0;
+             metaTable[i] = metaData;
+             metaData = null;
+        }   
+        imageParams.getInternalVariables().setImageMetadata(metaTable);
+        return finishedImages;
+    }
     /* DisposalMetods:
      * 0 - "none"
      * 1 - "doNotDispose"
@@ -246,4 +315,5 @@ public class ImageDecoder {
                          }                    
                      }      
      */
+     
 }

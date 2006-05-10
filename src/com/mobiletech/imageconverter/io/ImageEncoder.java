@@ -62,9 +62,7 @@ public class ImageEncoder {
             buffered = null;            
         }   
         if(format.compareToIgnoreCase("gif")==0 && inImage.getType() != BufferedImage.TYPE_BYTE_INDEXED && !params.isGrayscale()){   
-            long start = System.currentTimeMillis();
             inImage = toIndexColorModel(inImage,params); 
-            System.out.println("Time toindexcolormodel: " + (System.currentTimeMillis()-start)/1000);
         } 
         if(params.getFormat().compareToIgnoreCase("wbmp")==0){
             int bwWidth = inImage.getWidth(); 
@@ -157,7 +155,8 @@ public class ImageEncoder {
                     writer.setOutput(ios);
                     
                     writer.prepareWriteSequence(null);
-                    GIFImageMetadata [] metaDataTable = params.getInternalVariables().getImageMetadata(); 
+                    GIFImageMetadata [] metaDataTable = params.getInternalVariables().getImageMetadata();
+                   
                     for(int i = 0;i<images.length;i++){
                         writer.writeToSequence(new IIOImage(images[i],null,metaDataTable[i]),writer.getDefaultWriteParam());
                     }                   
@@ -234,8 +233,10 @@ public class ImageEncoder {
             
             int tableLength = colorMap.getNumEntries();
             // Circumventing bug in JAI gifwriter not accepting colortable with length less than 256, filling up array to become 256long
+            
+            byte[][] newTable = null;
             if(tableLength != 256) {
-                byte[][] newTable = new byte[3][256];
+                newTable = new byte[3][256];
                 for(int i = 0; i < 3; i++) {
                     System.arraycopy(colorMap.getByteData()[ i ], 0,
                             newTable[ i ], 0, tableLength);
@@ -252,13 +253,20 @@ public class ImageEncoder {
             if(params.getInternalVariables().getTransparentColor() != null){
                 int transIndex = getIndexOfColor(colorMap, tableLength,params.getInternalVariables().getTransparentColor());
                 if(transIndex == 256){
-                    transIndex = tableLength;
-                }
+                    if(tableLength != 255){
+                        Color trans = params.getInternalVariables().getTransparentColor();
+                        newTable[0][tableLength+1] = (byte)0x00;
+                        newTable[1][tableLength+1] = (byte)0x00;
+                        newTable[2][tableLength+1] = (byte)0x00;
+                    } else {
+                        transIndex = tableLength;
+                    }
+                }                
                 GIFImageMetadata [] metaDataTable = params.getInternalVariables().getImageMetadata();
                 for(int i = 0; i < metaDataTable.length; i++){
                     metaDataTable[i].transparentColorIndex = transIndex;                    
-                }                
-                params.getInternalVariables().setImageMetadata(metaDataTable);
+                }                                
+                params.getInternalVariables().setImageMetadata(metaDataTable);                
                 cm = new IndexColorModel(8, colorMap.getByteData()[0].length, colorMap.getByteData()[0], colorMap.getByteData()[1], colorMap.getByteData()[2], transIndex);
             } else {
                 cm = new IndexColorModel(8, colorMap.getByteData()[0].length, colorMap.getByteData()[0], colorMap.getByteData()[1], colorMap.getByteData()[2]);
