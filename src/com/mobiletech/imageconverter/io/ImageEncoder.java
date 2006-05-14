@@ -240,10 +240,16 @@ public class ImageEncoder {
                 for(int i = 0; i < 3; i++) {
                     System.arraycopy(colorMap.getByteData()[ i ], 0,
                             newTable[ i ], 0, tableLength);
-                }
-                newTable[0][tableLength] = (byte)0xFF;
-                newTable[1][tableLength] = (byte)0xFF;
-                newTable[2][tableLength] = (byte)0xFF;
+                }      
+                newTable[0][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getRed();
+                newTable[1][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getGreen();
+                newTable[2][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getBlue();
+                tableLength++;
+                for(int i = tableLength; i < 256; i++){
+                    newTable[0][i] = (byte)0x0D;
+                    newTable[1][i] = (byte)0x11;
+                    newTable[2][i] = (byte)0x15;    
+                }   
                 colorMap = new LookupTableJAI(newTable);
             }                        
             
@@ -251,17 +257,7 @@ public class ImageEncoder {
             
             ColorModel cm = null;
             if(params.getInternalVariables().getTransparentColor() != null){
-                int transIndex = getIndexOfColor(colorMap, tableLength,params.getInternalVariables().getTransparentColor());
-                if(transIndex == 256){
-                    if(tableLength != 255){
-                        Color trans = params.getInternalVariables().getTransparentColor();
-                        newTable[0][tableLength+1] = (byte)0x00;
-                        newTable[1][tableLength+1] = (byte)0x00;
-                        newTable[2][tableLength+1] = (byte)0x00;
-                    } else {
-                        transIndex = tableLength;
-                    }
-                }                
+                int transIndex = getIndexOfColor(colorMap, tableLength,params.getInternalVariables().getTransparentColor());                             
                 GIFImageMetadata [] metaDataTable = params.getInternalVariables().getImageMetadata();
                 for(int i = 0; i < metaDataTable.length; i++){
                     metaDataTable[i].transparentColorIndex = transIndex;                    
@@ -311,7 +307,7 @@ public class ImageEncoder {
     
     private static int getIndexOfColor(LookupTableJAI colorMap, int tableLength, Color color){
         int cIndex = 256;
-        for(int i = 0; i < tableLength; i++){
+        for(int i = tableLength; i >= 0; i--){
             if(color.getRed() == (colorMap.getByteData()[0][i] & 0xff) &&
                     color.getGreen() == (colorMap.getByteData()[1][i] & 0xff) &&
                     color.getBlue() == (colorMap.getByteData()[2][i] & 0xff)){
