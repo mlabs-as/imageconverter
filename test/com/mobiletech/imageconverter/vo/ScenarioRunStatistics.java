@@ -1,6 +1,7 @@
 package com.mobiletech.imageconverter.vo;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 
 public class ScenarioRunStatistics {
@@ -38,5 +39,8 @@ public class ScenarioRunStatistics {
     }
     public int getNumErrors(){
         return numErrors;
+    }
+    public Iterator getErrorIterator(){
+        return errors.iterator();
     }
 }

@@ -71,15 +71,20 @@ public class TestScenarioRunner implements Runnable{
         byte [] image = FileUtil.readFileAsByte(fil);
         ts.getParams().setImage(image);
         long endTime = 0;
-        long startTime = System.currentTimeMillis();        
+        long startTime = System.currentTimeMillis();
+        boolean write = false;
+        if(out != null){
+            write = true;
+        }
         try {
             image = ImageConverter.convertImage(ts.getParams());
             endTime = System.currentTimeMillis();
             stat.addStatistic(format,image.length,startTime, endTime);            
         } catch (ImageConverterException e) {
             stat.addError(e);
-        }
-        if(out != null){
+            write = false;
+        }        
+        if(write){
             try {
                 out.writeImage(image,ts.getName(),fil.substring(fil.lastIndexOf("\\")+1, fil.lastIndexOf(".")+1)+ts.getParams().getFormat());
             } catch (RuntimeException e) {

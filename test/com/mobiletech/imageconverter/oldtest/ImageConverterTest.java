@@ -12,7 +12,11 @@ import java.io.IOException;
 import com.mobiletech.imageconverter.ImageConverter;
 import com.mobiletech.imageconverter.exception.ImageConverterException;
 import com.mobiletech.imageconverter.fileio.FileUtil;
+//import com.mobiletech.imageconverter.oldtest.oldimageconverters.frame.FrameImageConverter;
+//import com.mobiletech.imageconverter.oldtest.oldimageconverters.frame.ImageConverterParams;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
+//import com.mobiletech.mcf.core.content.image.imageconv.ImageConverter;
+//import com.mobiletech.mcf.core.content.image.imageconv.ImageConverterParams;
 
 /**
  * @author Andreas Ryland
@@ -55,7 +59,7 @@ public class ImageConverterTest extends TestCase {
 	private boolean writeImages = true;
 	
 	public void setUp(){
-		testImage = new File("test/com/mobiletech/imageconverter/oldtest/testimages/tarnation_-_V_766603a.jpg");
+		testImage = new File("test/com/mobiletech/imageconverter/oldtest/testimages/osakafc_png.png");
 		testImagePNG = new File("test/com/mobiletech/imageconverter/oldtest/testimages/osakafc_png.png");
 		testImageBMP = new File("test/com/mobiletech/imageconverter/oldtest/testimages/bmpTest.bmp");
 		testImageTIF = new File("test/com/mobiletech/imageconverter/oldtest/testimages/osakafc_tif.tif");
@@ -89,6 +93,7 @@ public class ImageConverterTest extends TestCase {
 		
 		try{		
 			outputImage = ImageConverter.convertImage(params);
+            //outputImage = FrameImageConverter.convertImage(params);
 		}catch(Exception e){
 			fail("Exception caught when converting image: " + e);
 		}
@@ -105,6 +110,7 @@ public class ImageConverterTest extends TestCase {
         byte [] outputImage = null;
       
         outputImage = ImageConverter.convertImage(params);
+        //outputImage = FrameImageConverter.convertImage(params);
               
         if(writeImages){
             FileUtil.writeByteToFile(outputImage,"c:/temp/oldtest/"+filename);

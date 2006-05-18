@@ -220,32 +220,46 @@ public class ImageDecoder {
                     break;
                 }
             }
+            //This detects a known problem, for which no current solution is known, thus its not in use 
+            /*
+            for (int e = 0; e < numEntries; e++) {
+                if(e == metaData.transparentColorIndex) {
+                    continue;
+                }
+                if(transparentColor.getRed() == (colorTable[3*e] & 0xff) &&
+                        transparentColor.getGreen() == (colorTable[3*e+1] & 0xff) &&
+                        transparentColor.getBlue() == (colorTable[3*e+2] & 0xff)){                    
+                    //imageParams.setNumberOfColors(666);
+                    //transparentColor = ImageUtil.getUniqueColor(colorTable,transparentColor);
+                    //imageParams.getInternalVariables().setTransparentColor(transparentColor);
+                    break;
+                }
+            }
+            */
         }
         
         RenderedImage r = null;
         Graphics2D resG = null;
+        int noneCounter = 0;
         
-        for(int i = 0; i < images.length; i++){  
-            if(numImages > 1){
-                previousImage.flush();
-                previousImage.setData(resultImage.copyData(null));
-            }
+        for(int i = 0; i < images.length; i++){
+            resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);            
         
              r = images[i].getRenderedImage();
+             
              metaData = (GIFImageMetadata)images[i].getMetadata();                                                                                                                                      
-                                                                  
-             // Disposal of gif animation frames
-             if(images.length > 1){
-                 switch(metaData.disposalMethod){
+                          
+             // Disposal of gif animation frames                          
+             switch(metaData.disposalMethod){
                  case 0: // "None"
                      // Do Nothing
+                     noneCounter++;
                      break;
                  case 1: // "doNotDispose"
-                     //resultImage.setData(previousImage.copyData(null));
+                     previousImage.flush();
+                     previousImage.setData(resultImage.copyData(null));
                      break;
-                 case 2: // "restoreToBackgroundColor"                             
-                     resultImage = null;
-                     resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);
+                 case 2: // "restoreToBackgroundColor"                                                  
                      Graphics2D g = resultImage.createGraphics(); 
                      g.setPaintMode(); 
 
@@ -260,9 +274,8 @@ public class ImageDecoder {
                  case 3: // "restoreToPrevious"
                      resultImage.setData(previousImage.copyData(null));
                      break;                             
-                 }
              }
-        
+                         
              resG = resultImage.createGraphics();
              if(metaData.imageLeftPosition != 0 || metaData.imageTopPosition != 0){
                  resG.drawRenderedImage(r, AffineTransform.getTranslateInstance(metaData.imageLeftPosition, metaData.imageTopPosition));
@@ -274,12 +287,16 @@ public class ImageDecoder {
              resG = null;                     
                                   
              finishedImages[i] = resultImage;
-             
+             resultImage.flush();
+             resultImage = null;
              metaData.imageLeftPosition = 0;
              metaData.imageTopPosition = 0;
              metaTable[i] = metaData;
              metaData = null;
         }   
+        if(noneCounter == images.length){     
+            imageParams.getInternalVariables().setTransparentColor(null);
+        }
         imageParams.getInternalVariables().setImageMetadata(metaTable);
         return finishedImages;
     }

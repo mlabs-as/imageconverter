@@ -10,6 +10,7 @@ import java.util.Vector;
 
 import com.mobiletech.imageconverter.fileio.TestDirectory;
 import com.mobiletech.imageconverter.thread.TestScenarioRunner;
+import com.mobiletech.imageconverter.vo.ScenarioRunStatistics;
 import com.mobiletech.imageconverter.vo.TestScenario;
 
 import junit.framework.TestCase;
@@ -23,10 +24,10 @@ public class ImageConverterTestEngine extends TestCase{
     public ImageConverterTestEngine(){        
         //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/problem images");
         //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif images");
-        sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/animated gifs");
+        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/animated gifs");
         //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite");
         //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/Single Run");
-        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif transparency");
+        sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif transparency");
         testScenarioSourceDirectory = new TestDirectory("C:/data/work/workspace/imageconverter/test/testdata/routine");
         // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
         targetDirectory = new TestDirectory("C:/temp/imagetest"); // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
@@ -70,11 +71,18 @@ public class ImageConverterTestEngine extends TestCase{
         TestScenario currentScenario = null;
         Vector statVector = new Vector();
         
+        long start = System.currentTimeMillis();
         while(ite.hasNext()){
             currentScenario = ite.next();
             TestScenarioRunner tsc = new TestScenarioRunner(currentScenario, images, targetDirectory);
             tsc.runScenario();
+            ScenarioRunStatistics stats = tsc.getStatistics();
+            Iterator errors = stats.getErrorIterator();
+            while(errors.hasNext()){
+                ((Exception)errors.next()).printStackTrace();                
+            }
         }
+        System.out.println("Total time: " + (System.currentTimeMillis()-start)/1000 + " seconds");
         /*
          * THREADED PART
          

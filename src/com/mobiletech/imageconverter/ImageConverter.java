@@ -124,8 +124,8 @@ public class ImageConverter {
         }       
         // Perform color reduction if requested
         if(imageParams.getNumberOfColors() > 0){
-            image = ImageColorModifier.colorChange(image,imageParams.getNumberOfColors());
-            imageParams.getInternalVariables().setChanged(true);
+            //image = ImageColorModifier.colorChange(image,imageParams.getNumberOfColors());
+            //imageParams.getInternalVariables().setChanged(true);
         }       
         // Convert to grayscale if requested
         if(imageParams.isGrayscale()){

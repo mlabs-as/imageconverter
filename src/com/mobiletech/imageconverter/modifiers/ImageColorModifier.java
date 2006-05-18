@@ -1,7 +1,6 @@
 package com.mobiletech.imageconverter.modifiers;
 
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;

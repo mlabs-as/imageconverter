@@ -235,16 +235,37 @@ public class ImageEncoder {
             // Circumventing bug in JAI gifwriter not accepting colortable with length less than 256, filling up array to become 256long
             
             byte[][] newTable = null;
+            int transIndex = 256;
+            
             if(tableLength != 256) {
                 newTable = new byte[3][256];
                 for(int i = 0; i < 3; i++) {
                     System.arraycopy(colorMap.getByteData()[ i ], 0,
                             newTable[ i ], 0, tableLength);
-                }      
-                newTable[0][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getRed();
-                newTable[1][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getGreen();
-                newTable[2][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getBlue();
-                tableLength++;
+                }
+                // This fixes the problem in animated gifs where the transparent color is not present in the first frame, and
+                // as such is removed from the palette, so it needs to be added again
+                if(params.getInternalVariables().getTransparentColor() != null){
+                    transIndex = getIndexOfColor(colorMap, tableLength-1,params.getInternalVariables().getTransparentColor());
+                    if(transIndex == 256){
+                        newTable[0][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getRed();
+                        newTable[1][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getGreen();
+                        newTable[2][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getBlue();                       
+                        transIndex = tableLength;
+                        tableLength++;
+                    }
+                }          
+                /*
+                if(params.getNumberOfColors()==666){
+                    newTable[0][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getRed();
+                    newTable[1][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getGreen();
+                    newTable[2][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getBlue();
+                    transIndex = tableLength;
+                    tableLength++;
+                }
+                */
+                // Filling the rest of the palette with some random color, this should be changed so the color that is
+                // filled is a unique color
                 for(int i = tableLength; i < 256; i++){
                     newTable[0][i] = (byte)0x0D;
                     newTable[1][i] = (byte)0x11;
@@ -256,9 +277,11 @@ public class ImageEncoder {
             KernelJAI ditherMask = KernelJAI.ERROR_FILTER_FLOYD_STEINBERG;
             
             ColorModel cm = null;
-            if(params.getInternalVariables().getTransparentColor() != null){
-                int transIndex = getIndexOfColor(colorMap, tableLength,params.getInternalVariables().getTransparentColor());                             
+            if(params.getInternalVariables().getTransparentColor() != null){                                        
                 GIFImageMetadata [] metaDataTable = params.getInternalVariables().getImageMetadata();
+                if(transIndex == 256){
+                    transIndex = getIndexOfColor(colorMap, tableLength-1,params.getInternalVariables().getTransparentColor());
+                }
                 for(int i = 0; i < metaDataTable.length; i++){
                     metaDataTable[i].transparentColorIndex = transIndex;                    
                 }                                

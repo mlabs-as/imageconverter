@@ -1,7 +1,6 @@
 package com.mobiletech.imageconverter.modifiers;
 
 import java.awt.AlphaComposite;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
@@ -12,11 +11,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.awt.image.renderable.ParameterBlock;
-import java.io.IOException;
-
-import javax.media.jai.InterpolationBicubic;
-import javax.media.jai.InterpolationBicubic2;
-import javax.media.jai.InterpolationBilinear;
 import javax.media.jai.InterpolationNearest;
 import javax.media.jai.JAI;
 import javax.media.jai.RenderedOp;
@@ -25,7 +19,7 @@ import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 
 public class ImageScaler {
-    public static BufferedImage resizeImage(BufferedImage inImage,int height, int width,boolean noEnlargement, boolean hasTransparency, ImageConverterParams params){
+    public static BufferedImage resizeImage(BufferedImage inImage,int height, int width,boolean noEnlargement, boolean hasTransparency, ImageConverterParams params){        
         int oldWidth = inImage.getWidth(); 
         int oldHeight = inImage.getHeight(); 
 
@@ -40,7 +34,7 @@ public class ImageScaler {
         return resizeImage(inImage,scale,noEnlargement,hasTransparency,params);
     }   
     
-    public static BufferedImage resizeImage(BufferedImage inImage,double scale,boolean noEnlargement, boolean hasTransparency, ImageConverterParams params){          
+    public static BufferedImage resizeImage(BufferedImage inImage,double scale,boolean noEnlargement, boolean hasTransparency, ImageConverterParams params){                  
         if(noEnlargement){
             if(scale > 1.0){
                 return null;
