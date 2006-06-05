@@ -33,6 +33,8 @@ import com.mobiletech.imageconverter.watermarks.ImageWatermarker;
  *  
  */
 public class ImageConverter {
+    public static final String version = "ImageConverter version 1.1.0";
+    
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
     public static final int WMARK_POS_BOTTOMLEFT = 3;
@@ -53,6 +55,7 @@ public class ImageConverter {
      * @throws ImageConverterException
      */
     public static byte[] convertImage(ImageConverterParams imageParams) throws ImageConverterException{     
+       imageParams.setNumberOfColors(-1);
        byte [] returnByte = null;
        
         try{
@@ -296,4 +299,12 @@ public class ImageConverter {
         
         return returnvalue;
     }    
+    
+    public static String getVersionInformation(){
+        if (com.sun.medialib.codec.jiio.Util.isCodecLibAvailable()) {
+            return version + " Native Libraries Found.";
+        } else {
+            return version + " Not using Native Libraries.";
+        }        
+    }
 }
