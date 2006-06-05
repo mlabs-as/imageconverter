@@ -33,7 +33,7 @@ import com.mobiletech.imageconverter.watermarks.ImageWatermarker;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.1.0";
+    public static final String version = "ImageConverter version 1.0.1";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;

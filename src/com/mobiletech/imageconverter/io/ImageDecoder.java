@@ -221,34 +221,37 @@ public class ImageDecoder {
                     break;
                 }
             }
-            //This detects a known problem, for which no current solution is known, thus its not in use             
-            for (int e = 0; e < numEntries; e++) {
-                if(e == metaData.transparentColorIndex) {
-                    continue;
-                }
-                if(transparentColor.getRed() == (colorTable[3*e] & 0xff) &&
-                        transparentColor.getGreen() == (colorTable[3*e+1] & 0xff) &&
-                        transparentColor.getBlue() == (colorTable[3*e+2] & 0xff)){  
-                    /*
-                    WritableRaster wr = resultImage.getAlphaRaster();
-                    int h = wr.getHeight();
-                    int w = wr.getWidth();
-                    Color newColor = ImageUtil.getUniqueColor(colorTable,transparentColor);
-                    int[] newp = new int[] { newColor.getRed(), newColor.getGreen(), newColor.getBlue(), 255};
-                    int[] old = new int[4];
-                    
-                    for (int row = 0; row < w; row++) {
-                        for (int col = 0; col < h; col++) {                               
-                            old = wr.getPixel(row, col, old);                   
-                            if (old[0] == transparentColor.getRed() && old[1] == transparentColor.getGreen() && old[2] == transparentColor.getBlue()) {
-                                wr.setPixel(row, col, newp);
-                            }                                
-                        }
-                    }           
-                    transparentColor = newColor;
-                    imageParams.getInternalVariables().setTransparentColor(transparentColor);*/
-                    imageParams.getInternalVariables().setTransparentColor(ImageUtil.getUniqueColor(colorTable,transparentColor));
-                    break;
+            //This detects a known problem, for which no current solution is known, thus its not in use    
+            if(transparentColor != null){
+                for (int e = 0; e < numEntries; e++) {
+                    if(e == metaData.transparentColorIndex) {
+                        continue;
+                    }
+                    if(transparentColor.getRed() == (colorTable[3*e] & 0xff) &&
+                            transparentColor.getGreen() == (colorTable[3*e+1] & 0xff) &&
+                            transparentColor.getBlue() == (colorTable[3*e+2] & 0xff)){  
+                        /*
+                        WritableRaster wr = resultImage.getAlphaRaster();
+                        int h = wr.getHeight();
+                        int w = wr.getWidth();
+                        Color newColor = ImageUtil.getUniqueColor(colorTable,transparentColor);
+                        int[] newp = new int[] { newColor.getRed(), newColor.getGreen(), newColor.getBlue(), 255};
+                        int[] old = new int[4];
+                        
+                        for (int row = 0; row < w; row++) {
+                            for (int col = 0; col < h; col++) {                               
+                                old = wr.getPixel(row, col, old);                   
+                                if (old[0] == transparentColor.getRed() && old[1] == transparentColor.getGreen() && old[2] == transparentColor.getBlue()) {
+                                    wr.setPixel(row, col, newp);
+                                }                                
+                            }
+                        }           
+                        transparentColor = newColor;
+                        imageParams.getInternalVariables().setTransparentColor(transparentColor);*/
+                        imageParams.getInternalVariables().setTransparentColor(ImageUtil.getUniqueColor(colorTable,transparentColor));
+                        imageParams.setNumberOfColors(6868);
+                        break;
+                    }
                 }
             }
             

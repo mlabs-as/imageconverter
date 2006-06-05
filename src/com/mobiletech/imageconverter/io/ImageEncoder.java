@@ -27,6 +27,7 @@ import javax.media.jai.operator.ColorQuantizerDescriptor;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
 import com.mobiletech.imageconverter.modifiers.ImageColorModifier;
+import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGEncodeParam;
@@ -246,12 +247,15 @@ public class ImageEncoder {
                 // This fixes the problem in animated gifs where the transparent color is not present in the first frame, and
                 // as such is removed from the palette, so it needs to be added again
                 if(params.getInternalVariables().getTransparentColor() != null){
-                    transIndex = getIndexOfColor(colorMap, tableLength-1,params.getInternalVariables().getTransparentColor());
+                    if(params.getNumberOfColors() != 6868){
+                        transIndex = getIndexOfColor(colorMap, tableLength-1,params.getInternalVariables().getTransparentColor());  
+                    }
+                    //
                     if(transIndex == 256){
                         newTable[0][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getRed();
                         newTable[1][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getGreen();
                         newTable[2][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getBlue();                       
-                        transIndex = tableLength;
+                        transIndex = 255;//tableLength;
                         tableLength++;
                     }
                 }          
@@ -266,11 +270,26 @@ public class ImageEncoder {
                 */
                 // Filling the rest of the palette with some random color, this should be changed so the color that is
                 // filled is a unique color
-                for(int i = tableLength; i < 256; i++){
-                    newTable[0][i] = (byte)0x0D;
-                    newTable[1][i] = (byte)0x11;
-                    newTable[2][i] = (byte)0x15;    
-                }   
+                if(params.getNumberOfColors() != 6868){
+                    Color col = ImageUtil.getUniqueColor(null,null);
+                    for(int i = tableLength; i < 256; i++){                        
+                        newTable[0][i] = (byte)col.getRed();
+                        newTable[1][i] = (byte)col.getGreen();
+                        newTable[2][i] = (byte)col.getBlue();                          
+                    }
+                } else {
+                    for(int i = tableLength; i < 256; i++){
+                        newTable[0][i] = (byte)params.getInternalVariables().getTransparentColor().getRed();
+                        newTable[1][i] = (byte)params.getInternalVariables().getTransparentColor().getGreen();
+                        newTable[2][i] = (byte)params.getInternalVariables().getTransparentColor().getBlue();
+                        /*
+                        newTable[0][i] = (byte)0x00;
+                        newTable[1][i] = (byte)0x00;
+                        newTable[2][i] = (byte)0x00; 
+                        */   
+                    }    
+                }
+                   
                 colorMap = new LookupTableJAI(newTable);
             }                        
             
@@ -315,7 +334,7 @@ public class ImageEncoder {
             bi = null;
             surrogateImage = null;
             cm = null;
-        } else {                        
+        } else {   
             ColorModel cm = params.getInternalVariables().getCm();
             BufferedImage newImage = new BufferedImage(image.getWidth(),image.getHeight(),BufferedImage.TYPE_BYTE_INDEXED,(IndexColorModel)cm);
             Graphics2D gfx = newImage.createGraphics();
