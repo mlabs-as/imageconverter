@@ -33,7 +33,7 @@ import com.mobiletech.imageconverter.watermarks.ImageWatermarker;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.0.1";
+    public static final String version = "ImageConverter version 1.0.2";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -300,11 +300,15 @@ public class ImageConverter {
         return returnvalue;
     }    
     
-    public static String getVersionInformation(){
+    public static String getVersionInformation(){      
+        /*
         if (com.sun.medialib.codec.jiio.Util.isCodecLibAvailable()) {
             return version + " Native Libraries Found.";
         } else {
             return version + " Not using Native Libraries.";
-        }        
+        } 
+        */
+        return version;
+        //return "";
     }
 }

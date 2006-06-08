@@ -5,39 +5,39 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
-import java.awt.image.WritableRaster;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
-import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import com.mobiletech.imageconverter.exception.ImageConverterException;
+import com.mobiletech.imageconverter.filters.JPEGApp14Filter;
 import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.sun.imageio.plugins.gif.GIFImageMetadata;
 import com.sun.imageio.plugins.gif.GIFStreamMetadata;
 
 public class ImageDecoder {
-    public static BufferedImage [] readImages(byte [] inByteArray,ImageConverterParams imageParams) throws ImageConverterException{
+    public static BufferedImage [] readImages(byte [] inByteArray,ImageConverterParams imageParams) throws ImageConverterException{   
+            /*
+             * Filtering of the App14 segment for JPEG files only, the App14 segment contains photoshop information
+             * this segment causes problems with the java jpeg reader in some cases
+             */
+            if(imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpg") 
+                    || imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpeg")){
+                inByteArray = JPEGApp14Filter.filter(inByteArray);
+            }
         ByteArrayInputStream imageStream = null;                
         ImageInputStream iis = null;        
         ImageReader reader = null;
 
         BufferedImage [] finishedImages = null;
         
-        try {   
+        try {                                               
             imageStream = new ByteArrayInputStream(inByteArray);
             iis = ImageIO.createImageInputStream(imageStream);
             
@@ -75,7 +75,9 @@ public class ImageDecoder {
         } catch(IOException ioe){
             throw new ImageConverterException(ImageConverterException.Types.IO_ERROR,"IOException thrown when reading from InputByteStream",ioe);
         } finally {
-           reader.dispose();
+           if(reader != null){
+               reader.dispose();
+           }          
            reader = null;
            try {
                iis.close();            
