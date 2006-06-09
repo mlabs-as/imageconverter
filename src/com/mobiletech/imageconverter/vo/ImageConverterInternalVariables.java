@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 
+import javax.media.jai.LookupTableJAI;
+
 import com.sun.imageio.plugins.gif.GIFImageMetadata;
 
 public class ImageConverterInternalVariables {
@@ -14,15 +16,14 @@ public class ImageConverterInternalVariables {
     private ColorModel cm = null;
     private Color transparentColor = null;
     private GIFImageMetadata [] imageMetadata = null;
-    
     public ImageConverterInternalVariables(){
         oldFormat = null;
         cm = null;
         changed = false;
         bufferedImage = null;
         transparentColor = null;
-    }
-    
+    }    
+
     /**
      * Gets the oldFormat attribute of the ImageConverterParams object
      * 

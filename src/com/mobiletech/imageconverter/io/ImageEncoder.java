@@ -26,7 +26,6 @@ import javax.media.jai.PlanarImage;
 import javax.media.jai.operator.ColorQuantizerDescriptor;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
-import com.mobiletech.imageconverter.modifiers.ImageColorModifier;
 import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.sun.image.codec.jpeg.JPEGCodec;
@@ -322,9 +321,10 @@ public class ImageEncoder {
             pb.removeParameters();
             pb.removeSources();
             pb.addSource(surrogateImage);
+            
             pb.add(colorMap);
             pb.add(ditherMask);
-            op= JAI.create("errordiffusion",pb,rh);
+            op= JAI.create("errorDiffusion",pb,rh);
             surrogateImage=(PlanarImage)op;   
             image = surrogateImage.getAsBufferedImage();
             params.getInternalVariables().setCm(image.getColorModel());
@@ -336,13 +336,14 @@ public class ImageEncoder {
             cm = null;
         } else {   
             ColorModel cm = params.getInternalVariables().getCm();
+
             BufferedImage newImage = new BufferedImage(image.getWidth(),image.getHeight(),BufferedImage.TYPE_BYTE_INDEXED,(IndexColorModel)cm);
             Graphics2D gfx = newImage.createGraphics();
             gfx.drawImage(image,0,0,null);
             gfx.dispose();   
             image = null;
             image = newImage;
-            newImage = null;
+            newImage = null;            
         }
         return image;
     } 
