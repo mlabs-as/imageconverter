@@ -18,19 +18,19 @@ import org.xml.sax.InputSource;
 
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.mobiletech.imageconverter.vo.ImageWatermark;
-import com.mobiletech.imageconverter.vo.TestScenario;
+import com.mobiletech.imageconverter.vo.TsScenario;
 import com.mobiletech.imageconverter.vo.TextWatermark;
 
 public class TestScenarioXMLParser {
     
-    public static Vector<TestScenario> parseTestScenariosToVector(String xmlFile){
+    public static Vector<TsScenario> parseTestScenariosToVector(String xmlFile){
         File xmlF = new File(xmlFile);
         return parseTestScenariosToVector(xmlF);
     }
-    public static Vector<TestScenario> parseTestScenariosToVector(File xmlFile){
+    public static Vector<TsScenario> parseTestScenariosToVector(File xmlFile){
         InputSource xmlSource = null;
         Document document = null;
-        Vector<TestScenario> testScenarios = null;
+        Vector<TsScenario> testScenarios = null;
         try {
             xmlSource = new InputSource(new FileInputStream(xmlFile));        
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -41,7 +41,7 @@ public class TestScenarioXMLParser {
             
             Element root = document.getDocumentElement();
             NodeList scenarios = root.getElementsByTagName("TestScenario");
-            testScenarios = new Vector<TestScenario>(scenarios.getLength());
+            testScenarios = new Vector<TsScenario>(scenarios.getLength());
             for(int i = 0; i < scenarios.getLength(); i++){
                 testScenarios.add(parseTestScenario(scenarios.item(i)));
             }
@@ -51,14 +51,14 @@ public class TestScenarioXMLParser {
         return testScenarios;        
         
     }
-    public static TestScenario [] parseTestScenarios(String xmlFile){
+    public static TsScenario [] parseTestScenarios(String xmlFile){
         File xmlF = new File(xmlFile);
         return parseTestScenarios(xmlF);
     }
-    public static TestScenario [] parseTestScenarios(File xmlFile){
+    public static TsScenario [] parseTestScenarios(File xmlFile){
         InputSource xmlSource = null;
         Document document = null;
-        TestScenario [] testScenarios = null;
+        TsScenario [] testScenarios = null;
         try {
             xmlSource = new InputSource(new FileInputStream(xmlFile));        
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -72,14 +72,14 @@ public class TestScenarioXMLParser {
         
         Element root = document.getDocumentElement();
         NodeList scenarios = root.getElementsByTagName("TestScenario");
-        testScenarios = new TestScenario[scenarios.getLength()];
+        testScenarios = new TsScenario[scenarios.getLength()];
         for(int i = 0; i < scenarios.getLength(); i++){
             testScenarios[i] = parseTestScenario(scenarios.item(i));
         }
         return testScenarios;        
     }
         
-    public static String createScenarioXML(TestScenario ts){
+    public static String createScenarioXML(TsScenario ts){
         StringBuffer xml = new StringBuffer();
         xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         xml.append("<TestScenarios>");
@@ -87,7 +87,7 @@ public class TestScenarioXMLParser {
         xml.append("</TestScenarios>");
         return xml.toString();
     }
-    public static String createScenarioXML(TestScenario [] ts){
+    public static String createScenarioXML(TsScenario [] ts){
         StringBuffer xml = new StringBuffer();
         xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         xml.append("<TestScenarios>");
@@ -97,19 +97,19 @@ public class TestScenarioXMLParser {
         xml.append("</TestScenarios>");
         return xml.toString();
     }
-    public static String createScenarioXML(Vector<TestScenario> ts){
+    public static String createScenarioXML(Vector<TsScenario> ts){
         StringBuffer xml = new StringBuffer();
         xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         xml.append("<TestScenarios>");
-        Iterator<TestScenario> ite = ts.iterator();
+        Iterator<TsScenario> ite = ts.iterator();
         while(ite.hasNext()){
             xml.append(scenarioToXML(ite.next()));
         }
         xml.append("</TestScenarios>");
         return xml.toString();
     }
-    private static TestScenario parseTestScenario(Node scenario){
-        TestScenario scn = new TestScenario();
+    private static TsScenario parseTestScenario(Node scenario){
+        TsScenario scn = new TsScenario();
         Node child = scenario.getFirstChild();
         while(child != null){
             if(child.getNodeName().equalsIgnoreCase("ScenarioName")){
@@ -349,7 +349,7 @@ public class TestScenarioXMLParser {
     private static byte [] nodeToByteArray(Node n){
         return n.getFirstChild().getNodeValue().getBytes();
     }
-    private static String scenarioToXML(TestScenario ts){
+    private static String scenarioToXML(TsScenario ts){
         StringBuffer xml = new StringBuffer();
         xml.append("<TestScenario>");
         if(ts.getName() != null){

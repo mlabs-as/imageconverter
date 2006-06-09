@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8"?><TestScenarios><TestScenario><ScenarioName>400x400 GIF</ScenarioName><ScenarioFormat>All</ScenarioFormat><OnlyMultiframe>false</OnlyMultiframe><ImageParams><Format>gif</Format><Height>500</Height><Width>500</Width><Grayscale>false</Grayscale><NoEnlargment>false</NoEnlargment></ImageParams></TestScenario></TestScenarios>

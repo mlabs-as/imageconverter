@@ -8,22 +8,22 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import com.mobiletech.imageconverter.ImageConverter;
-import com.mobiletech.imageconverter.vo.TestScenario;
+import com.mobiletech.imageconverter.vo.TsScenario;
 import com.mobiletech.imageconverter.xml.TestScenarioXMLParser;
 
-public class TestDirectory {
+public class DirectoryUtil {
     
     private File directory = null;
     private HashMap map = null;
-    private Vector<TestScenario> tScn = null;
+    private Vector<TsScenario> tScn = null;
     
-    private TestDirectory(){}
+    private DirectoryUtil(){}
     
-    public TestDirectory(String dir){
+    public DirectoryUtil(String dir){
         directory = new File(dir);
     }
     
-    public TestDirectory(File dir){
+    public DirectoryUtil(File dir){
         directory = dir;
     }
     
@@ -48,11 +48,11 @@ public class TestDirectory {
         }
     }
     
-    public Vector<TestScenario> getAllTestScenarios(){
+    public Vector<TsScenario> getAllTestScenarios(){
         if(validate()){            
             File [] files = directory.listFiles();
-            TestScenario [] temp = null;
-            Vector<TestScenario> scn = new Vector<TestScenario>();
+            TsScenario [] temp = null;
+            Vector<TsScenario> scn = new Vector<TsScenario>();
             for(int i = 0;i < files.length; i++){
                 if(!files[i].isDirectory()){
                     if(files[i].getName().lastIndexOf(".") > 0 && files[i].getName().substring(files[i].getName().lastIndexOf(".")).equalsIgnoreCase("xml")){
@@ -71,10 +71,10 @@ public class TestDirectory {
         return null;
     }
     
-    public Vector<TestScenario> getAllTestScenariosScanSubdirs(){
+    public Vector<TsScenario> getAllTestScenariosScanSubdirs(){
         if(validate()){
             tScn = null;
-            tScn = new Vector<TestScenario>();
+            tScn = new Vector<TsScenario>();
             getAllTestScenariosRecursive(directory);
             return tScn;
         }
@@ -82,7 +82,7 @@ public class TestDirectory {
     }
     private void getAllTestScenariosRecursive(File dir){            
         File [] files = dir.listFiles();
-        TestScenario [] temp = null;
+        TsScenario [] temp = null;
         
         for(int i = 0;i < files.length; i++){
             if(!files[i].isDirectory()){
@@ -100,7 +100,7 @@ public class TestDirectory {
             }
         }
     }
-    private synchronized void addTestScenario(TestScenario ts){
+    private synchronized void addTestScenario(TsScenario ts){
         tScn.add(ts);
     }
     public HashMap getAllSupportedImages(){
@@ -153,10 +153,10 @@ public class TestDirectory {
             }
         }                                  
     }
-    public void createDirectoriesForScenarioNames(Vector<TestScenario> scenarios){
-        Iterator<TestScenario> ite = scenarios.iterator();
+    public void createDirectoriesForScenarioNames(Vector<TsScenario> scenarios){
+        Iterator<TsScenario> ite = scenarios.iterator();
         File temp = null;
-        TestScenario tmpScn = null;
+        TsScenario tmpScn = null;
         while(ite.hasNext()){
             tmpScn = ite.next();
             temp = new File(directory.getAbsolutePath() + "/" + tmpScn.getName());

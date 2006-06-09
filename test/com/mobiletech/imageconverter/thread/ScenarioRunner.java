@@ -8,21 +8,21 @@ import java.util.Vector;
 import com.mobiletech.imageconverter.ImageConverter;
 import com.mobiletech.imageconverter.exception.ImageConverterException;
 import com.mobiletech.imageconverter.fileio.FileUtil;
-import com.mobiletech.imageconverter.fileio.TestDirectory;
+import com.mobiletech.imageconverter.fileio.DirectoryUtil;
+import com.mobiletech.imageconverter.vo.TsScenario;
 import com.mobiletech.imageconverter.vo.ScenarioRunStatistics;
-import com.mobiletech.imageconverter.vo.TestScenario;
 
-public class TestScenarioRunner implements Runnable{
+public class ScenarioRunner implements Runnable{
     private int imagesDone = 0;
     private boolean finished = false;
-    private TestScenario ts = null;    
+    private TsScenario ts = null;    
     private ScenarioRunStatistics stat = null;
-    private TestDirectory out = null;
+    private DirectoryUtil out = null;
     private HashMap images = null;
     
-    private TestScenarioRunner(){}
+    private ScenarioRunner(){}
     
-    public TestScenarioRunner(TestScenario tst, HashMap images, TestDirectory out){
+    public ScenarioRunner(TsScenario tst, HashMap images, DirectoryUtil out){
         this.ts = tst;
         this.out = out;
         this.images = images;

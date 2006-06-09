@@ -161,9 +161,9 @@
     </extensions>
     <!-- <defaultGoal>compile war:manifest war:war</defaultGoal> -->
     <sourceDirectory>${basedir}/src</sourceDirectory>
-    <!--testSourceDirectory>${basedir}/test</testSourceDirectory -->
+    <testSourceDirectory>${basedir}/test</testSourceDirectory>
     <outputDirectory>${basedir}/target/classes/src</outputDirectory>
-    <!--testOutputDirectory>${basedir}/target/classes/test</testOutputDirectory -->
+    <testOutputDirectory>${basedir}/target/classes/test</testOutputDirectory>
     <!-- <directory>${basedir}/target/bin</directory> -->
     <finalName>ImageConverter-${version}</finalName>
    

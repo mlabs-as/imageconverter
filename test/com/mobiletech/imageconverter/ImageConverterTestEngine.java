@@ -1,36 +1,37 @@
 package com.mobiletech.imageconverter;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
-import com.mobiletech.imageconverter.fileio.TestDirectory;
-import com.mobiletech.imageconverter.thread.TestScenarioRunner;
+import com.mobiletech.imageconverter.fileio.DirectoryUtil;
+import com.mobiletech.imageconverter.thread.ScenarioRunner;
 import com.mobiletech.imageconverter.vo.ScenarioRunStatistics;
-import com.mobiletech.imageconverter.vo.TestScenario;
+import com.mobiletech.imageconverter.vo.TsScenario;
 
 import junit.framework.TestCase;
 
 public class ImageConverterTestEngine extends TestCase{
-    private TestDirectory sourceDirectory = null;
-    private TestDirectory testScenarioSourceDirectory = null; 
-    private TestDirectory targetDirectory = null;
+    private DirectoryUtil sourceDirectory = null;
+    private DirectoryUtil testScenarioSourceDirectory = null; 
+    private DirectoryUtil targetDirectory = null;
     private int maxThreads = 2;
     
     public ImageConverterTestEngine(){        
         //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/problem images");
         //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif images");
         //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/animated gifs");
+        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/new anim");
         //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite");
-        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/Single Run");
-        sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif transparency");
-        testScenarioSourceDirectory = new TestDirectory("C:/data/work/workspace/imageconverter/test/testdata/routine");
+        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/For 903");
+        sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/Single Run");
+        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif transparency");
+        testScenarioSourceDirectory = new DirectoryUtil("C:/data/work/workspace/imageconverter/test/testdata/routine");
         // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
-        targetDirectory = new TestDirectory("C:/temp/imagetest"); // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
+        targetDirectory = new DirectoryUtil("C:/temp/imagetest"); // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
         // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
         
     }
@@ -41,15 +42,15 @@ public class ImageConverterTestEngine extends TestCase{
     }
     
     public void runWithGUI(){
-        Vector<TestScenario> scenarios = testScenarioSourceDirectory.getAllTestScenariosScanSubdirs();
+        Vector<TsScenario> scenarios = testScenarioSourceDirectory.getAllTestScenariosScanSubdirs();
         scenarios = runGui();
         runTest(scenarios);
     }
     public void testMain(){        
-        Vector<TestScenario> scenarios = testScenarioSourceDirectory.getAllTestScenariosScanSubdirs();
+        Vector<TsScenario> scenarios = testScenarioSourceDirectory.getAllTestScenariosScanSubdirs();
         runTest(scenarios);
     }
-    private void runTest(Vector<TestScenario> scenarios){
+    private void runTest(Vector<TsScenario> scenarios){
         InputStreamReader stdin =
             new InputStreamReader(System.in);
             BufferedReader console =
@@ -67,14 +68,14 @@ public class ImageConverterTestEngine extends TestCase{
         int testsRun = 0;
         int pointsPrinted = 0;
         
-        Iterator<TestScenario> ite = scenarios.iterator();
-        TestScenario currentScenario = null;
+        Iterator<TsScenario> ite = scenarios.iterator();
+        TsScenario currentScenario = null;
         Vector statVector = new Vector();
         
         long start = System.currentTimeMillis();
         while(ite.hasNext()){
             currentScenario = ite.next();
-            TestScenarioRunner tsc = new TestScenarioRunner(currentScenario, images, targetDirectory);
+            ScenarioRunner tsc = new ScenarioRunner(currentScenario, images, targetDirectory);
             tsc.runScenario();
             ScenarioRunStatistics stats = tsc.getStatistics();
             Iterator errors = stats.getErrorIterator();
@@ -138,14 +139,14 @@ public class ImageConverterTestEngine extends TestCase{
         */
     }
     
-    private Vector<TestScenario> runGui(){
+    private Vector<TsScenario> runGui(){
         
         return null;
     }
-    private int calculateAndPrintTotalNumberOfTests(Vector<TestScenario> scenarios, HashMap images){
+    private int calculateAndPrintTotalNumberOfTests(Vector<TsScenario> scenarios, HashMap images){
         outp("\nCalculating number of tests to be run...");
-        Iterator<TestScenario> ite = scenarios.iterator();
-        TestScenario tmp = null;
+        Iterator<TsScenario> ite = scenarios.iterator();
+        TsScenario tmp = null;
         int numTests = 0;
         while(ite.hasNext()){
             tmp = ite.next();
@@ -155,7 +156,7 @@ public class ImageConverterTestEngine extends TestCase{
         out("\nBased on the current input data, a total of -> " + numTests + " <- tests will be run.");
         return numTests;
     }
-    private int calculateNumberOfTestsForScenario(TestScenario ts, HashMap images){
+    private int calculateNumberOfTestsForScenario(TsScenario ts, HashMap images){
         int num = 0;
         if(ts.isTestForAll()){
             Set keys = images.keySet();
@@ -179,7 +180,7 @@ public class ImageConverterTestEngine extends TestCase{
         }                    
         return num;
     }
-    private void printTestScenarioSummary(Vector<TestScenario> scenarios){
+    private void printTestScenarioSummary(Vector<TsScenario> scenarios){
         out("\nScanned test scenario source Directory, found " + scenarios.size() + " Test Scenarios");        
     }
     

@@ -1,6 +1,6 @@
 package com.mobiletech.imageconverter.vo;
 
-public class TestScenario {
+public class TsScenario {
     private ImageConverterParams params = null;
     private String name = null;
     private boolean testForAll = false;
