@@ -96,7 +96,7 @@ public class DirectoryUtil {
                     }                        
                 }
             } else {
-                getAllTestScenariosRecursive(dir);
+                getAllTestScenariosRecursive(files[i]);
             }
         }
     }

@@ -21,14 +21,14 @@ public class ImageConverterTestEngine extends TestCase{
     private int maxThreads = 2;
     
     public ImageConverterTestEngine(){        
-        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/problem images");
-        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif images");
-        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/animated gifs");
-        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/new anim");
-        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite");
-        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/For 903");
-        sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/Single Run");
-        //sourceDirectory = new TestDirectory("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif transparency");
+        //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/problem images");
+        //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif images");
+        //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/animated gifs");
+        //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/new anim");
+        //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite");
+        sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/For 903");
+        //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/Single Run");
+        //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif transparency");
         testScenarioSourceDirectory = new DirectoryUtil("C:/data/work/workspace/imageconverter/test/testdata/routine");
         // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
         targetDirectory = new DirectoryUtil("C:/temp/imagetest"); // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)

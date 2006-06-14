@@ -347,7 +347,7 @@ public class TestScenarioXMLParser {
         return (n.getFirstChild().getNodeValue().equalsIgnoreCase("true") ? true : false);
     }
     private static byte [] nodeToByteArray(Node n){
-        return n.getFirstChild().getNodeValue().getBytes();
+        return Base64.decode(n.getFirstChild().getNodeValue());
     }
     private static String scenarioToXML(TsScenario ts){
         StringBuffer xml = new StringBuffer();
@@ -393,7 +393,7 @@ public class TestScenarioXMLParser {
         }
         if(ts.getImage() != null){
             xml.append("<Image>");
-            xml.append(ts.getImage());
+            xml.append(Base64.encodeBytes(ts.getImage()));
             xml.append("</Image>");
         }
         if(ts.getJPEGCompressionQuality() > 0f){
