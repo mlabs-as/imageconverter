@@ -188,6 +188,7 @@ public class ImageDecoder {
   
         Color backgroundColor = Color.white; 
         Color transparentColor = null;
+        byte [] colorTable = null;
         
         BufferedImage previousImage = null;
         if(numImages > 1){
@@ -201,7 +202,7 @@ public class ImageDecoder {
         
         if(streamMetaData.globalColorTable != null){
             int numEntries = streamMetaData.globalColorTable.length/3;
-            byte [] colorTable = streamMetaData.globalColorTable;
+            colorTable = streamMetaData.globalColorTable;
             int found = 0;
             for (int e = 0; e < numEntries; e++) {
                 if(e == streamMetaData.backgroundColorIndex) {
@@ -318,6 +319,11 @@ public class ImageDecoder {
         }   
         if(noneCounter == images.length){     
             //imageParams.getInternalVariables().setTransparentColor(null);
+        }
+        if(finishedImages[0].getColorModel().hasAlpha() && imageParams.getInternalVariables().getTransparentColor() == null){
+            //System.out.println("has alpha");
+            imageParams.getInternalVariables().setTransparentColor(ImageUtil.getUniqueColor(colorTable,transparentColor));
+            imageParams.setNumberOfColors(6868);
         }
         imageParams.getInternalVariables().setImageMetadata(metaTable);
         return finishedImages;

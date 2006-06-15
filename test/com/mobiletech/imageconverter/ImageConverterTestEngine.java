@@ -26,9 +26,9 @@ public class ImageConverterTestEngine extends TestCase{
         //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/animated gifs");
         //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/new anim");
         //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite");
-        sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/For 903");
+        //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/For 903");
         //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/Single Run");
-        //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif transparency");
+        sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/gif transparency");
         testScenarioSourceDirectory = new DirectoryUtil("C:/data/work/workspace/imageconverter/test/testdata/routine");
         // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
         targetDirectory = new DirectoryUtil("C:/temp/imagetest"); // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)

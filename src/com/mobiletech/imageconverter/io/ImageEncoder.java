@@ -45,7 +45,8 @@ public class ImageEncoder {
         // This code gets run for gif to gif conversion since they are converted to RGB ARGB, oddly, the images appear faulty and striped if this code
         // is not run, although in principle, this code should not be run, as it destroys the transparency of the image and replaces it with white. 
         // Possibly the error is due to the gif conversion code not being able to handle ARGB images. 
-        if(params.getInternalVariables().getOldFormat().equalsIgnoreCase("gif") && (inImage.getType() != BufferedImage.TYPE_BYTE_INDEXED || format.compareToIgnoreCase("gif")!=0)){
+        if((params.getInternalVariables().getOldFormat().equalsIgnoreCase("gif") || params.getInternalVariables().getOldFormat().equalsIgnoreCase("png"))
+                && (inImage.getType() != BufferedImage.TYPE_BYTE_INDEXED || format.compareToIgnoreCase("gif")!=0)){
             BufferedImage buffered = new BufferedImage( inImage.getWidth( null ), inImage.getHeight( null ), BufferedImage.TYPE_INT_RGB);
             Graphics2D g2 = buffered.createGraphics();
             if(params.getInternalVariables().getTransparentColor() == null){                             
@@ -253,8 +254,12 @@ public class ImageEncoder {
                     if(transIndex == 256){
                         newTable[0][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getRed();
                         newTable[1][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getGreen();
-                        newTable[2][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getBlue();                       
-                        transIndex = 255;//tableLength;
+                        newTable[2][tableLength] = (byte)params.getInternalVariables().getTransparentColor().getBlue();  
+                        if(params.getNumberOfColors() != 6868){
+                            transIndex = tableLength;
+                        } else {
+                            transIndex = 255;//tableLength;    
+                        }                        
                         tableLength++;
                     }
                 }          
