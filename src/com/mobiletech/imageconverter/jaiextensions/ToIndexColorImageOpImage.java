@@ -226,36 +226,43 @@ public abstract class ToIndexColorImageOpImage extends PointOpImage
         if (colorMap == null)
             train();
         if (colorModel == null){
-        	//Color col = new Color(0,255,0);
-	        int cIndex = 256;
-	        for(int i = colorMap.getNumEntries()-1; i >= 0; i--){
-	            if(col.getRed() == (colorMap.getByteData()[0][i] & 0xff) &&
-	                    col.getGreen() == (colorMap.getByteData()[1][i] & 0xff) &&
-	                    col.getBlue() == (colorMap.getByteData()[2][i] & 0xff)){
-	                        cIndex = i;
-	                        break;
-	            }
-	        }
-	        if(cIndex == 256){
-	        	byte[][] newTable = null;
-	            
-	                newTable = new byte[3][256];
-	                for(int i = 0; i < 3; i++) {
-	                    System.arraycopy(colorMap.getByteData()[ i ], 0,
-	                            newTable[ i ], 0, colorMap.getNumEntries());
-	                }
-	        	cIndex = colorMap.getNumEntries();
-	        	newTable[0][cIndex] = (byte)col.getRed();
-	        	newTable[1][cIndex] = (byte)col.getGreen();
-	        	newTable[2][cIndex] = (byte)col.getBlue();
-	        	colorMap = null;
-	        	colorMap = new LookupTableJAI(newTable);
-	        }
-            colorModel =
-                new IndexColorModel(8, colorMap.getByteData(0).length,
-                                    colorMap.getByteData(0),
-                                    colorMap.getByteData(1),
-                                    colorMap.getByteData(2),cIndex);
+        	if(col != null){
+		        int cIndex = 256;
+		        for(int i = colorMap.getNumEntries()-1; i >= 0; i--){
+		            if(col.getRed() == (colorMap.getByteData()[0][i] & 0xff) &&
+		                    col.getGreen() == (colorMap.getByteData()[1][i] & 0xff) &&
+		                    col.getBlue() == (colorMap.getByteData()[2][i] & 0xff)){
+		                        cIndex = i;
+		                        break;
+		            }
+		        }
+		        if(cIndex == 256){
+		        	byte[][] newTable = null;
+		            
+		                newTable = new byte[3][256];
+		                for(int i = 0; i < 3; i++) {
+		                    System.arraycopy(colorMap.getByteData()[ i ], 0,
+		                            newTable[ i ], 0, colorMap.getNumEntries());
+		                }
+		        	cIndex = colorMap.getNumEntries();
+		        	newTable[0][cIndex] = (byte)col.getRed();
+		        	newTable[1][cIndex] = (byte)col.getGreen();
+		        	newTable[2][cIndex] = (byte)col.getBlue();
+		        	colorMap = null;
+		        	colorMap = new LookupTableJAI(newTable);
+		        }
+	            colorModel =
+	                new IndexColorModel(8, colorMap.getByteData(0).length,
+	                                    colorMap.getByteData(0),
+	                                    colorMap.getByteData(1),
+	                                    colorMap.getByteData(2),cIndex);
+        	} else {
+        		colorModel =
+	                new IndexColorModel(8, colorMap.getByteData(0).length,
+	                                    colorMap.getByteData(0),
+	                                    colorMap.getByteData(1),
+	                                    colorMap.getByteData(2));
+        	}
         }
         return colorModel;
     }
