@@ -26,6 +26,7 @@ import javax.media.jai.PlanarImage;
 import javax.media.jai.operator.ColorQuantizerDescriptor;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
+import com.mobiletech.imageconverter.jaiextensions.ToIndexColorImageOpDescriptor;
 import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.sun.image.codec.jpeg.JPEGCodec;
@@ -207,7 +208,33 @@ public class ImageEncoder {
     }  
     
     private static BufferedImage toIndexColorModel(BufferedImage image, ImageConverterParams params) throws ImageConverterException{  
-        if(params.getInternalVariables().getCm() == null){
+        if(true){
+        	ToIndexColorImageOpDescriptor.register();
+        	PlanarImage surrogateImage = PlanarImage.wrapRenderedImage(image);
+            ParameterBlock pb = new ParameterBlock();
+            int w = surrogateImage.getWidth();
+            int h = surrogateImage.getHeight();
+    
+            BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
+    
+            WritableRaster wr = bi.getWritableTile(0, 0);
+            WritableRaster wr3 = wr.createWritableChild(0, 0, w, h, 0, 0, new int[] { 0, 1, 2 });
+    
+            wr3.setRect(surrogateImage.getData());
+            bi.releaseWritableTile(0, 0);
+            surrogateImage = PlanarImage.wrapRenderedImage(bi);
+    
+            pb.removeParameters();
+            pb.removeSources();
+        	
+            pb.addSource(surrogateImage).add(ToIndexColorImageOpDescriptor.MEDIANCUT).add(new Integer(256)).add(null).add(null).add(new Integer(6)).add(new Integer(1)).add(params.getInternalVariables().getTransparentColor());
+            //p.add(new Integer(210));
+            // Threshold the image with the new operator.
+            PlanarImage output = JAI.create("toIndexColorImage",pb,null);
+            image = output.getAsBufferedImage();
+            return image;
+        }
+    	if(params.getInternalVariables().getCm() == null){
             PlanarImage surrogateImage = PlanarImage.wrapRenderedImage(image);
             ParameterBlock pb = new ParameterBlock();
             int w = surrogateImage.getWidth();

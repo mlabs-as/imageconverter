@@ -218,6 +218,8 @@ public class ImageDecoder {
                     int b1 = colorTable[3*e + 2] & 0xff; 
                     transparentColor = new Color(r1,g1,b1);   
                     imageParams.getInternalVariables().setTransparentColor(transparentColor);  
+                    //imageParams.getInternalVariables().setTransparentColor(ImageUtil.getUniqueColor(colorTable,transparentColor));
+                    //imageParams.setNumberOfColors(6868);
                     found++; 
                 }
                 if(found == 2){
