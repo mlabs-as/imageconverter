@@ -29,12 +29,14 @@ public class ImageConverterTestEngine extends TestCase{
         //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/For 903");
         //sourceDirectory = new DirectoryUtil("C:/Documents and Settings/Andreas/Desktop/desktop/TestSite/Single Run");
         //sourceDirectory = new DirectoryUtil("C:/work/testdata/jetmobile");
-        sourceDirectory = new DirectoryUtil("C:/work/testdata/jetmobile2");
+        //sourceDirectory = new DirectoryUtil("C:/work/testdata/jetmobile2");
+        //sourceDirectory = new DirectoryUtil("C:/work/testdata/TestSite");
         //sourceDirectory = new DirectoryUtil("C:/work/testdata/new anim");
         //sourceDirectory = new DirectoryUtil("C:/work/testdata/gif transparency");        
-        //sourceDirectory = new DirectoryUtil("C:/work/testdata/single run");
+        sourceDirectory = new DirectoryUtil("C:/work/testdata/single run");
         //sourceDirectory = new DirectoryUtil("C:/work/testdata/Animated Gifs");        
-        testScenarioSourceDirectory = new DirectoryUtil("C:/work/workspace/imageconverter/test/testdata/routine");
+        //testScenarioSourceDirectory = new DirectoryUtil("C:/work/workspace/imageconverter/test/testdata/routine");
+        testScenarioSourceDirectory = new DirectoryUtil("C:/work/workspace/imageconverter/test/testdata/stresstest");
         // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
         targetDirectory = new DirectoryUtil("C:/temp/imagetest"); // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
         // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)        
