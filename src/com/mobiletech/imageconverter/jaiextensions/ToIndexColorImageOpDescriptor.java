@@ -10,6 +10,7 @@ import javax.media.jai.OperationDescriptorImpl;
 import javax.media.jai.OperationRegistry;
 import javax.media.jai.ParameterBlockJAI;
 import javax.media.jai.ROI;
+import javax.media.jai.RegistryElementDescriptor;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.ColorQuantizerType;
 import javax.media.jai.registry.RIFRegistry;
@@ -209,20 +210,21 @@ public class ToIndexColorImageOpDescriptor extends OperationDescriptorImpl {
 	  * A method to register this operator with the OperationRegistry and
 	  * RIFRegistry. 
 	  */
-	  public static void register()
+	  public synchronized static void register()
 	    {
 	    if (!registered)
 	      {
-	      // Get the OperationRegistry.
-	      OperationRegistry op = JAI.getDefaultInstance().getOperationRegistry();
-	      // Register the operator's descriptor. 
-	      ToIndexColorImageOpDescriptor desc = 
-	        new ToIndexColorImageOpDescriptor();
-	      op.registerDescriptor(desc);
-	      // Register the operators's RIF.
-	      ToIndexColorImageOpRIF rif = new ToIndexColorImageOpRIF();
-	      RIFRegistry.register(op,"toIndexColorImage","br.inpe.lac",rif);
-	      registered = true;
+//	    	 Get the OperationRegistry.
+		      OperationRegistry op = JAI.getDefaultInstance().getOperationRegistry();
+	    	if(op.getDescriptor("rendered","toIndexColorImage") == null){		      
+		      // Register the operator's descriptor. 
+		      ToIndexColorImageOpDescriptor desc = new ToIndexColorImageOpDescriptor();	      
+		      op.registerDescriptor(desc);
+		      // Register the operators's RIF.
+		      ToIndexColorImageOpRIF rif = new ToIndexColorImageOpRIF();
+		      RIFRegistry.register(op,"toIndexColorImage","br.inpe.lac",rif);
+		      registered = true;
+	    	}
 	      }
 	    }
 	  
