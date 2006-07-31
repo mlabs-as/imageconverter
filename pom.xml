@@ -45,7 +45,7 @@
   </developers>
 
   <scm>
-    <connection>scm:cvs|pserver|nc9005ar@cvs.mobiletech.no|/mobiletech|dextella/imageconverter</connection>
+    <connection>scm:cvs|local|/mobiletech|dextella/imageconverter</connection>
     <developerConnection>scm:cvs|pserver|${maven.username}@cvs.mobiletech.no|/mobiletech|/dextella/imageconverter</developerConnection>
     <url></url>
   </scm>
