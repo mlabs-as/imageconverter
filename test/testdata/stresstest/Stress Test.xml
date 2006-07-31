@@ -6,8 +6,8 @@
 		<OnlyMultiframe>false</OnlyMultiframe>
 		<ImageParams>
 			<Format>gif</Format>
-			<Height>400</Height>
-			<Width>400</Width>
+			<Height>500</Height>
+			<Width>500</Width>
 			<Grayscale>false</Grayscale>
 			<NoEnlargment>false</NoEnlargment>
 		</ImageParams>
@@ -18,8 +18,8 @@
 		<OnlyMultiframe>false</OnlyMultiframe>
 		<ImageParams>
 			<Format>bmp</Format>
-			<Height>400</Height>
-			<Width>400</Width>
+			<Height>500</Height>
+			<Width>500</Width>
 			<Grayscale>false</Grayscale>
 			<NoEnlargment>false</NoEnlargment>
 		</ImageParams>
@@ -30,8 +30,8 @@
 		<OnlyMultiframe>false</OnlyMultiframe>
 		<ImageParams>
 			<Format>wbmp</Format>
-			<Height>400</Height>
-			<Width>400</Width>
+			<Height>500</Height>
+			<Width>500</Width>
 			<Grayscale>false</Grayscale>
 			<NoEnlargment>false</NoEnlargment>
 		</ImageParams>
@@ -42,8 +42,8 @@
 		<OnlyMultiframe>false</OnlyMultiframe>
 		<ImageParams>
 			<Format>jpg</Format>
-			<Height>400</Height>
-			<Width>400</Width>
+			<Height>500</Height>
+			<Width>500</Width>
 			<Grayscale>false</Grayscale>
 			<NoEnlargment>false</NoEnlargment>
 		</ImageParams>
@@ -54,8 +54,8 @@
 		<OnlyMultiframe>false</OnlyMultiframe>
 		<ImageParams>
 			<Format>tif</Format>
-			<Height>400</Height>
-			<Width>400</Width>
+			<Height>500</Height>
+			<Width>500</Width>
 			<Grayscale>false</Grayscale>
 			<NoEnlargment>false</NoEnlargment>
 		</ImageParams>
@@ -66,8 +66,8 @@
 		<OnlyMultiframe>false</OnlyMultiframe>
 		<ImageParams>
 			<Format>png</Format>
-			<Height>400</Height>
-			<Width>400</Width>
+			<Height>500</Height>
+			<Width>500</Width>
 			<Grayscale>false</Grayscale>
 			<NoEnlargment>false</NoEnlargment>
 		</ImageParams>
