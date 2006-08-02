@@ -2,9 +2,17 @@ package com.mobiletech.imageconverter.io;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Iterator;
@@ -12,7 +20,11 @@ import java.util.Iterator;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageInputStream;
+
+import org.w3c.dom.NodeList;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
 import com.mobiletech.imageconverter.filters.JPEGApp14Filter;
@@ -29,7 +41,7 @@ public class ImageDecoder {
              */
             if(imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpg") 
                     || imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpeg")){
-                inByteArray = JPEGApp14Filter.filter(inByteArray);
+                //inByteArray = JPEGApp14Filter.filter(inByteArray);
             }
         ByteArrayInputStream imageStream = null;                
         ImageInputStream iis = null;        
@@ -54,7 +66,28 @@ public class ImageDecoder {
             // for all formats except gif
             if(!imageParams.getFormat().equalsIgnoreCase("gif") || !reader.getFormatName().equalsIgnoreCase("gif")){
                 finishedImages = new BufferedImage[1];
-                finishedImages[0] = reader.read(0);
+                try{
+                	finishedImages[0] = reader.read(0);
+                } catch (IOException e){
+                	// If this was an unsupported jpeg image, it could have been CMYK or YCCK, these are not supported by
+                	// ImageIO, we can try to load the image using thrid party code.
+                	if(false){//(reader.getFormatName().equalsIgnoreCase("jpeg") || reader.getFormatName().equalsIgnoreCase("jpg")) && e.getMessage().equalsIgnoreCase("Unsupported Image Type")){
+                		IIOMetadata metadata = reader.getImageMetadata(0);
+                		String metadataFormat = metadata.getNativeMetadataFormatName() ;
+                		IIOMetadataNode iioNode = (IIOMetadataNode)metadata.getAsTree(metadataFormat);
+
+                		NodeList children = iioNode.getElementsByTagName("app14Adobe") ;
+                		if ( children.getLength() > 0 ) {
+                			iioNode = (IIOMetadataNode) children.item(0) ;
+                			int transform = Integer.parseInt(iioNode.getAttribute("transform")) ;
+                			Raster raster = reader.readRaster(0, reader.getDefaultReadParam()) ;
+
+                			finishedImages[0] = createJPEG4(raster,transform) ;
+                		}
+                	} else {
+                		throw e;
+                	}
+                }
                 // this is for some known problem images that have been processed in photoshop
                 // they will cause crashes and/or get wrong colors unless they are converted to
                 // have a known image type, this conversion can be quite time consuming for some of these
@@ -329,6 +362,131 @@ public class ImageDecoder {
         }
         imageParams.getInternalVariables().setImageMetadata(metaTable);
         return finishedImages;
+    }
+    
+    /**                                                                                                                                           
+    Java's ImageIO can't process 4-component images                                                                                             
+    and Java2D can't apply AffineTransformOp either,                                                                                            
+    so convert raster data to RGB.                                                                                                              
+    Technique due to MArk Stephens.                                                                                                             
+    Free for any use.                                                                                                                           
+  */
+    private static BufferedImage createJPEG4(Raster raster, int xform) {
+    	int w = raster.getWidth() ;
+    	int h = raster.getHeight();
+
+    	byte[] rgb = new byte[w*h*3];
+
+
+//    	 if (Adobe_APP14 and transform==2) then YCCK else CMYK
+
+    	if (false){//xform == 2) { // YCCK -- Adobe
+	    	float[] Y = raster.getSamples(0,0,w,h, 0, (float[])null);
+	    	float[] Cb = raster.getSamples(0,0,w,h, 1, (float[])null);
+	    	float[] Cr = raster.getSamples(0,0,w,h, 2, (float[])null);
+	    	float[] K = raster.getSamples(0,0,w,h, 3, (float[])null);
+
+	        for (int i=0,imax=Y.length, base=0; i<imax; i++, base+=3) {
+	            // faster to track last cmyk and save computations on stretches of same color?                                                      
+	            // better to use ColorConvertOp?                                                                                                    
+	            float k=K[i], y = Y[i], cb=Cb[i], cr=Cr[i];
+	            double val = y + 1.402*(cr-128) - k;
+	            rgb[base] = val<0.0? (byte)0: val>255.0? (byte)0xff: (byte)(val+0.5);
+	            val = y - 0.34414*(cb-128) - 0.71414*(cr-128) - k;
+	            rgb[base+1] = val<0.0? (byte)0: val>255.0? (byte)0xff: (byte)(val+0.5);
+	            val = y + 1.772 * (cb-128) - k;
+	            rgb[base+2] = val<0.0? (byte)0: val>255.0? (byte)0xff: (byte)(val+0.5);
+	        }
+    	}
+    	else {
+//    	assert xform==0: xform; // CMYK
+    		int[] C = raster.getSamples(0,0,w,h, 0, (int[])null) ;
+    		int[] M = raster.getSamples(0,0,w,h, 1, (int[])null) ;
+    		int[] Y = raster.getSamples(0,0,w,h, 2, (int[])null) ;
+    		int[] K = raster.getSamples(0,0,w,h, 3, (int[])null) ;
+
+    		int val = 0;
+            for (int i=0,imax=C.length, base=0; i<imax; i++, base+=3) {
+            	int r = 1 - ((255-C[i]) - (255-K[i]));
+            	int g = 1 - ((255-M[i]) - (255-K[i]));
+            	int b = 1 - ((255-Y[i]) - (255-K[i]));
+            	rgb[base] = (byte)r;
+            	rgb[base+1] = (byte)g;
+            	rgb[base+2] = (byte)b;
+            	
+            	/*
+            	double c = ( C[i] * ( 1 - K[i] ) + K[i] )/255;
+            	double m = ( M[i] * ( 1 - K[i] ) + K[i] )/255;
+            	double y = ( Y[i] * ( 1 - K[i] ) + K[i] )/255;
+            	            	
+            	val = (int)( 1 - c ) * 255;
+            	rgb[base] = (byte)val;
+            	val = (int)( 1 - m ) * 255;
+            	rgb[base+1] = (byte)val;
+            	val = (int)( 1 - y ) * 255;
+            	rgb[base+2] = (byte)val;
+            	/*
+            	int colors = 255 - 0;//K[i];
+            	val = (colors * (255 - C[i]) / 255);
+            	rgb[base] = (byte)val;
+            	val = (colors * (255 - M[i]) / 255);
+            	rgb[base+1] = (byte)val;
+            	val = (colors * (255 - Y[i]) / 255);
+            	rgb[base+2] = (byte)val;
+            	*/
+                /*int k = K[i];
+                int m = M[i];
+                int y = Y[i];
+                int c = C[i];
+                c = +(c-255);
+                m = +(m-255);
+                y = +(y-255);
+                k = +(k-255);
+                
+                val = c + k;
+                rgb[base] = (byte)val;
+                val = m + k;
+                rgb[base+1] = (byte) val;
+                val = y + k;
+                rgb[base+2] = (byte) val;*/
+                /*
+                val = (255 - Math.min(255, C[i] + k));
+                rgb[base] = (byte)val;
+                val = (255 - Math.min(255, M[i] + k));
+                rgb[base+1] = (byte) val;
+                val = (255 - Math.min(255, Y[i] + k));
+                rgb[base+2] = (byte) val;
+                */
+                
+            }
+    		
+    		/*
+    		rgb[base] = (byte)(Math.min(255f, c * kk + k));
+    		rgb[base+1] = (byte)(Math.min(255f, m * kk + k));
+    		rgb[base+2] = (byte)(Math.min(255f, y * kk + k));
+    		}
+    		/*
+    	int[] C = raster.getSamples(0,0,w,h, 0, (int[])null) ;
+    	int[] M = raster.getSamples(0,0,w,h, 1, (int[])null) ;
+    	int[] Y = raster.getSamples(0,0,w,h, 2, (int[])null) ;
+    	int[] K = raster.getSamples(0,0,w,h, 3, (int[])null) ;
+
+    	 for (int i=0,imax=C.length, base=0; i<imax; i++, base+=3) {
+             int k = K[i];
+             rgb[base] = (byte)(255 - Math.min(255, C[i] + k));
+             rgb[base+1] = (byte)(255 - Math.min(255, M[i] + k));
+             rgb[base+2] = (byte)(255 - Math.min(255, Y[i] + k));
+         }*/
+    	}
+
+//    	 from other image types we know InterleavedRaster's can be
+//    	 manipulated by AffineTransformOp, so create one of	those.
+    	raster = Raster.createInterleavedRaster(new DataBufferByte(rgb, rgb.length), w, h, w*3,3, new int[] {0,1,2 }, null);
+
+    	ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_sRGB);
+    	ColorModel cm = new ComponentColorModel(cs, false, true, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+    	
+    	return new BufferedImage(cm, (WritableRaster) raster, true, null);
     }
     /* DisposalMetods:
      * 0 - "none"

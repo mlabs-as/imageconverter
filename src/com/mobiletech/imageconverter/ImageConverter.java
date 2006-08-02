@@ -7,6 +7,7 @@ package com.mobiletech.imageconverter;
 
 import java.io.*;
 import java.util.Iterator;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import javax.imageio.*;
 import javax.imageio.stream.*;
@@ -33,7 +34,7 @@ import com.mobiletech.imageconverter.watermarks.ImageWatermarker;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.0.8";
+    public static final String version = "ImageConverter version 1.0.9";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -310,5 +311,18 @@ public class ImageConverter {
         */
         return version;
         //return "";
+    }
+    
+    public static Dimension getImageDimension(byte [] image) throws ImageConverterException{ 
+    	Dimension dim = new Dimension();
+    	try {
+        ImageConverterParams params = new ImageConverterParams(image);
+        params.getInternalVariables().setOldFormat(getImageFormatName(image));
+        BufferedImage [] imgs = ImageDecoder.readImages(image, params);
+        dim.setSize(imgs[0].getWidth(), imgs[0].getHeight());
+    	} catch (Throwable t){
+    		throw new ImageConverterException(ImageConverterException.Types.EMBEDDED_EXCEPTION,t.getClass().getName() + " thrown: " + t.getMessage(),t);
+    	}
+        return dim;
     }
 }
