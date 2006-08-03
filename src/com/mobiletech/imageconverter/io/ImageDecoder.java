@@ -41,7 +41,7 @@ public class ImageDecoder {
              */
             if(imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpg") 
                     || imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpeg")){
-                //inByteArray = JPEGApp14Filter.filter(inByteArray);
+                inByteArray = JPEGApp14Filter.filter(inByteArray);
             }
         ByteArrayInputStream imageStream = null;                
         ImageInputStream iis = null;        

@@ -64,6 +64,12 @@ public class ImageScaler {
     private static BufferedImage scaleImageWithGetScaledInstance(BufferedImage inImage, int newWidth, int newHeight, int type){
         Image image3 = inImage.getScaledInstance(newWidth,newHeight,BufferedImage.SCALE_SMOOTH);
         
+        if(newWidth == 0){
+        	newWidth = 1;
+        }
+        if(newHeight == 0){
+        	newHeight = 1;
+        }
         BufferedImage theNewImage2 = new BufferedImage( newWidth, newHeight, type ); 
         Graphics2D g2 = theNewImage2.createGraphics(); 
         
@@ -91,7 +97,19 @@ public class ImageScaler {
         renderHint.put(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
         renderHint.put(RenderingHints.KEY_FRACTIONALMETRICS,RenderingHints.VALUE_FRACTIONALMETRICS_ON);
         
-        AffineTransformOp scaleOp = new AffineTransformOp(AffineTransform.getScaleInstance(scale, scale), renderHint);
+        AffineTransformOp scaleOp = null;
+        
+        if(newHeight == 0){
+        	double hScale = 1.0 / inImage.getHeight();
+        	newHeight = 1;
+        	scaleOp = new AffineTransformOp(AffineTransform.getScaleInstance(scale, hScale), renderHint);
+        } else if(newWidth == 0){
+        	double vScale = 1.0 / inImage.getWidth();
+        	newWidth = 1;
+        	scaleOp = new AffineTransformOp(AffineTransform.getScaleInstance(vScale, scale), renderHint);
+        } else {
+        	scaleOp = new AffineTransformOp(AffineTransform.getScaleInstance(scale, scale), renderHint);
+        }
         BufferedImage scaledImg = new BufferedImage( newWidth, newHeight, inImage.getType() );
  
         Rectangle2D dstBounds = scaleOp.getBounds2D(inImage);
@@ -131,9 +149,19 @@ public class ImageScaler {
     
     private static final BufferedImage scaleUsingJAI(BufferedImage image, double scale, int newWidth, int newHeight, int type){
         ParameterBlock scalePb = new ParameterBlock();
-        scalePb.addSource( image );  // Even so, a source of 'im' shows the same problem
-        scalePb.add( (float)scale );
-        scalePb.add( (float)scale );
+        scalePb.addSource( image );  
+        float hScale = 0.0f, vScale = 0.0f;
+        if(newHeight == 0){
+        	hScale = 1.0f / image.getHeight();
+        	
+        } else if(newWidth == 0){
+        	vScale = 1.0f / image.getWidth();
+        	
+        } else {
+        	hScale = vScale = (float)scale;
+        }
+        scalePb.add( vScale );
+        scalePb.add( hScale );
         scalePb.add( 0.0F );
         scalePb.add( 0.0F );
         scalePb.add( new InterpolationNearest() ); // nearest looks ok

@@ -34,7 +34,7 @@ import com.mobiletech.imageconverter.watermarks.ImageWatermarker;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.0.9";
+    public static final String version = "ImageConverter version 1.0.10";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -318,6 +318,7 @@ public class ImageConverter {
     	try {
         ImageConverterParams params = new ImageConverterParams(image);
         params.getInternalVariables().setOldFormat(getImageFormatName(image));
+        params.setFormat(params.getInternalVariables().getOldFormat());
         BufferedImage [] imgs = ImageDecoder.readImages(image, params);
         dim.setSize(imgs[0].getWidth(), imgs[0].getHeight());
     	} catch (Throwable t){
