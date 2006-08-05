@@ -1,5 +1,6 @@
 package com.mobiletech.imageconverter.thread;
 
+import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -77,7 +78,7 @@ public class ScenarioRunner implements Runnable{
             write = true;
         }
         try {
-            image = ImageConverter.convertImage(ts.getParams());
+            image = ImageConverter.convertImage(ts.getParams());            
             endTime = System.currentTimeMillis();
             stat.addStatistic(format,image.length,startTime, endTime);            
         } catch (ImageConverterException e) {

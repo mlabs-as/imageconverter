@@ -71,7 +71,7 @@ public class ImageDecoder {
                 } catch (IOException e){
                 	// If this was an unsupported jpeg image, it could have been CMYK or YCCK, these are not supported by
                 	// ImageIO, we can try to load the image using thrid party code.
-                	if(false){//(reader.getFormatName().equalsIgnoreCase("jpeg") || reader.getFormatName().equalsIgnoreCase("jpg")) && e.getMessage().equalsIgnoreCase("Unsupported Image Type")){
+                	if((reader.getFormatName().equalsIgnoreCase("jpeg") || reader.getFormatName().equalsIgnoreCase("jpg")) && e.getMessage().equalsIgnoreCase("Unsupported Image Type")){
                 		IIOMetadata metadata = reader.getImageMetadata(0);
                 		String metadataFormat = metadata.getNativeMetadataFormatName() ;
                 		IIOMetadataNode iioNode = (IIOMetadataNode)metadata.getAsTree(metadataFormat);
@@ -172,11 +172,11 @@ public class ImageDecoder {
         metaTable[0] = (GIFImageMetadata)images[0].getMetadata(); 
         
         RenderedImage r = images[0].getRenderedImage();         
+        int numEntries = streamMetaData.globalColorTable.length/3;
+        byte [] colorTable = streamMetaData.globalColorTable;
         
         if(metaTable[0].transparentColorFlag){
-            if(streamMetaData.globalColorTable != null){           
-                int numEntries = streamMetaData.globalColorTable.length/3;
-                byte [] colorTable = streamMetaData.globalColorTable;
+            if(streamMetaData.globalColorTable != null){                                           
                 for (int e = 0; e < numEntries; e++) {
                     if(e == metaTable[0].transparentColorIndex) {
                         int r1 = colorTable[3*e] & 0xff; 
@@ -188,7 +188,22 @@ public class ImageDecoder {
                     }                
                 }
             }
-        }                                                                                                                                                               
+        }    
+        
+        if(transparentColor != null){
+            for (int e = 0; e < numEntries; e++) {
+                if(e == metaTable[0].transparentColorIndex) {
+                    continue;
+                }
+                if(transparentColor.getRed() == (colorTable[3*e] & 0xff) &&
+                        transparentColor.getGreen() == (colorTable[3*e+1] & 0xff) &&
+                        transparentColor.getBlue() == (colorTable[3*e+2] & 0xff)){  
+                    imageParams.getInternalVariables().setTransparentColor(ImageUtil.getUniqueColor(colorTable,transparentColor));
+                    imageParams.setNumberOfColors(6868);
+                    break;
+                }
+            }
+        }
                                                                                     
          Graphics2D resG = resultImage.createGraphics();
          if(metaTable[0].imageLeftPosition != 0 || metaTable[0].imageTopPosition != 0){
@@ -400,13 +415,23 @@ public class ImageDecoder {
     	}
     	else {
 //    	assert xform==0: xform; // CMYK
-    		int[] C = raster.getSamples(0,0,w,h, 0, (int[])null) ;
-    		int[] M = raster.getSamples(0,0,w,h, 1, (int[])null) ;
-    		int[] Y = raster.getSamples(0,0,w,h, 2, (int[])null) ;
-    		int[] K = raster.getSamples(0,0,w,h, 3, (int[])null) ;
+                int[] C = raster.getSamples(0,0,w,h, 0, (int[])null) ;
+                int[] M =    raster.getSamples(0,0,w,h, 1, (int[])null) ;
+                int[] Y = raster.getSamples(0,0,w,h, 2, (int[])null) ;
+                int[] K = raster.getSamples(0,0,w,h, 3, (int[])null) ;
 
-    		int val = 0;
-            for (int i=0,imax=C.length, base=0; i<imax; i++, base+=3) {
+                for (int i=0,imax=C.length, base=0; i<imax; i++, base+=3) {
+                    int c = 255 - C[i] ;
+                    int m = 255 - M[i] ;
+                    int y = 255 - Y[i] ;
+                    int k = 255 - K[i] ;
+                    float kk = k/255f ;
+
+                    rgb[base] = (byte)(255 - Math.min(255f, c * kk + k));
+                    rgb[base+1] = (byte)(255 - Math.min(255f, m * kk + k));
+                    rgb[base+2] = (byte)(255 - Math.min(255f, y * kk + k));
+                }
+            	/*
             	int r = 1 - ((255-C[i]) - (255-K[i]));
             	int g = 1 - ((255-M[i]) - (255-K[i]));
             	int b = 1 - ((255-Y[i]) - (255-K[i]));
@@ -414,16 +439,16 @@ public class ImageDecoder {
             	rgb[base+1] = (byte)g;
             	rgb[base+2] = (byte)b;
             	
-            	/*
-            	double c = ( C[i] * ( 1 - K[i] ) + K[i] )/255;
-            	double m = ( M[i] * ( 1 - K[i] ) + K[i] )/255;
-            	double y = ( Y[i] * ( 1 - K[i] ) + K[i] )/255;
+            	*
+            	double c = ( C[i] * ( 1 - K[i] ) + K[i] );
+            	double m = ( M[i] * ( 1 - K[i] ) + K[i] );
+            	double y = ( Y[i] * ( 1 - K[i] ) + K[i] );
             	            	
-            	val = (int)( 1 - c ) * 255;
+            	val = (int)( 1 - c );
             	rgb[base] = (byte)val;
-            	val = (int)( 1 - m ) * 255;
+            	val = (int)( 1 - m );
             	rgb[base+1] = (byte)val;
-            	val = (int)( 1 - y ) * 255;
+            	val = (int)( 1 - y );
             	rgb[base+2] = (byte)val;
             	/*
             	int colors = 255 - 0;//K[i];
@@ -477,7 +502,7 @@ public class ImageDecoder {
              rgb[base+1] = (byte)(255 - Math.min(255, M[i] + k));
              rgb[base+2] = (byte)(255 - Math.min(255, Y[i] + k));
          }*/
-    	}
+    	//}
 
 //    	 from other image types we know InterleavedRaster's can be
 //    	 manipulated by AffineTransformOp, so create one of	those.

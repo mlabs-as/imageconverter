@@ -37,7 +37,7 @@ public class ImageConverterTest extends TestCase{
         //sourceDirectory = new DirectoryUtil("C:/work/testdata/single run");
         //sourceDirectory = new DirectoryUtil("C:/work/testdata/Animated Gifs");        
         //testScenarioSourceDirectory = new DirectoryUtil("C:/utv/mobiletech/dextella/imageconverter/test/testdata/routine");
-        testScenarioSourceDirectory = new DirectoryUtil("test/testdata/stresstest");
+        testScenarioSourceDirectory = new DirectoryUtil("test/testdata/routine");
         // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
         targetDirectory = new DirectoryUtil("/tmp/imagetest"); // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
         // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)        
