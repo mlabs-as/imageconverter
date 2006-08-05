@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestScenarios>
+	<TestScenario>
+		<ScenarioName>400x400 GIF</ScenarioName>
+		<ScenarioFormat>All</ScenarioFormat>
+		<OnlyMultiframe>false</OnlyMultiframe>
+		<ImageParams>
+			<Format>gif</Format>
+			<Height>400</Height>
+			<Width>400</Width>
+			<Grayscale>false</Grayscale>
+			<NoEnlargment>false</NoEnlargment>
+		</ImageParams>
+	</TestScenario>
+	<TestScenario>
+		<ScenarioName>400x400 BMP</ScenarioName>
+		<ScenarioFormat>All</ScenarioFormat>
+		<OnlyMultiframe>false</OnlyMultiframe>
+		<ImageParams>
+			<Format>bmp</Format>
+			<Height>400</Height>
+			<Width>400</Width>
+			<Grayscale>false</Grayscale>
+			<NoEnlargment>false</NoEnlargment>
+		</ImageParams>
+	</TestScenario>
+	<TestScenario>
+		<ScenarioName>400x400 WBMP</ScenarioName>
+		<ScenarioFormat>All</ScenarioFormat>
+		<OnlyMultiframe>false</OnlyMultiframe>
+		<ImageParams>
+			<Format>wbmp</Format>
+			<Height>400</Height>
+			<Width>400</Width>
+			<Grayscale>false</Grayscale>
+			<NoEnlargment>false</NoEnlargment>
+		</ImageParams>
+	</TestScenario>
+	<TestScenario>
+		<ScenarioName>400x400 JPG</ScenarioName>
+		<ScenarioFormat>All</ScenarioFormat>
+		<OnlyMultiframe>false</OnlyMultiframe>
+		<ImageParams>
+			<Format>jpg</Format>
+			<Height>400</Height>
+			<Width>400</Width>
+			<Grayscale>false</Grayscale>
+			<NoEnlargment>false</NoEnlargment>
+		</ImageParams>
+	</TestScenario>
+	<TestScenario>
+		<ScenarioName>400x400 TIF</ScenarioName>
+		<ScenarioFormat>All</ScenarioFormat>
+		<OnlyMultiframe>false</OnlyMultiframe>
+		<ImageParams>
+			<Format>tif</Format>
+			<Height>400</Height>
+			<Width>400</Width>
+			<Grayscale>false</Grayscale>
+			<NoEnlargment>false</NoEnlargment>
+		</ImageParams>
+	</TestScenario>
+	<TestScenario>
+		<ScenarioName>400x400 PNG</ScenarioName>
+		<ScenarioFormat>All</ScenarioFormat>
+		<OnlyMultiframe>false</OnlyMultiframe>
+		<ImageParams>
+			<Format>png</Format>
+			<Height>400</Height>
+			<Width>400</Width>
+			<Grayscale>false</Grayscale>
+			<NoEnlargment>false</NoEnlargment>
+		</ImageParams>
+	</TestScenario>
+</TestScenarios>
