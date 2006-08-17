@@ -34,7 +34,7 @@ import com.mobiletech.imageconverter.watermarks.ImageWatermarker;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.1.0";
+    public static final String version = "ImageConverter version 1.0.15";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -56,6 +56,9 @@ public class ImageConverter {
      * @throws ImageConverterException
      */
     public static byte[] convertImage(ImageConverterParams imageParams) throws ImageConverterException{     
+       // Determine pipeline
+    	
+    	// run pipeline   	
        imageParams.setNumberOfColors(-1);
        byte [] returnByte = null;
        
@@ -102,7 +105,12 @@ public class ImageConverter {
     private static ImageConverterParams doPipeline(BufferedImage image, ImageConverterParams imageParams) throws ImageConverterException{
         // Perform resize if requested
         if(imageParams.getWidth() > 0 || imageParams.getHeight() > 0){
-            BufferedImage temp = ImageScaler.resizeImage(image, imageParams.getHeight(),imageParams.getWidth(),imageParams.isNoEnlargement(),(imageParams.getInternalVariables().getTransparentColor() != null ? true : false),imageParams);
+        	BufferedImage temp = null;
+        	if(imageParams.getInternalVariables().getScale() != 0.0){
+        		temp = ImageScaler.resizeImage(image, imageParams.getInternalVariables().getScale(),imageParams.isNoEnlargement(),(imageParams.getInternalVariables().getTransparentColor() != null ? true : false),imageParams);
+        	} else {
+        		temp = ImageScaler.resizeImage(image, imageParams.getHeight(),imageParams.getWidth(),imageParams.isNoEnlargement(),(imageParams.getInternalVariables().getTransparentColor() != null ? true : false),imageParams);
+        	}
             if(temp != null){
                 image = null;
                 image = temp;
@@ -159,6 +167,10 @@ public class ImageConverter {
         if(format.length()<3 || format.length()>4){
             throw new ImageConverterException(ImageConverterException.Types.BAD_INPUT_VARIABLE,"Bad input argument: requested codec name not in 3 or 4 letter format Format: '" + format + "'",null);
         }
+        if(inParams.getFormat().equalsIgnoreCase("wbmp") && inParams.isGrayscale()){
+        	inParams.setGrayscale(false);
+        }
+        /*
         if(!(format.compareToIgnoreCase("png") == 0 || 
              format.compareToIgnoreCase("gif") == 0 ||
              format.compareToIgnoreCase("wbmp") == 0 ||
@@ -168,6 +180,7 @@ public class ImageConverter {
              format.compareToIgnoreCase("bmp") == 0)){
             //throw new ImageConverterException(ImageConverterException.Types.CODEC_NOT_SUPPORTED,"Requested codec not supported: " + format,null);
         }       
+        */
         //  throw new ImageConverterException(ImageConverterException.Types.BAD_RESIZE_SIZE,"Cannot resize to size height: "+ inHeight + " width: " + inWidth,null);        
         return inParams;
     }                                 
@@ -280,6 +293,24 @@ public class ImageConverter {
             readers = null;
         }        
         return frames;
+    }
+    
+    public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight){
+    	double scale = ImageScaler.getResizeScale(width, height, desiredWidth, desiredHeight);
+    	int newWidth = (int) (width * scale); 
+        int newHeight = (int) (height * scale); 
+        if(newWidth == 0){
+        	newWidth = 1;
+        }
+        if(newHeight == 0){
+        	newHeight = 1;
+        }
+        
+        Dimension dim = new Dimension();
+        dim.height = newHeight;
+        dim.width = newWidth;
+        
+        return dim;
     }
     
     public static boolean isSupportedImageFormat(String format){

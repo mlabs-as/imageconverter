@@ -5,6 +5,26 @@
       <author email="ar@mobiletech.no">Andreas Ryland</author>
    </properties>
    <body>
+         <release version="1.0.15" description="Bugfix Release" date="17.08.2006">    
+           <action dev="Andreas Ryland" type="fix" issue="668">
+              If one attempts to convert an image to wbmp, grayscale will be set to false if it was set to true. since a wbmp iamage can only by binary color. And this setting combinatio will trigger an exception.
+           </action>
+      </release>   
+      <release version="1.0.14" description="Minor Enhancement Release" date="17.08.2006">    
+           <action dev="Andreas Ryland" type="add">
+               New method Dimension calculateConvertedImageDimension(int, int, int, int) added to provide information on how the resulting dimensions of an image without having to run it through the imageconverter
+           </action>
+      </release>   
+      <release version="1.0.13" description="Bugfix Release" date="15.08.2006">    
+           <action dev="Andreas Ryland" type="fix" issue="664">
+               Banner was attempted scaled with a factor of 0, error in code, fixed. 
+           </action>
+      </release>
+         <release version="1.0.12" description="Bugfix Release" date="15.08.2006">    
+           <action dev="Andreas Ryland" type="fix" issue="663">
+               Common for several jpeg crash bugs, before only one filter setting combination was used, now the imageconverter will try to cycle through different setting combinations to try to get the image working because it was learned that one setting cannot work for all faulty images.
+           </action>
+      </release>
       <release version="1.0.11" description="Bugfix Release" date="05.08.2006">    
            <action dev="Andreas Ryland" type="fix" issue="538">
                Reopened bug. Changing of the transparent color in a gif image when the transparent color is also present among the non transparent colors in order to successfully seperate them when converted to RGB colorspace is now applied to both animated and non animated gifs. This was previously only applied to animated gifs. 

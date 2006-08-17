@@ -28,97 +28,74 @@ import org.w3c.dom.NodeList;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
 import com.mobiletech.imageconverter.filters.JPEGApp14Filter;
+import com.mobiletech.imageconverter.filters.JPEGFilter;
+import com.mobiletech.imageconverter.modifiers.ImageScaler;
 import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.sun.imageio.plugins.gif.GIFImageMetadata;
 import com.sun.imageio.plugins.gif.GIFStreamMetadata;
 
 public class ImageDecoder {
-    public static BufferedImage [] readImages(byte [] inByteArray,ImageConverterParams imageParams) throws ImageConverterException{   
-            /*
-             * Filtering of the App14 segment for JPEG files only, the App14 segment contains photoshop information
-             * this segment causes problems with the java jpeg reader in some cases
-             */
-            if(imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpg") 
-                    || imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpeg")){
-                inByteArray = JPEGApp14Filter.filter(inByteArray);
-            }
-        ByteArrayInputStream imageStream = null;                
-        ImageInputStream iis = null;        
-        ImageReader reader = null;
-
-        BufferedImage [] finishedImages = null;
-        
-        try {                                               
-            imageStream = new ByteArrayInputStream(inByteArray);
-            iis = ImageIO.createImageInputStream(imageStream);
-            
-            Iterator readers = ImageIO.getImageReaders(iis);
-            
-            if(readers.hasNext()){
-                reader = (ImageReader)readers.next();
-            } else {
-                throw new ImageConverterException(ImageConverterException.Types.READ_CODEC_NOT_FOUND,"No image readers found for the image type of the supplied image",null);
-            }
-            
-            reader.setInput(iis,false); 
-
-            // for all formats except gif
-            if(!imageParams.getFormat().equalsIgnoreCase("gif") || !reader.getFormatName().equalsIgnoreCase("gif")){
-                finishedImages = new BufferedImage[1];
-                try{
-                	finishedImages[0] = reader.read(0);
-                } catch (IOException e){
-                	// If this was an unsupported jpeg image, it could have been CMYK or YCCK, these are not supported by
-                	// ImageIO, we can try to load the image using thrid party code.
-                	if((reader.getFormatName().equalsIgnoreCase("jpeg") || reader.getFormatName().equalsIgnoreCase("jpg")) && e.getMessage().equalsIgnoreCase("Unsupported Image Type")){
-                		IIOMetadata metadata = reader.getImageMetadata(0);
-                		String metadataFormat = metadata.getNativeMetadataFormatName() ;
-                		IIOMetadataNode iioNode = (IIOMetadataNode)metadata.getAsTree(metadataFormat);
-
-                		NodeList children = iioNode.getElementsByTagName("app14Adobe") ;
-                		if ( children.getLength() > 0 ) {
-                			iioNode = (IIOMetadataNode) children.item(0) ;
-                			int transform = Integer.parseInt(iioNode.getAttribute("transform")) ;
-                			Raster raster = reader.readRaster(0, reader.getDefaultReadParam()) ;
-
-                			finishedImages[0] = createJPEG4(raster,transform) ;
-                		}
-                	} else {
-                		throw e;
-                	}
-                }
-                // this is for some known problem images that have been processed in photoshop
-                // they will cause crashes and/or get wrong colors unless they are converted to
-                // have a known image type, this conversion can be quite time consuming for some of these
-                // images and will reduce the filesize in some cases
-                if(finishedImages[0].getType() == 0){
-                    finishedImages[0] = ImageUtil.toBuffImageRGBorARGB(finishedImages[0]);
-                }                
-            } else { // GIF specific processing (gif is not well supported in java so we need to do some things manually)                         
-                Iterator iioimages = reader.readAll(null);
-                int numImages = reader.getNumImages(true);
-                GIFStreamMetadata  streamMetaData = (GIFStreamMetadata)reader.getStreamMetadata();
-                if(numImages == 1){ // Normal Gif
-                    finishedImages = readGif(iioimages, imageParams, streamMetaData);
-                } else { // Animated Gif 
-                    finishedImages = readAnimatedGif(iioimages, numImages, imageParams, streamMetaData);
-                }                               
-            }
-        } catch(IOException ioe){
-            throw new ImageConverterException(ImageConverterException.Types.IO_ERROR,"IOException thrown when reading from InputByteStream",ioe);
-        } finally {
-           if(reader != null){
-               reader.dispose();
-           }          
-           reader = null;
-           try {
-               iis.close();            
-               imageStream.close();            
-           } catch (IOException ignored){}
-           iis = null;
-           imageStream = null;
-        }   
+    public static BufferedImage [] readImages(byte [] inByteArray,ImageConverterParams imageParams) throws ImageConverterException{
+    	BufferedImage [] finishedImages = null;
+    	if(imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpg") || imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpeg")){
+        	finishedImages = readJPEG(inByteArray, imageParams);
+        } else {
+	        ByteArrayInputStream imageStream = null;                
+	        ImageInputStream iis = null;        
+	        ImageReader reader = null;		       
+	        
+	        try {                                               
+	            imageStream = new ByteArrayInputStream(inByteArray);
+	            iis = ImageIO.createImageInputStream(imageStream);
+	            
+	            Iterator readers = ImageIO.getImageReaders(iis);
+	            
+	            if(readers.hasNext()){
+	                reader = (ImageReader)readers.next();
+	            } else {
+	                throw new ImageConverterException(ImageConverterException.Types.READ_CODEC_NOT_FOUND,"No image readers found for the image type of the supplied image",null);
+	            }
+	            
+	            reader.setInput(iis,false); 
+	            
+	            if(!imageParams.getFormat().equalsIgnoreCase("gif") || !reader.getFormatName().equalsIgnoreCase("gif")){
+	                finishedImages = new BufferedImage[1];
+	
+	            	finishedImages[0] = reader.read(0);
+	
+	                // this is for some known problem images that have been processed in photoshop
+	                // they will cause crashes and/or get wrong colors unless they are converted to
+	                // have a known image type, this conversion can be quite time consuming for some of these
+	                // images and will reduce the filesize in some cases
+	                if(finishedImages[0].getType() == 0){
+	                    finishedImages[0] = ImageUtil.toBuffImageRGBorARGB(finishedImages[0]);
+	                }                
+	            } else { // GIF specific processing (gif is not well supported in java so we need to do some things manually)                         
+	                Iterator iioimages = reader.readAll(null);
+	                int numImages = reader.getNumImages(true);
+	                GIFStreamMetadata  streamMetaData = (GIFStreamMetadata)reader.getStreamMetadata();
+	                if(numImages == 1){ // Normal Gif
+	                    finishedImages = readGif(iioimages, imageParams, streamMetaData);
+	                } else { // Animated Gif 
+	                    finishedImages = readAnimatedGif(iioimages, numImages, imageParams, streamMetaData);
+	                }                               
+	            }
+	        } catch(IOException ioe){
+	            throw new ImageConverterException(ImageConverterException.Types.IO_ERROR,"IOException thrown when reading from InputByteStream",ioe);
+	        } finally {
+	           if(reader != null){
+	               reader.dispose();
+	           }          
+	           reader = null;
+	           try {
+	               iis.close();            
+	               imageStream.close();            
+	           } catch (IOException ignored){}
+	           iis = null;
+	           imageStream = null;
+	        }   
+        }
         return finishedImages;
     }          
         
@@ -155,6 +132,89 @@ public class ImageDecoder {
         return image;
     }
 
+    private static BufferedImage[] readJPEG(byte [] inByteArray,ImageConverterParams imageParams) throws ImageConverterException{
+    	BufferedImage[] finishedImages = new BufferedImage[1];
+    	
+        ByteArrayInputStream imageStream = null;                
+        ImageInputStream iis = null;        
+        ImageReader reader = null;
+        JPEGApp14Filter jpegFilter = new JPEGApp14Filter();
+        int filterLevel = 1;
+        int maxFilterLevel = JPEGApp14Filter.getMaxFilterLevel();
+        
+        boolean success = false;
+        IOException ioex = null;
+        byte [] temp = null; //incrimental filtering not working, need to save the original
+        try{        	
+	        while(filterLevel <= maxFilterLevel && !success){
+	        	 temp = null;
+	           	 temp = jpegFilter.filter(inByteArray, filterLevel);
+                 imageStream = new ByteArrayInputStream(temp);
+                 iis = ImageIO.createImageInputStream(imageStream);
+                 
+                 Iterator readers = ImageIO.getImageReaders(iis);
+                 
+                 if(readers.hasNext()){
+                     reader = (ImageReader)readers.next();
+                 } else {
+                     throw new ImageConverterException(ImageConverterException.Types.READ_CODEC_NOT_FOUND,"No image readers found for the image type of the supplied image",null);
+                 }
+                 
+                 reader.setInput(iis,false); 
+             try{            
+             	finishedImages[0] = reader.read(0);
+             	success = true;
+             } catch (IOException e){
+                // If this was an unsupported jpeg image, it could have been CMYK or YCCK, these are not supported by
+             	// ImageIO, we can try to load the image using thrid party code.
+             	if(e.getMessage().equalsIgnoreCase("Unsupported Image Type")){
+             		IIOMetadata metadata = reader.getImageMetadata(0);
+             		String metadataFormat = metadata.getNativeMetadataFormatName() ;
+             		IIOMetadataNode iioNode = (IIOMetadataNode)metadata.getAsTree(metadataFormat);
+
+             		NodeList children = iioNode.getElementsByTagName("app14Adobe") ;
+             		if ( children.getLength() > 0 ) {
+             			iioNode = (IIOMetadataNode) children.item(0) ;
+             			int transform = Integer.parseInt(iioNode.getAttribute("transform")) ;
+             			Raster raster = reader.readRaster(0, reader.getDefaultReadParam()) ;
+
+             			finishedImages[0] = createJPEG4(raster,transform) ;
+             			success = true;
+             		}
+             	}
+            	 // We got an io exception, attempt to increase level of filtering to make the image readable
+            	 filterLevel++;
+            	 if(filterLevel > maxFilterLevel){
+            		 // If the filtering level has exceeded the max, then we have already tried to 
+            		 // strip the entire metadata and it makes no difference increasing the filter level any higher
+            		 throw e;
+            	 }
+             } finally {
+                 if(reader != null){
+                     reader.dispose();
+                 }          
+                 reader = null;
+                 try {
+                     iis.close();            
+                     imageStream.close();            
+                 } catch (IOException ignored){}
+                 iis = null;
+                 imageStream = null;
+              }     
+	        }      	        
+	    } catch(IOException ioe){
+	        throw new ImageConverterException(ImageConverterException.Types.IO_ERROR,"IOException thrown when reading from InputByteStream",ioe);
+	    }
+	    // this is for some known problem images that have been processed in photoshop
+	    // they will cause crashes and/or get wrong colors unless they are converted to
+	    // have a known image type, this conversion can be quite time consuming for some of these
+	    // images and will reduce the filesize in some cases
+	    if(finishedImages[0] != null && finishedImages[0].getType() == 0){
+	        finishedImages[0] = ImageUtil.toBuffImageRGBorARGB(finishedImages[0]);
+	    }    
+        return finishedImages;
+    }
+    
     private static BufferedImage[] readGif(Iterator iioimages, ImageConverterParams imageParams, GIFStreamMetadata  streamMetaData){        
         IIOImage [] images = new IIOImage[1];
         BufferedImage [] finishedImages = new BufferedImage[1];
@@ -316,12 +376,14 @@ public class ImageDecoder {
         int noneCounter = 0;
         
         for(int i = 0; i < images.length; i++){
-            resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);                    
+            //resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);                    
             
              r = images[i].getRenderedImage();
              
              metaData = (GIFImageMetadata)images[i].getMetadata();                                                                                                                                      
-                          
+            
+             resultImage = new BufferedImage(metaData.imageWidth, metaData.imageHeight, BufferedImage.TYPE_INT_ARGB);
+             
              // Disposal of gif animation frames                          
              switch(metaData.disposalMethod){
                  case 0: // "None"
@@ -350,7 +412,15 @@ public class ImageDecoder {
              }
                          
              resG = resultImage.createGraphics();
-             if(metaData.imageLeftPosition != 0 || metaData.imageTopPosition != 0){
+             
+             double scale = imageParams.getInternalVariables().getScale();
+             
+             if(scale == 0.0){
+            	scale = ImageScaler.getResizeScale(r.getWidth(), r.getHeight(), imageParams.getHeight(), imageParams.getWidth());
+            	imageParams.getInternalVariables().setScale(scale);
+             } 
+                          
+             if(false){//metaData.imageLeftPosition != 0 || metaData.imageTopPosition != 0){
                  resG.drawRenderedImage(r, AffineTransform.getTranslateInstance(metaData.imageLeftPosition, metaData.imageTopPosition));
              } else {
                  resG.drawRenderedImage(r,null);
@@ -362,8 +432,9 @@ public class ImageDecoder {
              finishedImages[i] = resultImage;
              resultImage.flush();
              resultImage = null;
-             metaData.imageLeftPosition = 0;
-             metaData.imageTopPosition = 0;
+             metaData.imageLeftPosition = (int)(metaData.imageLeftPosition * scale);
+             metaData.imageTopPosition = (int)(metaData.imageTopPosition * scale);
+             //metaData.imageTopPosition = 0;
              metaTable[i] = metaData;
              metaData = null;
         }   
@@ -513,6 +584,36 @@ public class ImageDecoder {
     	
     	return new BufferedImage(cm, (WritableRaster) raster, true, null);
     }
+    
+    // JPEG cmyk exterimental
+    
+    /*
+     *
+     *         	// If this was an unsupported jpeg image, it could have been CMYK or YCCK, these are not supported by
+        	// ImageIO, we can try to load the image using thrid party code.
+        	if((reader.getFormatName().equalsIgnoreCase("jpeg") || reader.getFormatName().equalsIgnoreCase("jpg")) && e.getMessage().equalsIgnoreCase("Unsupported Image Type")){
+        		IIOMetadata metadata = reader.getImageMetadata(0);
+        		String metadataFormat = metadata.getNativeMetadataFormatName() ;
+        		IIOMetadataNode iioNode = (IIOMetadataNode)metadata.getAsTree(metadataFormat);
+
+        		NodeList children = iioNode.getElementsByTagName("app14Adobe") ;
+        		if ( children.getLength() > 0 ) {
+        			iioNode = (IIOMetadataNode) children.item(0) ;
+        			int transform = Integer.parseInt(iioNode.getAttribute("transform")) ;
+        			Raster raster = reader.readRaster(0, reader.getDefaultReadParam()) ;
+
+        			finishedImages[0] = createJPEG4(raster,transform) ;
+        		}
+        	} else {
+        		throw e;
+        	}
+     * 
+     * 
+     * 
+     */
+    
+    
+    
     /* DisposalMetods:
      * 0 - "none"
      * 1 - "doNotDispose"

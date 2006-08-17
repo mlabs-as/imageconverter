@@ -19,6 +19,19 @@ import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 
 public class ImageScaler {
+	
+	public static double getResizeScale(int inWidth, int inHeight, int inNewWidth, int inNewHeight){
+	    double scale = 0.0; 
+
+        if (((double) inNewWidth / inWidth ) < ((double) inNewHeight / inHeight)) {
+            scale = (double) inNewWidth / inWidth; 
+        } else { 
+            scale = (double) inNewHeight / inHeight;
+        }   
+
+        return scale;
+	}
+	
     public static BufferedImage resizeImage(BufferedImage inImage,int height, int width,boolean noEnlargement, boolean hasTransparency, ImageConverterParams params){        
         int oldWidth = inImage.getWidth(); 
         int oldHeight = inImage.getHeight(); 
@@ -39,6 +52,9 @@ public class ImageScaler {
             if(scale > 1.0){
                 return null;
             }
+        }
+        if(scale == 0){
+        	return null;
         }
         int newWidth = (int) (inImage.getWidth() * scale); 
         int newHeight = (int) (inImage.getHeight() * scale); 
@@ -153,10 +169,10 @@ public class ImageScaler {
         float hScale = 0.0f, vScale = 0.0f;
         if(newHeight == 0){
         	hScale = 1.0f / image.getHeight();
-        	
+        	vScale = (float)scale;
         } else if(newWidth == 0){
         	vScale = 1.0f / image.getWidth();
-        	
+        	hScale = (float)scale;
         } else {
         	hScale = vScale = (float)scale;
         }

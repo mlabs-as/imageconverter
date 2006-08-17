@@ -16,6 +16,8 @@ public class ImageConverterInternalVariables {
     private ColorModel cm = null;
     private Color transparentColor = null;
     private GIFImageMetadata [] imageMetadata = null;
+    private double scale = 0.0;
+    
     public ImageConverterInternalVariables(){
         oldFormat = null;
         cm = null;
@@ -24,7 +26,21 @@ public class ImageConverterInternalVariables {
         transparentColor = null;
     }    
 
-    /**
+    
+    
+    public double getScale() {
+		return scale;
+	}
+
+
+
+	public void setScale(double scale) {
+		this.scale = scale;
+	}
+
+
+
+	/**
      * Gets the oldFormat attribute of the ImageConverterParams object
      * 
      * @return Returns the current value of the oldFormat attribute

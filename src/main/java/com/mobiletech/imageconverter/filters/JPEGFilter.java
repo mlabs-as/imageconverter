@@ -29,15 +29,16 @@ public class JPEGFilter extends FilterInputStream {
     public static final int APP_14 = 0xEE;
     public static final int APP_15 = 0xEF;
 
-    public static final int[] defaultMarkers = new int[]{
-        APP_1, APP_2, APP_3, APP_4, APP_5, APP_6, APP_7        
+    public static int[] defaultMarkers = new int[]{
+    	APP_1, APP_2, APP_3, APP_4, APP_5, APP_6, APP_7,
+        APP_8, APP_9, APP_10, APP_11, APP_12, APP_13, APP_14, APP_15
     };
     
     public static final int[] defaultMarkersBck = new int[]{
         APP_1, APP_2, APP_3, APP_4, APP_5, APP_6, APP_7,
         APP_8, APP_9, APP_10, APP_11, APP_12, APP_13, APP_14, APP_15
     };
-
+    
     public static void filterFile(File src, File dest) throws IOException {
         FileInputStream in = new FileInputStream(src);
         FileOutputStream out = new FileOutputStream(dest);
