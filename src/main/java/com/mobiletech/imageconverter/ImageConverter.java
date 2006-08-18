@@ -295,21 +295,25 @@ public class ImageConverter {
         return frames;
     }
     
-    public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight){
+    public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight, boolean noEnlargement){
+    	Dimension dim = new Dimension();
     	double scale = ImageScaler.getResizeScale(width, height, desiredWidth, desiredHeight);
-    	int newWidth = (int) (width * scale); 
-        int newHeight = (int) (height * scale); 
-        if(newWidth == 0){
-        	newWidth = 1;
-        }
-        if(newHeight == 0){
-        	newHeight = 1;
-        }
-        
-        Dimension dim = new Dimension();
-        dim.height = newHeight;
-        dim.width = newWidth;
-        
+    	if(noEnlargement && scale > 1.0){
+    		dim.height = height;
+            dim.width = width;
+    	} else {
+    		int newWidth = (int) (width * scale); 
+            int newHeight = (int) (height * scale); 
+            if(newWidth == 0){
+            	newWidth = 1;
+            }
+            if(newHeight == 0){
+            	newHeight = 1;
+            }                      
+            dim.height = newHeight;
+            dim.width = newWidth;
+    	}
+    	
         return dim;
     }
     
