@@ -382,7 +382,8 @@ public class ImageDecoder {
              
              metaData = (GIFImageMetadata)images[i].getMetadata();                                                                                                                                      
             
-             resultImage = new BufferedImage(metaData.imageWidth, metaData.imageHeight, BufferedImage.TYPE_INT_ARGB);
+             //resultImage = new BufferedImage(metaData.imageWidth, metaData.imageHeight, BufferedImage.TYPE_INT_ARGB);
+             resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);
              
              // Disposal of gif animation frames                          
              switch(metaData.disposalMethod){
@@ -413,14 +414,14 @@ public class ImageDecoder {
                          
              resG = resultImage.createGraphics();
              
-             double scale = imageParams.getInternalVariables().getScale();
+             //double scale = imageParams.getInternalVariables().getScale();
              
-             if(scale == 0.0){
-            	scale = ImageScaler.getResizeScale(r.getWidth(), r.getHeight(), imageParams.getHeight(), imageParams.getWidth());
-            	imageParams.getInternalVariables().setScale(scale);
+             if(false){//scale == 0.0){
+            	//scale = ImageScaler.getResizeScale(r.getWidth(), r.getHeight(), imageParams.getWidth(), imageParams.getHeight());
+            	//imageParams.getInternalVariables().setScale(scale);
              } 
                           
-             if(false){//metaData.imageLeftPosition != 0 || metaData.imageTopPosition != 0){
+             if(metaData.imageLeftPosition != 0 || metaData.imageTopPosition != 0){
                  resG.drawRenderedImage(r, AffineTransform.getTranslateInstance(metaData.imageLeftPosition, metaData.imageTopPosition));
              } else {
                  resG.drawRenderedImage(r,null);
@@ -432,9 +433,10 @@ public class ImageDecoder {
              finishedImages[i] = resultImage;
              resultImage.flush();
              resultImage = null;
-             metaData.imageLeftPosition = (int)(metaData.imageLeftPosition * scale);
-             metaData.imageTopPosition = (int)(metaData.imageTopPosition * scale);
-             //metaData.imageTopPosition = 0;
+             //metaData.imageLeftPosition = (int)(metaData.imageLeftPosition * scale);
+             //metaData.imageTopPosition = (int)(metaData.imageTopPosition * scale);
+             metaData.imageTopPosition = 0;
+             metaData.imageLeftPosition = 0;
              metaTable[i] = metaData;
              metaData = null;
         }   

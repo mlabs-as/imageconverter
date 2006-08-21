@@ -12,6 +12,7 @@ import java.util.Vector;
 import com.mobiletech.imageconverter.vo.ImageConverterInternalVariables;
 import com.mobiletech.imageconverter.vo.ImageWatermark;
 import com.mobiletech.imageconverter.vo.TextWatermark;
+import com.mobiletech.imageconverter.xml.Base64;
 
 /**
  * This class is used to pass all desired parameters to the ImageConverter in a
@@ -74,6 +75,50 @@ public class ImageConverterParams {
      */
     public void resetInternal(){
         internalVariables = null;
+    }
+    
+    public String toString(){
+    	return toXML();
+    }
+    
+    public String toXML(){
+    	  StringBuffer xml = new StringBuffer();
+          xml.append("<ImageParams>");        
+          if(this.getFormat() != null){
+              xml.append("<Format>");
+              xml.append(this.getFormat());
+              xml.append("</Format>");
+          }
+          if(this.getHeight() > 0){
+              xml.append("<Height>");
+              xml.append(this.getHeight());
+              xml.append("</Height>");
+          }
+          if(this.getWidth() > 0){
+              xml.append("<Width>");
+              xml.append(this.getWidth());
+              xml.append("</Width>");
+          }
+          if(this.getJPEGCompressionQuality() > 0f){
+              xml.append("<JPEGCompressionQuality>");
+              xml.append(this.getJPEGCompressionQuality());
+              xml.append("</JPEGCompressionQuality>");
+          }
+          if(this.getNumberOfColors() > 0){
+              xml.append("<NumberOfColors>");
+              xml.append(this.getNumberOfColors());
+              xml.append("</NumberOfColors>");
+          }
+          xml.append("<Grayscale>");
+          xml.append((this.isGrayscale() ? "true" : "false"));
+          xml.append("</Grayscale>");
+          
+          xml.append("<NoEnlargment>");
+          xml.append((this.isNoEnlargement() ? "true" : "false"));
+          xml.append("</NoEnlargment>");                                 
+          
+          xml.append("</ImageParams>");
+          return xml.toString();
     }
 
     /**
