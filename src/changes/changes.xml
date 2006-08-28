@@ -9,10 +9,13 @@
            <action dev="Andreas Ryland" type="fix" issue="669">
               Progressive animated gif code that was causing problems was removed.
            </action>
+           <action dev="Andreas Ryland" type="add">
+              ImageConverterParams can now write itself as XML data, for logging and testing purposes.
+           </action>
       </release>  
       <release version="1.0.15" description="Bugfix Release" date="17.08.2006">    
            <action dev="Andreas Ryland" type="fix" issue="668">
-              If one attempts to convert an image to wbmp, grayscale will be set to false if it was set to true. since a wbmp iamage can only by binary color. And this setting combinatio will trigger an exception.
+              If one attempts to convert an image to wbmp, grayscale will be set to false if it was set to true. since a wbmp image can only by binary color. And this setting combination will trigger an exception.
            </action>
       </release>   
       <release version="1.0.14" description="Minor Enhancement Release" date="17.08.2006">    

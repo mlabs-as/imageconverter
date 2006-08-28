@@ -97,8 +97,8 @@
       </plugin>
       <!-- Manual Changelist -->
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>changes-maven-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-changes-plugin</artifactId>
         <configuration>
           <link_template>http://bugs.mobiletech.no/show_bug.cgi?id=%ISSUE%</link_template>
         </configuration>
@@ -221,4 +221,12 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  
+    <pluginRepositories>
+     <pluginRepository>
+       <id>apache-snapshots</id>
+       <name>Apache snapshots</name>
+       <url>http://people.apache.org/maven-snapshot-repository/</url>
+     </pluginRepository>
+   </pluginRepositories>
 </project>
