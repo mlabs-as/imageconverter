@@ -28,8 +28,6 @@ import org.w3c.dom.NodeList;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
 import com.mobiletech.imageconverter.filters.JPEGApp14Filter;
-import com.mobiletech.imageconverter.filters.JPEGFilter;
-import com.mobiletech.imageconverter.modifiers.ImageScaler;
 import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.sun.imageio.plugins.gif.GIFImageMetadata;
@@ -59,7 +57,7 @@ public class ImageDecoder {
 	            
 	            reader.setInput(iis,false); 
 	            
-	            if(!imageParams.getFormat().equalsIgnoreCase("gif") || !reader.getFormatName().equalsIgnoreCase("gif")){
+	            if(!reader.getFormatName().equalsIgnoreCase("gif")){
 	                finishedImages = new BufferedImage[1];
 	
 	            	finishedImages[0] = reader.read(0);
@@ -75,7 +73,7 @@ public class ImageDecoder {
 	                Iterator iioimages = reader.readAll(null);
 	                int numImages = reader.getNumImages(true);
 	                GIFStreamMetadata  streamMetaData = (GIFStreamMetadata)reader.getStreamMetadata();
-	                if(numImages == 1){ // Normal Gif
+	                if(numImages == 1 || !imageParams.getFormat().equalsIgnoreCase("gif")){ // Normal Gif, or conversion to non gif
 	                    finishedImages = readGif(iioimages, imageParams, streamMetaData);
 	                } else { // Animated Gif 
 	                    finishedImages = readAnimatedGif(iioimages, numImages, imageParams, streamMetaData);
