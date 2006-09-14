@@ -5,6 +5,11 @@
       <author email="ar@mobiletech.no">Andreas Ryland</author>
    </properties>
    <body>
+      <release version="1.0.17" description="Bugfix Release" date="10.09.2006">    
+           <action dev="Andreas Ryland" type="fix" issue="707">
+              Gifs to be converted to non gif images are now read with the gif reader method and not using the general image reader method. The extra calculations done by this method is not nescesary, but the conversion away from IndexColorModel prevents a bug.
+           </action>
+      </release>  
       <release version="1.0.16" description="Bugfix Release" date="18.08.2006">    
            <action dev="Andreas Ryland" type="fix" issue="669">
               Progressive animated gif code that was causing problems was removed.

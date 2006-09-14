@@ -9,7 +9,7 @@ import java.util.Vector;
 
 import com.mobiletech.imageconverter.ImageConverter;
 import com.mobiletech.imageconverter.vo.TsScenario;
-import com.mobiletech.imageconverter.xml.TestScenarioXMLParser;
+import com.mobiletech.imageconverter.xml.ScenarioXMLParser;
 
 public class DirectoryUtil {
     
@@ -56,7 +56,7 @@ public class DirectoryUtil {
             for(int i = 0;i < files.length; i++){
                 if(!files[i].isDirectory()){
                     if(files[i].getName().lastIndexOf(".") > 0 && files[i].getName().substring(files[i].getName().lastIndexOf(".")).equalsIgnoreCase("xml")){
-                        temp = TestScenarioXMLParser.parseTestScenarios(files[i]);
+                        temp = ScenarioXMLParser.parseTestScenarios(files[i]);
                     }
                     if(temp != null){
                         for(int e = 0; e < temp.length; e++){
@@ -87,7 +87,7 @@ public class DirectoryUtil {
         for(int i = 0;i < files.length; i++){
             if(!files[i].isDirectory()){
                 if(files[i].getName().lastIndexOf(".") > 0 && files[i].getName().substring(files[i].getName().lastIndexOf(".")+1).equalsIgnoreCase("xml")){
-                    temp = TestScenarioXMLParser.parseTestScenarios(files[i]);
+                    temp = ScenarioXMLParser.parseTestScenarios(files[i]);
                 }
                 if(temp != null){
                     for(int e = 0; e < temp.length; e++){
