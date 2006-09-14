@@ -77,13 +77,13 @@ public class ScenarioRunner implements Runnable{
         if(out != null){
             write = true;
         }
-        try {
-            image = ImageConverter.convertImage(ts.getParams());            
+        try {  
+            image = ImageConverter.convertImage(ts.getParams());                
             endTime = System.currentTimeMillis();
             stat.addStatistic(format,image.length,startTime, endTime);            
         } catch (ImageConverterException e) {
             stat.addError(e);
-            write = false;
+            write = false;            
         }        
         if(write){
             try {

@@ -12,7 +12,6 @@ import java.util.Vector;
 import com.mobiletech.imageconverter.vo.ImageConverterInternalVariables;
 import com.mobiletech.imageconverter.vo.ImageWatermark;
 import com.mobiletech.imageconverter.vo.TextWatermark;
-import com.mobiletech.imageconverter.xml.Base64;
 
 /**
  * This class is used to pass all desired parameters to the ImageConverter in a
