@@ -161,6 +161,7 @@ public class ImageEncoder {
                    
                     for(int i = 0;i<images.length;i++){
                         writer.writeToSequence(new IIOImage(images[i],null,metaDataTable[i]),writer.getDefaultWriteParam());
+                    	//writer.writeToSequence(new IIOImage(images[i],null,null),writer.getDefaultWriteParam());
                     }                   
                     writer.endWriteSequence();                  
                     ios.flush();
@@ -208,9 +209,9 @@ public class ImageEncoder {
     }  
     
     private static BufferedImage toIndexColorModel(BufferedImage image, ImageConverterParams params) throws ImageConverterException{  
-        if(true){
+    	if(true){
         	ToIndexColorImageOpDescriptor.register();
-        	PlanarImage surrogateImage = PlanarImage.wrapRenderedImage(image);
+        	PlanarImage surrogateImage = PlanarImage.wrapRenderedImage(image);        	
             ParameterBlock pb = new ParameterBlock();
             int w = surrogateImage.getWidth();
             int h = surrogateImage.getHeight();

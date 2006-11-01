@@ -5,10 +5,24 @@
       <author email="ar@mobiletech.no">Andreas Ryland</author>
    </properties>
    <body>
+      <release version="1.0.18" description="Bugfix Release" date="01.11.2006">    
+           <action dev="Andreas Ryland" type="fix" issue="60">
+              JPEG images with CMYK colors are now supported without the use of nativelibs.
+           </action>
+           <action dev="Andreas Ryland" type="fix" issue="869">
+              LocalColorTables in animated gifs are now erased after reading the animation into memory, so they will not cause problems after we have computed a new globalcolortable for all frames to use.
+           </action>      
+           <action dev="Andreas Ryland" type="fix" issue="871">
+              Single image GIF images now have a nullpointer safety against non-existing global colortables, and a fallback to localcolortable, if one exists.
+           </action>                 
+      </release>     
       <release version="1.0.17" description="Bugfix Release" date="10.09.2006">    
            <action dev="Andreas Ryland" type="fix" issue="707">
               Gifs to be converted to non gif images are now read with the gif reader method and not using the general image reader method. The extra calculations done by this method is not nescesary, but the conversion away from IndexColorModel prevents a bug.
            </action>
+           <action dev="Andreas Ryland" type="add">
+              Added new overloaded converImage method that allows you to pass a preallocated Dimension object to the method to retrieve the dimensions of the resulting image without having to make a call to the getImageDimension method as well.
+           </action>           
       </release>  
       <release version="1.0.16" description="Bugfix Release" date="18.08.2006">    
            <action dev="Andreas Ryland" type="fix" issue="669">

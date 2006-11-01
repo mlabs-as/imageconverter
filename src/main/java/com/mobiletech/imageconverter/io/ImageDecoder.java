@@ -2,6 +2,7 @@ package com.mobiletech.imageconverter.io;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
@@ -9,10 +10,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
-import java.awt.image.WritableRaster;
+import java.awt.image.renderable.ParameterBlock;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Iterator;
@@ -23,15 +22,21 @@ import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageInputStream;
+import javax.media.jai.ImageLayout;
+import javax.media.jai.JAI;
+import javax.media.jai.ParameterBlockJAI;
+import javax.media.jai.RenderedOp;
 
 import org.w3c.dom.NodeList;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
 import com.mobiletech.imageconverter.filters.JPEGApp14Filter;
+import com.mobiletech.imageconverter.jaiextensions.ByteArrayLoadOpDescriptor;
 import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.sun.imageio.plugins.gif.GIFImageMetadata;
 import com.sun.imageio.plugins.gif.GIFStreamMetadata;
+import com.sun.media.jai.codec.ByteArraySeekableStream;
 
 public class ImageDecoder {
     public static BufferedImage [] readImages(byte [] inByteArray,ImageConverterParams imageParams) throws ImageConverterException{
@@ -172,11 +177,10 @@ public class ImageDecoder {
 
              		NodeList children = iioNode.getElementsByTagName("app14Adobe") ;
              		if ( children.getLength() > 0 ) {
-             			iioNode = (IIOMetadataNode) children.item(0) ;
-             			int transform = Integer.parseInt(iioNode.getAttribute("transform")) ;
-             			Raster raster = reader.readRaster(0, reader.getDefaultReadParam()) ;
-
-             			finishedImages[0] = createJPEG4(raster,transform) ;
+             			//iioNode = (IIOMetadataNode) children.item(0) ;
+             			//int transform = Integer.parseInt(iioNode.getAttribute("transform")) ;
+             			//Raster raster = reader.readRaster(0, reader.getDefaultReadParam()) ;
+             			finishedImages[0] = createJPEG4(inByteArray) ;
              			success = true;
              		}
              	}
@@ -230,24 +234,41 @@ public class ImageDecoder {
         metaTable[0] = (GIFImageMetadata)images[0].getMetadata(); 
         
         RenderedImage r = images[0].getRenderedImage();         
-        int numEntries = streamMetaData.globalColorTable.length/3;
+        int numEntries = 0;
         byte [] colorTable = streamMetaData.globalColorTable;
         
-        if(metaTable[0].transparentColorFlag){
-            if(streamMetaData.globalColorTable != null){                                           
+        if(colorTable == null){
+        	if(metaTable[0].localColorTable != null){
+                numEntries = metaTable[0].localColorTable.length/3;
+                colorTable = metaTable[0].localColorTable;
                 for (int e = 0; e < numEntries; e++) {
                     if(e == metaTable[0].transparentColorIndex) {
                         int r1 = colorTable[3*e] & 0xff; 
                         int g1 = colorTable[3*e + 1] & 0xff; 
                         int b1 = colorTable[3*e + 2] & 0xff; 
                         transparentColor = new Color(r1,g1,b1);   
-                        imageParams.getInternalVariables().setTransparentColor(transparentColor);  
+                        imageParams.getInternalVariables().setTransparentColor(transparentColor);
                         break; 
-                    }                
+                    }
                 }
-            }
-        }    
-        
+            }         	
+        } else {
+        	numEntries = streamMetaData.globalColorTable.length/3;
+	        if(metaTable[0].transparentColorFlag){
+	            if(streamMetaData.globalColorTable != null){                                           
+	                for (int e = 0; e < numEntries; e++) {
+	                    if(e == metaTable[0].transparentColorIndex) {
+	                        int r1 = colorTable[3*e] & 0xff; 
+	                        int g1 = colorTable[3*e + 1] & 0xff; 
+	                        int b1 = colorTable[3*e + 2] & 0xff; 
+	                        transparentColor = new Color(r1,g1,b1);   
+	                        imageParams.getInternalVariables().setTransparentColor(transparentColor);  
+	                        break; 
+	                    }                
+	                }
+	            }
+	        }    
+        }
         if(transparentColor != null){
             for (int e = 0; e < numEntries; e++) {
                 if(e == metaTable[0].transparentColorIndex) {
@@ -378,8 +399,13 @@ public class ImageDecoder {
             
              r = images[i].getRenderedImage();
              
-             metaData = (GIFImageMetadata)images[i].getMetadata();                                                                                                                                      
-            
+             metaData = (GIFImageMetadata)images[i].getMetadata(); 
+             /**
+         	if(metaData.localColorTable != null){
+        		System.out.println("localtable not null");
+        	} else {
+        		System.out.println("localtable null");
+        	}**/
              //resultImage = new BufferedImage(metaData.imageWidth, metaData.imageHeight, BufferedImage.TYPE_INT_ARGB);
              resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);
              
@@ -435,6 +461,9 @@ public class ImageDecoder {
              //metaData.imageTopPosition = (int)(metaData.imageTopPosition * scale);
              metaData.imageTopPosition = 0;
              metaData.imageLeftPosition = 0;
+             if(metaData.localColorTable != null){
+            	 metaData.localColorTable = null; // if the frame has a localcolortable, this will override the new global colortable and cause problems
+             }
              metaTable[i] = metaData;
              metaData = null;
         }   
@@ -457,7 +486,68 @@ public class ImageDecoder {
     Technique due to MArk Stephens.                                                                                                             
     Free for any use.                                                                                                                           
   */
-    private static BufferedImage createJPEG4(Raster raster, int xform) {
+    private static BufferedImage createJPEG4(byte [] source) throws IOException{
+    	ByteArrayLoadOpDescriptor.register();
+		ByteArraySeekableStream bass = null;
+		
+		bass = new ByteArraySeekableStream(source);
+		
+		RenderedOp op = JAI.create("byteArrayLoad", bass);
+		
+		op = ImageDecoder.convertYCCKtoRGB(op);		
+		BufferedImage image = op.getAsBufferedImage();
+		op.dispose();
+		return image;
+	}
+    
+		/*
+    	if(true){
+//    		 -- Convert RGBA to CMYK
+//    		 -- because JAI reads CMYK as RGBA
+    		ByteArrayLoadOpDescriptor.register();
+    		ByteArraySeekableStream bass = null;
+    		try {
+				bass = new ByteArraySeekableStream(source);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+    		RenderedOp op = JAI.create("byteArrayLoad", bass);
+    		//RenderedOp op = JAI.create("fileload", imageStream);
+    		if(true){
+	    		op = ImageDecoder.convertYCCKtoRGB(op);
+	    		return op.getAsBufferedImage();
+    		}
+    		ICC_Profile cmyk_profile = null;
+    		try {
+				cmyk_profile = ICC_Profile.getInstance("CMYK.pf");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		ICC_ColorSpace cmyk_icp = new ICC_ColorSpace(cmyk_profile);
+    		ColorModel cmyk_cm = RasterFactory.createComponentColorModel(op.getSampleModel().getDataType(), cmyk_icp, false, true, Transparency.OPAQUE);
+    		ImageLayout cmyk_il = new ImageLayout();
+    		cmyk_il.setColorModel(cmyk_cm);
+    		RenderingHints cmyk_hints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, cmyk_il);
+    		ParameterBlockJAI pb = new ParameterBlockJAI("format");
+    		
+    		pb.addSource(op);
+    		pb.setParameter("datatype", op.getSampleModel().getDataType());
+    		op = JAI.create("format", pb, cmyk_hints);
+//    		 -- Convert CMYK to RGB
+    		ColorSpace rgb_icp = ColorSpace.getInstance(ColorSpace.CS_sRGB );
+    		ColorModel rgb_cm =
+    		RasterFactory.createComponentColorModel(op.getSampleModel().getDataType(), rgb_icp, false, true, Transparency.OPAQUE);
+    		ImageLayout rgb_il = new ImageLayout();
+    		rgb_il.setSampleModel(rgb_cm.createCompatibleSampleModel(op.getWidth(), op.getHeight()));
+    		RenderingHints rgb_hints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, rgb_il);
+    		pb = new ParameterBlockJAI("colorconvert");
+    		pb.addSource(op);
+    		pb.setParameter("colormodel", rgb_cm);
+    		op = JAI.create("colorconvert", pb, rgb_hints);
+    		return op.getAsBufferedImage();
+    	}
     	int w = raster.getWidth() ;
     	int h = raster.getHeight();
 
@@ -554,7 +644,7 @@ public class ImageDecoder {
                 rgb[base+2] = (byte) val;
                 */
                 
-            }
+           // }
     		
     		/*
     		rgb[base] = (byte)(Math.min(255f, c * kk + k));
@@ -577,13 +667,14 @@ public class ImageDecoder {
 
 //    	 from other image types we know InterleavedRaster's can be
 //    	 manipulated by AffineTransformOp, so create one of	those.
+    /*
     	raster = Raster.createInterleavedRaster(new DataBufferByte(rgb, rgb.length), w, h, w*3,3, new int[] {0,1,2 }, null);
 
     	ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_sRGB);
     	ColorModel cm = new ComponentColorModel(cs, false, true, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
     	
-    	return new BufferedImage(cm, (WritableRaster) raster, true, null);
-    }
+    	return new BufferedImage(cm, (WritableRaster) raster, true, null);*/
+    
     
     // JPEG cmyk exterimental
     
@@ -646,5 +737,40 @@ public class ImageDecoder {
                          }                    
                      }      
      */
+    
+    public static RenderedOp convertYCCKtoRGB(RenderedOp src)
+     {
+              double[][] matrix = {
+                      { -1.0D,  0.0D,  0.0D, 1.0D, 0.0D },
+                      {  0.0D, -1.0D,  0.0D, 1.0D, 0.0D },
+                      {  0.0D,  0.0D, -1.0D, 1.0D, 0.0D },
+              };
+     
+              // Step 1: 4-band nach 3-band
+              ParameterBlock pb = new ParameterBlock();
+              pb.addSource(src);
+              pb.add(matrix);
+              // Perform the band combine operation.
+              src = JAI.create("bandcombine", pb, null);
+     
+              // Step 2: CMY to RGB
+              ParameterBlockJAI pbjai = new  ParameterBlockJAI("colorconvert");
+              ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_sRGB);
+              int[] bits = { 8, 8, 8 };
+              ColorModel cm = new 
+     ComponentColorModel(cs,bits,false,false,Transparency.OPAQUE,DataBuffer.TYPE_BYTE);
+              pbjai.addSource(src);
+              pbjai.setParameter("colormodel", cm);
+     
+              // ImageLayout for RenderingHints
+              ImageLayout il = new ImageLayout();
+              // compatible sample model
+              il.setSampleModel(cm.createCompatibleSampleModel(src.getWidth(),src.getHeight()));
+              RenderingHints hints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, il);
+              // Perform the color conversion.
+              RenderedOp dst = JAI.create("colorconvert", pbjai, hints);
+     
+              return dst;
+     } // confertYCCKtoRGB
      
 }

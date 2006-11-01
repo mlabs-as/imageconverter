@@ -34,7 +34,7 @@ import com.mobiletech.imageconverter.watermarks.ImageWatermarker;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.0.17";
+    public static final String version = "ImageConverter version 1.0.18";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -55,7 +55,24 @@ public class ImageConverter {
      * @return A byte array containing the converted image
      * @throws ImageConverterException
      */
-    public static byte[] convertImage(ImageConverterParams imageParams) throws ImageConverterException{     
+    public static byte[] convertImage(ImageConverterParams imageParams) throws ImageConverterException{
+    	return convertImage(imageParams,null);
+    }
+    /**
+     * Takes an original image and performs conversion on it to produce a
+     * converted image. See the ImageConverterParams class for more information
+     * on how to specify the conversions to be done.
+     * 
+     * @param imageParams
+     *            The ImageConverterParams object containing the original image
+     *            and the desired settings specifying how the converted image
+     *            should be.
+     * @param dim
+     * 			A preallocated Dimension object that wil be used to return the width and height of the resulting image.
+     * @return A byte array containing the converted image
+     * @throws ImageConverterException
+     */
+    public static byte[] convertImage(ImageConverterParams imageParams, Dimension dim) throws ImageConverterException{     
        // Determine pipeline
     	
     	// run pipeline   	
@@ -74,6 +91,12 @@ public class ImageConverter {
                 imageParams = doPipeline(images[i],imageParams);
                 images[i] = imageParams.getInternalVariables().getBufferedImage();
             }
+            if(dim != null){
+            	if(images[0] != null){
+	            	dim.height = images[0].getHeight();
+	            	dim.width = images[0].getWidth();
+            	} 
+            }            
             // If the image has not been changed, check if the image format was to be converted, or, in case of jpeg to jpeg conversion, if the
             // compression factor should be changed (thus needing the jpeg to be re-encoded with the new compression setting) if neither of these
             // cases are true, then just return the original image
