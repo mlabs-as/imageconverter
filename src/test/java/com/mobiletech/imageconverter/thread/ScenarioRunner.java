@@ -82,6 +82,7 @@ public class ScenarioRunner implements Runnable{
             endTime = System.currentTimeMillis();
             stat.addStatistic(format,image.length,startTime, endTime);            
         } catch (ImageConverterException e) {
+        	System.out.println("Image failed: "+fil+" error: "+e.getMessage());
             stat.addError(e);
             write = false;            
         }        

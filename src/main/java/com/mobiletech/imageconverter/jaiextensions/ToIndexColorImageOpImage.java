@@ -245,6 +245,12 @@ public abstract class ToIndexColorImageOpImage extends PointOpImage
 		                            newTable[ i ], 0, colorMap.getNumEntries());
 		                }
 		        	cIndex = colorMap.getNumEntries();
+		        	if(cIndex > 255){
+		        		return new IndexColorModel(8, colorMap.getByteData(0).length,
+	        				colorMap.getByteData(0),
+                            colorMap.getByteData(1),
+                            colorMap.getByteData(2));
+		        	}
 		        	newTable[0][cIndex] = (byte)col.getRed();
 		        	newTable[1][cIndex] = (byte)col.getGreen();
 		        	newTable[2][cIndex] = (byte)col.getBlue();

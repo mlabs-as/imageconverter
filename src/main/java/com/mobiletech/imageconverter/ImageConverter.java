@@ -13,14 +13,19 @@ import javax.imageio.*;
 import javax.imageio.stream.*;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
+import com.mobiletech.imageconverter.io.DexImageReaderFactory;
+import com.mobiletech.imageconverter.io.DexImageWriterFactory;
 import com.mobiletech.imageconverter.io.ImageDecoder;
 import com.mobiletech.imageconverter.io.ImageEncoder;
 import com.mobiletech.imageconverter.modifiers.ImageColorModifier;
 import com.mobiletech.imageconverter.modifiers.ImageScaler;
+import com.mobiletech.imageconverter.readers.DexImageReader;
+import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.mobiletech.imageconverter.vo.ImageWatermark;
 import com.mobiletech.imageconverter.vo.TextWatermark;
 import com.mobiletech.imageconverter.watermarks.ImageWatermarker;
+import com.mobiletech.imageconverter.writers.DexImageWriter;
 
 /**
  * This class functions as an Image converter. Taking images and converting them
@@ -34,7 +39,7 @@ import com.mobiletech.imageconverter.watermarks.ImageWatermarker;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.0.18";
+    public static final String version = "ImageConverter version 1.1.0";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -84,6 +89,66 @@ public class ImageConverter {
             imageParams.resetInternal();
             //Validate input parameters
             imageParams = validateParams(imageParams);
+            
+            if(true){ // Use 1.1 logic
+//            	 Enhanced Special Nice Test(r) (tm) (c)
+            	DexImageReader reader = DexImageReaderFactory.getImageReader(imageParams);
+            	DexImageWriter writer = null;
+            	BufferedImage temp = null;
+            	
+ 	            try {
+					while(reader.hasMore()){
+						temp = reader.getNext();
+						
+						doPipeline(temp,imageParams);
+						
+						// write image
+						temp = imageParams.getInternalVariables().getBufferedImage();
+						temp = ImageEncoder.prepareForConversion(temp, imageParams);	            		            	
+						if(writer == null){
+				            if(dim != null){
+				            	if(temp != null){
+					            	dim.height = temp.getHeight();
+					            	dim.width = temp.getWidth();
+				            	} 
+				            }
+							writer = DexImageWriterFactory.getImageWriter(temp, imageParams);
+						}
+						writer.writeNext(temp);
+						if(!writer.canWriteMore()){
+							break;
+						}
+					}
+					returnByte = writer.getByte();
+				} finally {
+					if(reader != null){
+						reader.dispose();
+						reader = null;						
+					} 
+					if(writer != null){
+						writer.dispose();
+						writer = null;
+					}
+				}  
+	            // If the image has not been changed, check if the image format was to be converted, or, in case of jpeg to jpeg conversion, if the
+	            // compression factor should be changed (thus needing the jpeg to be re-encoded with the new compression setting) if neither of these
+	            // cases are true, then just return the original image
+	            if(!imageParams.getInternalVariables().isChanged()){
+	                // if there was no change in jpeg compression quality...
+	                if(imageParams.getJPEGCompressionQuality() <= 0.0){                         
+	                        if(imageParams.getFormat().equalsIgnoreCase( imageParams.getInternalVariables().getOldFormat() ) ){
+	                            return imageParams.getImage();
+	                        }else if((imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpg") ||
+	                                            imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpeg")) && 
+	                                                (imageParams.getFormat().equalsIgnoreCase("jpg") || imageParams.getFormat().equalsIgnoreCase("jpeg"))){
+	                                                    return imageParams.getImage();
+	                                                }
+	                }
+	            } 
+	            return returnByte;
+            }
+            
+           
             // Read all images into BufferedImage objects for processing           
             BufferedImage [] images  = ImageDecoder.readImages(imageParams.getImage(),imageParams);            
             // Run the processing pipeline for each image and retrieve the processed image            
@@ -125,8 +190,9 @@ public class ImageConverter {
         return returnByte;      
     }       
         
-    private static ImageConverterParams doPipeline(BufferedImage image, ImageConverterParams imageParams) throws ImageConverterException{
+    private static ImageConverterParams doPipeline(BufferedImage image, ImageConverterParams imageParams) throws ImageConverterException{    	
         // Perform resize if requested
+    	//imageParams.getInternalVariables().setChanged(true);
         if(imageParams.getWidth() > 0 || imageParams.getHeight() > 0){
         	BufferedImage temp = null;
         	if(imageParams.getInternalVariables().getScale() != 0.0){
@@ -164,6 +230,7 @@ public class ImageConverter {
         }       
         // Convert to grayscale if requested
         if(imageParams.isGrayscale()){
+        	image = ImageUtil.toBuffImageRGBorARGB(image);
             image = ImageColorModifier.getGrayscale(image);
             imageParams.getInternalVariables().setChanged(true);
         }

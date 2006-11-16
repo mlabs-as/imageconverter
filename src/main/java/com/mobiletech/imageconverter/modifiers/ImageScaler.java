@@ -65,9 +65,20 @@ public class ImageScaler {
         if(type == 0){
             type = BufferedImage.TYPE_INT_RGB;
         } 
+
         if(hasTransparency){
-            inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type);
-        } else if (scale <= 0.7) {
+            if (scale <= 0.8 && params.getInternalVariables().isOkToBlur()){
+    			int bl = (int) Math.floor(1 / scale);
+    	        inImage = blur(bl,inImage);
+            }
+        	if(params.getInternalVariables().getOldFormat().equalsIgnoreCase("png")){
+        		inImage = scaleImageWithGetScaledInstance(inImage,newWidth,newHeight,type);
+        		//inImage = scaleImageWithAfflineTransformOp(inImage,scale,newWidth,newHeight,type);
+        		//inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type);
+        	} else {
+        		inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type);
+        	}
+        } else if (scale <= 0.8) {
             int bl = (int) Math.floor(1 / scale);
             inImage = blur(bl,inImage);    
             inImage = scaleImageWithAfflineTransformOp(inImage,scale,newWidth,newHeight,type);            

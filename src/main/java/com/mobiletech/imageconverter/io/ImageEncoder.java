@@ -35,9 +35,68 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import com.sun.imageio.plugins.gif.GIFImageMetadata;
 
 public class ImageEncoder {
-    private static BufferedImage prepareForConversion(BufferedImage inImage, ImageConverterParams params) throws ImageConverterException{
-        String format = params.getFormat();
-                    
+	private static void printPixel(int [] pixel){
+		int ps = 0;
+		for(int i = 0; i < pixel.length; i++){
+			ps += pixel[i];			
+		}
+		/*
+		 *             for(int i = 0; i < w; i++){
+            	for(int e = 0; e < h; e++){
+            		printPixel(ar.getPixel(i, e, pixel));
+            	}
+            	System.out.println("");
+            }
+		 * 
+		 * 
+		 * 
+		if(ps != 255 && ps != 0){
+			System.out.println(pixel[0]+" "+pixel[1]+" "+pixel[2]);
+		}
+		*/
+		
+		System.out.print(" ");	
+		if(ps < 100){
+			System.out.print(" ");	
+		}
+		if(ps < 10){
+			System.out.print(" ");	
+		}
+		System.out.print(ps);
+		
+	}
+    public static BufferedImage prepareForConversion(BufferedImage inImage, ImageConverterParams params) throws ImageConverterException{
+    	String format = params.getFormat();
+    	if(format.equalsIgnoreCase("png") && params.getInternalVariables().getOldFormat().equalsIgnoreCase("gif")){
+    		return inImage;
+    	} else if(format.equalsIgnoreCase("png") && params.getInternalVariables().getOldFormat().equalsIgnoreCase("png")){
+        	return inImage;
+        } else if(format.equalsIgnoreCase("gif") && params.getInternalVariables().getOldFormat().equalsIgnoreCase("png")){
+    		WritableRaster ar = inImage.getAlphaRaster();
+    		if(ar != null){
+	            int w = ar.getWidth();
+	            int h = ar.getHeight();
+	            int[] pixel = new int[3];
+	
+	            for(int i = 0; i < w; i++){
+	            	for(int e = 0; e < h; e++){
+	            		//printPixel(ar.getPixel(i, e, pixel));
+	            		pixel = ar.getPixel(i, e, pixel);
+	            		if(pixel[0] > 0 && pixel[0] < 255){
+	            			if(pixel[0] < 140){
+	            				pixel[0] = 0;
+	            				ar.setPixel(i, e, pixel);
+	            			} else {
+	            				pixel[0] = 255;
+	            				ar.setPixel(i, e, pixel);
+	            			}
+	            		}
+	            	}
+	            }
+    		}
+    	}
+        
+
         // Special case for grayscale gif images, as it was more troublesome getting it not to hit in the wrong if statements below, see 
         // Description of below if statement as to why this is problematic
         if(params.getInternalVariables().getOldFormat().equalsIgnoreCase("gif") && format.equalsIgnoreCase("gif") && params.isGrayscale()){
@@ -50,7 +109,7 @@ public class ImageEncoder {
                 && (inImage.getType() != BufferedImage.TYPE_BYTE_INDEXED || format.compareToIgnoreCase("gif")!=0)){
             BufferedImage buffered = new BufferedImage( inImage.getWidth( null ), inImage.getHeight( null ), BufferedImage.TYPE_INT_RGB);
             Graphics2D g2 = buffered.createGraphics();
-            if(params.getInternalVariables().getTransparentColor() == null){                             
+            if(params.getInternalVariables().getTransparentColor() == null || !params.getFormat().equalsIgnoreCase("gif")){                             
                 g2.setColor(Color.WHITE);
                 g2.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
             } else {

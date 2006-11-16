@@ -5,6 +5,26 @@
       <author email="ar@mobiletech.no">Andreas Ryland</author>
    </properties>
    <body>
+      <release version="1.1.0" description="General Release" date="14.11.2006">    
+           <action dev="Andreas Ryland" type="fix" issue="244">
+				New image reader/writer structure means that for animated gifs, a maximum of 2 images will be held in memory at the same time, as opposed to (N = num frames) before. This will dramatically reduce the amount of memory used when converting animated gifs that have many frames.
+           </action>
+           <action dev="Andreas Ryland" type="fix" issue="599">
+				Transparency in PNG images will now be preserved when converting PNG to PNG
+           </action>           
+           <action dev="Andreas Ryland" type="fix" issue="917">
+				Transparent gifs will be processed and have any partial transparency converted to either transparent or non transparent pixels. Any transparent pixels with an alpha of less than 140 (out of 255) will be made transparent and will appear in the gif image as transparent.
+           </action>      
+           <action dev="Andreas Ryland" type="fix" issue="917">
+				Gif transparency will be conserved when converting GIF to PNG.
+           </action>       
+           <action dev="Andreas Ryland" type="fix" issue="912">
+				Animated gifs that do not have any transparency even though they have a transparent pixel set will now be blured when scaled down with a factor of 0.8 or smaller.
+           </action>          
+           <action dev="Andreas Ryland" type="fix" issue="911">
+				Safety check and conversion to RGB or ARGB for images that are to be made grayscale, to prevent "Numbers of source Raster bands and source color space components do not match"
+           </action>                           
+      </release>    
       <release version="1.0.18" description="Bugfix Release" date="01.11.2006">    
            <action dev="Andreas Ryland" type="fix" issue="60">
               JPEG images with CMYK colors are now supported without the use of nativelibs.

@@ -25,6 +25,9 @@ public class ImageUtil {
         return source;
     }
     
+    public static final Color getUniqueColor(Color oldColor){
+    	return getUniqueColor(null,oldColor);
+    }
     public static final Color getUniqueColor(byte [] colorTable, Color oldColor){
         if(true){
             // the magical green color that works
