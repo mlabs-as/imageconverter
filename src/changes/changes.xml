@@ -5,6 +5,19 @@
       <author email="ar@mobiletech.no">Andreas Ryland</author>
    </properties>
    <body>
+   	  <release version="1.1.2" description="General Release" date="22.11.2006">    
+   	       <action dev="Andreas Ryland" type="add">
+				Added a first version of image rotation, available as an ImageConverterParams setting
+           </action>
+           <action dev="Andreas Ryland" type="add">
+				Added a method to use the ImageConverter to read a byte into a BufferedImage
+           </action>
+      </release>   
+   	  <release version="1.1.1" description="General Release" date="22.11.2006">    
+           <action dev="Andreas Ryland" type="fix" issue="954">
+				Removed an erroneous cast of image metadata to PNGMetadata that caused the imageconveter to fail when conveting some formats, such as BMP.
+           </action>
+      </release>
       <release version="1.1.0" description="General Release" date="16.11.2006">    
            <action dev="Andreas Ryland" type="fix" issue="244">
 				New image reader/writer structure means that for animated gifs, a maximum of 2 images will be held in memory at the same time, as opposed to (N = num frames) before. This will dramatically reduce the amount of memory used when converting animated gifs that have many frames.

@@ -44,6 +44,7 @@ public class ImageConverterParams {
     private Vector imageWatermarks = null;
     private Vector textWatermarks = null;           
     private boolean no_enlargement = false;
+    private int rotationAngle = 0;
     
     // Automatic Variables (Set by this class)
     private boolean hasImageWatermarks = false;
@@ -66,6 +67,7 @@ public class ImageConverterParams {
         hasTextWatermarks = false;
         no_enlargement = false;
         internalVariables = null;
+        rotationAngle = 0;
     }    
     
     /**
@@ -76,7 +78,15 @@ public class ImageConverterParams {
         internalVariables = null;
     }
     
-    public String toString(){
+    public int getRotationAngle() {
+		return rotationAngle;
+	}
+
+	public void setRotationAngle(int rotationAngle) {
+		this.rotationAngle = rotationAngle;
+	}
+
+	public String toString(){
     	return toXML();
     }
     
@@ -107,6 +117,11 @@ public class ImageConverterParams {
               xml.append("<NumberOfColors>");
               xml.append(this.getNumberOfColors());
               xml.append("</NumberOfColors>");
+          }
+          if(this.getRotationAngle() > 0){
+        	  xml.append("<RotationAngle>");
+              xml.append(this.getRotationAngle());
+              xml.append("</RotationAngle>");
           }
           xml.append("<Grayscale>");
           xml.append((this.isGrayscale() ? "true" : "false"));
@@ -757,6 +772,5 @@ public class ImageConverterParams {
         this.internalVariables = internalVariables;
     }
 
-    
-    
+       
 }

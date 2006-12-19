@@ -144,6 +144,9 @@ public class ScenarioXMLParser {
             if(child.getNodeName().equalsIgnoreCase("NumberOfColors")){
                 icp.setNumberOfColors(nodeToInt(child));
             }
+            if(child.getNodeName().equalsIgnoreCase("RotationAngle")){
+                icp.setRotationAngle(nodeToInt(child));
+            }
             if(child.getNodeName().equalsIgnoreCase("Grayscale")){
                 icp.setGrayscale(nodeToBoolean(child));
             }
@@ -405,6 +408,11 @@ public class ScenarioXMLParser {
             xml.append("<NumberOfColors>");
             xml.append(ts.getNumberOfColors());
             xml.append("</NumberOfColors>");
+        }
+        if(ts.getRotationAngle() > 0){
+      	  	xml.append("<RotationAngle>");
+            xml.append(ts.getRotationAngle());
+            xml.append("</RotationAngle>");
         }
         xml.append("<Grayscale>");
         xml.append((ts.isGrayscale() ? "true" : "false"));

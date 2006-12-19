@@ -27,15 +27,12 @@ public class GeneralImageIOReader implements DexImageReader{
 
 		try {
 			image = reader.read(0);
-			PNGMetadata pmd = null;			
-			pmd = (PNGMetadata)reader.getImageMetadata(0);
-			Object obj = pmd.getStandardTransparencyNode();	
-			
+
 	        // this is for some known problem images that have been processed in photoshop
 	        // they will cause crashes and/or get wrong colors unless they are converted to
 	        // have a known image type, this conversion can be quite time consuming for some of these
 	        // images and will reduce the filesize in some cases
-	        if(image.getType() == 0 && !reader.getFormatName().equalsIgnoreCase("png")){
+	        if(image.getType() == 0){
 	        	image = ImageUtil.toBuffImageRGBorARGB(image);
 	        }       
 		} catch(IOException ioe){

@@ -50,6 +50,7 @@ public class DexImageReaderFactory {
 		        	int numImages = ireader.getNumImages(true);
 		        	if(numImages > 1){
 		        		dexReader = new AnimGIFReader(ireader, imageParams, numImages);
+//		        		dexReader = new FlatteningAnimGifReader(ireader, imageParams, numImages);
 		        	} else {
 		        		dexReader = new GIFReader(ireader, imageParams);
 		        	}

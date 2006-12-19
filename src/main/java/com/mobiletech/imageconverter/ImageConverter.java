@@ -18,6 +18,7 @@ import com.mobiletech.imageconverter.io.DexImageWriterFactory;
 import com.mobiletech.imageconverter.io.ImageDecoder;
 import com.mobiletech.imageconverter.io.ImageEncoder;
 import com.mobiletech.imageconverter.modifiers.ImageColorModifier;
+import com.mobiletech.imageconverter.modifiers.ImageRotater;
 import com.mobiletech.imageconverter.modifiers.ImageScaler;
 import com.mobiletech.imageconverter.readers.DexImageReader;
 import com.mobiletech.imageconverter.util.ImageUtil;
@@ -39,7 +40,7 @@ import com.mobiletech.imageconverter.writers.DexImageWriter;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.1.0";
+    public static final String version = "ImageConverter version 1.1.2";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -189,7 +190,18 @@ public class ImageConverter {
         }
         return returnByte;      
     }       
-        
+    public static BufferedImage getBufferedImage(byte[] image) throws ImageConverterException{
+    	ImageConverterParams params = new ImageConverterParams(image);
+    	BufferedImage temp = null;
+    	params = validateParams(params);
+		DexImageReader reader = DexImageReaderFactory.getImageReader(params);    	
+		        
+		if(reader.hasMore()){				
+			temp = reader.getNext();
+		}
+		
+		return temp;
+    }    
     private static ImageConverterParams doPipeline(BufferedImage image, ImageConverterParams imageParams) throws ImageConverterException{    	
         // Perform resize if requested
     	//imageParams.getInternalVariables().setChanged(true);
@@ -234,7 +246,10 @@ public class ImageConverter {
             image = ImageColorModifier.getGrayscale(image);
             imageParams.getInternalVariables().setChanged(true);
         }
-        
+        // Rotate if requested
+        if(imageParams.getRotationAngle() > 0){
+        	image = ImageRotater.rotate(image, imageParams.getRotationAngle());
+        }
         imageParams.getInternalVariables().setBufferedImage(image);
         // Return converted image
         return imageParams;     

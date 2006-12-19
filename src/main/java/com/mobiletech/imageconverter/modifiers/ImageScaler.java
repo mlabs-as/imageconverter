@@ -203,3 +203,128 @@ public class ImageScaler {
         return scaleImg.getAsBufferedImage();
     }
 }
+
+/*
+ * else {  
+            		if(false){
+            			int[] pixel = new int[4];
+            			WritableRaster before = inImage.getRaster();
+            			pixel = before.getPixel(76, 76, pixel);
+            			System.out.println("Pixel: A: "+pixel[0]+" R: "+pixel[1]+" G: "+pixel[2]+" B: "+pixel[3]);
+            			
+            			int bl = (int) Math.floor(1 / scale);
+		    	        inImage = blur(bl,inImage);
+		    	        
+		    	        WritableRaster after = inImage.getRaster();
+            			pixel = after.getPixel(76, 76, pixel);
+            			after.setPixel(76, 76, before.getPixel(76, 76, pixel));
+            			System.out.println("Pixel: A: "+pixel[0]+" R: "+pixel[1]+" G: "+pixel[2]+" B: "+pixel[3]);
+            		}
+            		if(false){
+            			 BufferedImage buffered = new BufferedImage( inImage.getWidth( null ), inImage.getHeight( null ), BufferedImage.TYPE_INT_RGB);
+            	            Graphics2D g2 = buffered.createGraphics();
+            	            g2.setColor(Color.WHITE);
+        	                g2.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
+            	            g2.drawImage( inImage, null, null );            
+            	            inImage = buffered;
+            	            g2.dispose();
+            	            g2 = null;
+            	            buffered = null;
+            	            int bl = (int) Math.floor(1 / scale);
+    		    	        inImage = blur(bl,inImage);
+            		}
+            		if(false){
+            			int bl = (int) Math.floor(1 / scale);
+		    	        inImage = blur(bl,inImage);
+            		}
+            		if(false){
+            			int[] pixel = new int[4];
+            			WritableRaster before = inImage.getRaster();
+            			/*
+            			pixel = before.getPixel(137, 177, pixel);
+		    	        System.out.println("Pixel: A: "+pixel[0]+" R: "+pixel[1]+" G: "+pixel[2]+" B: "+pixel[3]);
+            			            			*/
+            		/*	int bl = (int) Math.floor(1 / scale);
+		    	        inImage = blur(bl,inImage);
+		    	        
+		    	        WritableRaster after = inImage.getRaster();
+		    	        		    	        
+		    	        int w = inImage.getWidth();
+	                  	 int h = inImage.getHeight();
+	                  	 //int[] marker = new int[]{0,0,255,255};
+	                  	 //int count = 0;
+	                  	//Color col = params.getInternalVariables().getTransparentColor();
+	                  	 for(int i = 0; i < h; i++){
+	                  		 for(int e = 0; e < w; e++){
+	                  			pixel = after.getPixel(e, i, pixel);	                  			
+	                  			if(pixel[3] != 255 && pixel[3] != 0){
+	                  				after.setPixel(e, i, before.getPixel(e, i, pixel));
+	                  				//after.setPixel(e, i, marker);	                  				
+	                  			} 
+	                  		 }
+	                  	 }    
+	                  	 /*
+	                  	pixel = after.getPixel(137, 177, pixel);
+		    	        System.out.println("Pixel: A: "+pixel[0]+" R: "+pixel[1]+" G: "+pixel[2]+" B: "+pixel[3]);
+	                  	 System.out.println("changed "+count+" pixels out of "+(w*h));*/
+/*	}
+            		if(false){
+	            		WritableRaster alpha = inImage.getAlphaRaster();
+	            		WritableRaster raster = inImage.getRaster();
+	                  	 int w = inImage.getWidth();
+	                  	 int h = inImage.getHeight();
+	                  	 LinkedList<Pixel> protect = new LinkedList<Pixel>();
+	                  	 Color col = params.getInternalVariables().getTransparentColor();
+	                  	System.out.println("Trans Pixel: A: "+col.getAlpha()+" R: "+col.getRed()+" G: "+col.getGreen()+" B: "+col.getBlue());
+	                  	 int result = 0;
+	                  	 int[] pixel = new int[4];
+	                  	 for(int i = 0; i < h; i++){
+	                  		 for(int e = 0; e < w; e++){
+	                  			pixel = raster.getPixel(e, i, pixel);
+	                  			if(col.getRed() == pixel[1] &&
+	        		                    col.getGreen() == pixel[2] &&
+	        		                    col.getBlue() == pixel[3]){
+	                  				if(e == i && e == 76){
+	                  					System.out.println("protecting 76");
+	                  				}
+	                  				protect.add(new Pixel(e, i, raster.getPixel(e, i, pixel)));
+	                  			}
+	                  			/*
+	                  			if(pixel[0] != 255){
+	                  				protect.add(new Pixel(e, i, raster.getPixel(e, i, pixel)));
+	                  			}*/
+	          /*        		 }
+	                  	 }                  	 
+	            		int bl = (int) Math.floor(1 / scale);
+		    	        inImage = blur(bl,inImage);
+		    	        alpha = inImage.getAlphaRaster();
+		    	        raster = inImage.getRaster();
+		    	        Iterator<Pixel> ite = protect.iterator();
+		    	        Pixel tmp = null;
+		    	        while(ite.hasNext()){
+		    	        	tmp = ite.next();
+		    	        	pixel = raster.getPixel(tmp.getX(), tmp.getY(), pixel);
+		    	        	if(col.getRed() != (pixel[1] & 0xff) ||
+        		                    col.getGreen() != (pixel[2] & 0xff) ||
+        		                    col.getBlue() != (pixel[3] & 0xff)){
+		    	        		System.out.println("1 pixel changed! X:"+tmp.getX()+" Y:"+tmp.getY());
+		    	        		raster.setPixel(tmp.getX(), tmp.getY(), tmp.getRgb());
+		    	        	}
+		    	        }
+		    	        alpha = inImage.getAlphaRaster();
+		    	        raster = inImage.getRaster();
+		    	        ite = protect.iterator();
+		    	        while(ite.hasNext()){
+		    	        	tmp = ite.next();
+		    	        	pixel = alpha.getPixel(tmp.getX(), tmp.getY(), pixel);
+		    	        	if(pixel[0] == 255){
+		    	        		System.out.println("2 pixel changed!");
+		    	        	}
+		    	        }
+            		}
+            		if(false){
+            			int bl = (int) Math.floor(1 / scale);
+    	    	        inImage = blur(bl,inImage);
+            		}
+            	}
+            	*/

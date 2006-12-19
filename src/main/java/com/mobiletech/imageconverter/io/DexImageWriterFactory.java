@@ -28,6 +28,7 @@ public class DexImageWriterFactory {
 	        ImageWriter iwriter = (ImageWriter)writers.next();
 	        if(imageParams.getFormat().equalsIgnoreCase("gif") && imageParams.getInternalVariables().getImageMetadata() != null && imageParams.getInternalVariables().getImageMetadata().length > 1){
 	        	writer = new AnimGifWriter(iwriter, imageParams);
+//	        	writer = new OptimizingAnimGifWriter(iwriter, imageParams);	        	
 	        } else {
 	        	writer = new GeneralImageIOWriter(iwriter);
 	        }

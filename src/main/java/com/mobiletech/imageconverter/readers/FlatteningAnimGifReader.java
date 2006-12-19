@@ -7,19 +7,24 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageReader;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
+import com.mobiletech.imageconverter.modifiers.ImageScaler;
 import com.mobiletech.imageconverter.util.ImageUtil;
+import com.mobiletech.imageconverter.util.Pixel;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.sun.imageio.plugins.gif.GIFImageMetadata;
 import com.sun.imageio.plugins.gif.GIFStreamMetadata;
 
-public class AnimGIFReader implements DexImageReader{
+public class FlatteningAnimGifReader implements DexImageReader{
 	private ImageReader reader = null; // NEEDED
 	private BufferedImage previousImage = null;
+	private BufferedImage baseImage = null;
 	private GIFStreamMetadata streamMetaData = null;
 	private int counter = 0;
 	private int numImages = 0;
@@ -27,9 +32,9 @@ public class AnimGIFReader implements DexImageReader{
     private Color transparentColor = null;
 	private ImageConverterParams imageParams = null;
 	
-	private AnimGIFReader(){}
+	private FlatteningAnimGifReader(){}
 	
-	public AnimGIFReader(ImageReader reader, ImageConverterParams imageParams){
+	public FlatteningAnimGifReader(ImageReader reader, ImageConverterParams imageParams){
 		this.reader = reader;
 		try {
 			this.numImages = reader.getNumImages(true);
@@ -38,7 +43,7 @@ public class AnimGIFReader implements DexImageReader{
 		}
 		this.imageParams = imageParams;
 	}
-	public AnimGIFReader(ImageReader reader, ImageConverterParams imageParams, int numImages){
+	public FlatteningAnimGifReader(ImageReader reader, ImageConverterParams imageParams, int numImages){
 		this.reader = reader;		
 		this.numImages = numImages;		
 		this.imageParams = imageParams;
@@ -61,7 +66,8 @@ public class AnimGIFReader implements DexImageReader{
 			e1.printStackTrace();
 		}
 		imageParams.getInternalVariables().setOkToBlur(false);
-        previousImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);        
+        previousImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);
+        baseImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);   
         imageParams.getInternalVariables().setImageMetadata(new GIFImageMetadata[numImages]);
         
         // Storing metadata for later use                             
@@ -95,7 +101,7 @@ public class AnimGIFReader implements DexImageReader{
                 }
             }
             //This detects a known problem, for which no current solution is known, thus its not in use    
-            if(transparentColor != null){
+            if(false){//transparentColor != null){
                 for (int e = 0; e < numEntries; e++) {
                     if(e == metaData.transparentColorIndex) {
                         continue;
@@ -122,7 +128,7 @@ public class AnimGIFReader implements DexImageReader{
 	}
 	
 	public BufferedImage getNext() throws ImageConverterException{
-		imageParams.getInternalVariables().setOkToBlur(false);
+		imageParams.getInternalVariables().setOkToBlur(true);
 		BufferedImage resultImage = null;           		
 		IIOImage iioimage = null;
 		try {
@@ -139,7 +145,8 @@ public class AnimGIFReader implements DexImageReader{
              
 		GIFImageMetadata metaData = (GIFImageMetadata)iioimage.getMetadata(); 
 
-         resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);         
+         resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);
+         
          // Disposal of gif animation frames                          
          switch(metaData.disposalMethod){
              case 0: // "None"
@@ -179,6 +186,117 @@ public class AnimGIFReader implements DexImageReader{
          resG = null;                     
                               
          resultImage.flush();
+         // Flattening Code
+         if(true){
+        	 if(counter == 0){
+	        	 baseImage.setData(resultImage.copyData(null));
+        	 } else {
+        		 WritableRaster base = baseImage.getRaster();
+	        	 WritableRaster current = resultImage.getRaster();
+	          	 int w = resultImage.getWidth();
+	          	 int h = resultImage.getHeight();
+	          	 
+	          	 int[] pixel = new int[4];
+
+	          	 for(int i = 0; i < h; i++){
+	          		 for(int e = 0; e < w; e++){
+	          			pixel = current.getPixel(e, i, pixel);
+	          			if(pixel[3] == 0){
+	          				pixel = base.getPixel(e, i, pixel);
+	          				current.setPixel(e, i, pixel);          				
+	          			}          			
+	          		 }
+	          	 }
+	          	 baseImage.setData(resultImage.copyData(null));
+        	 }
+         }
+         if(false){
+        	 boolean backCorrection = false;
+        	 boolean optimization = false;
+	         if(counter == 0){
+	        	 baseImage.setData(resultImage.copyData(null));
+	        	 if(backCorrection){
+	        		 int bl = (int) Math.floor(1 / ImageScaler.getResizeScale(resultImage.getWidth(), resultImage.getHeight(), imageParams.getWidth(), imageParams.getHeight()));
+	        		// resultImage = ImageScaler.blur(bl,resultImage);
+	        	 }
+	        	 if(false){//optimization){
+	        		 int bl = (int) Math.floor(1 / ImageScaler.getResizeScale(resultImage.getWidth(), resultImage.getHeight(), imageParams.getWidth(), imageParams.getHeight()));
+	        		// resultImage = ImageScaler.blur(bl,resultImage);
+	        	 }
+	         } else {	        	 
+	        	 WritableRaster base = baseImage.getRaster();
+	        	 WritableRaster current = resultImage.getRaster();
+	          	 int w = resultImage.getWidth();
+	          	 int h = resultImage.getHeight();
+	          	 
+	          	//System.out.println("Trans Pixel: A: "+col.getAlpha()+" R: "+col.getRed()+" G: "+col.getGreen()+" B: "+col.getBlue());
+	          	 int result = 0;
+	          	 int[] pixel = new int[4];
+	          	 int[] marker = new int[]{255,0,255,255};
+	          	LinkedList<Pixel> protect = new LinkedList<Pixel>();
+          		
+	          	if(counter == 15){
+	          		pixel = current.getPixel(227, 138, pixel);
+	          		//System.out.println("Trans Pixel: A: "+pixel[0]+" R: "+pixel[1]+" G: "+pixel[2]+" B: "+pixel[3]);
+	          	}
+	          	 for(int i = 0; i < h; i++){
+	          		 for(int e = 0; e < w; e++){
+	          			pixel = current.getPixel(e, i, pixel);
+	          			if(pixel[3] == 0){
+	          				if(backCorrection){
+	          					protect.add(new Pixel(e, i, new int[]{pixel[0],pixel[1],pixel[2],pixel[3]}));
+	          				}
+	          				pixel = base.getPixel(e, i, pixel);
+	          				current.setPixel(e, i, pixel);
+	          				//current.setPixel(e, i, marker);	          				
+	          			}          			
+	          		 }
+	          	 } 	          	
+	          	if(optimization){
+	          		base = baseImage.getRaster();		        	
+	          		int bl = (int) Math.floor(1 / ImageScaler.getResizeScale(resultImage.getWidth(), resultImage.getHeight(), imageParams.getWidth(), imageParams.getHeight()));
+	          		//resultImage = ImageScaler.blur(bl,resultImage);
+	          		current = resultImage.getRaster();
+	          		marker = new int[]{0,255,255,0};
+	          		int[] opixel = new int[4];
+	          		for(int i = 0; i < h; i++){
+		          		 for(int e = 0; e < w; e++){
+		          			pixel = current.getPixel(e, i, pixel);
+		          			opixel = base.getPixel(e, i, opixel);
+		          			if(pixel[0] == opixel[0]
+		          			    && pixel[1] == opixel[1]
+		          			    && pixel[2] == opixel[2]
+		          			    && pixel[3] == opixel[3]){		          				
+		          				current.setPixel(e, i, marker);
+		          				//current.setPixel(e, i, marker);	          				
+		          			}          			
+		          		 }
+		          	 }
+	          		baseImage.setData(resultImage.copyData(null));
+	          	} else {
+	          		baseImage.setData(resultImage.copyData(null));
+	          	}
+	          	if(backCorrection){
+	          		int bl = (int) Math.floor(1 / ImageScaler.getResizeScale(resultImage.getWidth(), resultImage.getHeight(), imageParams.getWidth(), imageParams.getHeight()));
+	          		//resultImage = ImageScaler.blur(bl,resultImage);
+	          		current = resultImage.getRaster();
+	          		Iterator<Pixel> ite = protect.iterator();
+	    	        Pixel tmp = null;
+	    	        while(ite.hasNext()){
+	    	        	tmp = ite.next();
+	    	        	if(counter == 15){
+	    	        	pixel = current.getPixel(tmp.getX(), tmp.getY(), pixel);
+	    	        	//System.out.println("Before Pixel: A: "+pixel[0]+" R: "+pixel[1]+" G: "+pixel[2]+" B: "+pixel[3]);
+	    	        	}
+	    	        	current.setPixel(tmp.getX(), tmp.getY(), tmp.getRgb());
+	    	        	if(counter == 15){
+	    	        	pixel = current.getPixel(tmp.getX(), tmp.getY(), pixel);
+	    	        	//System.out.println("After Pixel: A: "+pixel[0]+" R: "+pixel[1]+" G: "+pixel[2]+" B: "+pixel[3]);
+	    	        	}
+	    	        }
+	          	}
+	         }
+         }
          metaData.imageTopPosition = 0;
          metaData.imageLeftPosition = 0;
          if(metaData.localColorTable != null){
@@ -192,7 +310,7 @@ public class AnimGIFReader implements DexImageReader{
         	afterInitialize(resultImage);
         }
         counter++;
-        if(metaData.disposalMethod == 0){
+        if(false){//metaData.disposalMethod == 0){
        	 WritableRaster wr = resultImage.getAlphaRaster();
        	 int w = resultImage.getWidth();
        	 int h = resultImage.getHeight();
@@ -217,11 +335,10 @@ public class AnimGIFReader implements DexImageReader{
        	//System.out.println("result: "+result);
        	//System.out.println("resultss: "+(w*h));
         }
+        imageParams.getInternalVariables().setOkToBlur(true);
 		return resultImage;
 	}
 	public boolean hasMore(){		
 		return counter < numImages;
 	}		 
 }
-
-
