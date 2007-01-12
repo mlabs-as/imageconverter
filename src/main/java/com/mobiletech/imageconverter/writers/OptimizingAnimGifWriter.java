@@ -1,8 +1,12 @@
 package com.mobiletech.imageconverter.writers;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
+import java.awt.image.renderable.ParameterBlock;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -10,9 +14,15 @@ import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
+import javax.media.jai.JAI;
+import javax.media.jai.LookupTableJAI;
+import javax.media.jai.PlanarImage;
+import javax.media.jai.operator.ColorQuantizerDescriptor;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
 import com.mobiletech.imageconverter.io.ImageEncoder;
+import com.mobiletech.imageconverter.jaiextensions.ToIndexColorImageOpDescriptor;
+import com.mobiletech.imageconverter.modifiers.ImageCropper;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.sun.imageio.plugins.gif.GIFImageMetadata;
 
@@ -24,6 +34,8 @@ public class OptimizingAnimGifWriter implements DexImageWriter{
 	private ImageConverterParams imageParams = null;
 	private int counter = 0;
 	private BufferedImage baseFrame = null;
+	private LookupTableJAI colorMap = null;
+	private ColorModel cm = null;
 	
 	private OptimizingAnimGifWriter(){}
 	
@@ -77,6 +89,103 @@ public class OptimizingAnimGifWriter implements DexImageWriter{
 	public void writeNext(BufferedImage image) throws ImageConverterException{
 		GIFImageMetadata metaData =  imageParams.getInternalVariables().getImageMetadata()[counter];
 		//image = ImageEncoder.prepareForConversion(image, imageParams);
+		if(true){
+			image = cropForProgressiveEncoding(image, metaData);
+		}		
+		BufferedImage buffered = new BufferedImage( image.getWidth( null ), image.getHeight( null ), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2 = buffered.createGraphics();
+        if(imageParams.getInternalVariables().getTransparentColor() == null || !imageParams.getFormat().equalsIgnoreCase("gif")){                             
+            g2.setColor(Color.WHITE);
+            g2.fillRect(0,0,image.getWidth( null ),image.getHeight( null ));
+        } else {
+            g2.setColor(imageParams.getInternalVariables().getTransparentColor());
+            g2.fillRect(0,0,image.getWidth( null ),image.getHeight( null ));
+        }
+       
+        g2.drawImage( image, null, null );            
+        image = buffered;
+        g2.dispose();
+        g2 = null;
+        buffered = null;  
+        
+		if(colorMap == null){						
+			PlanarImage surrogateImage = PlanarImage.wrapRenderedImage(image);
+	        ParameterBlock pb = new ParameterBlock();
+	        int w = surrogateImage.getWidth();
+	        int h = surrogateImage.getHeight();
+	
+	        BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
+	
+	        WritableRaster wr = bi.getWritableTile(0, 0);
+	        WritableRaster wr3 = wr.createWritableChild(0, 0, w, h, 0, 0, new int[] { 0, 1, 2 });
+	
+	        wr3.setRect(surrogateImage.getData());
+	        bi.releaseWritableTile(0, 0);
+	        surrogateImage = PlanarImage.wrapRenderedImage(bi);
+	
+	        pb.removeParameters();
+	        pb.removeSources();
+	        
+	        pb.addSource(surrogateImage).add(ColorQuantizerDescriptor.MEDIANCUT).add(new Integer(imageParams.getInternalVariables().getGifNumColors()));
+	       	        
+	        colorMap = (LookupTableJAI)JAI.create("ColorQuantizer", pb).getProperty("LUT");
+	       // image = JAI.create("ColorQuantizer", pb).getAsBufferedImage();
+			//int numEntries = ((IndexColorModel)image.getColorModel()).getMapSize();
+	        //System.out.println("After number of colors in global colortable: "+numEntries);
+		} 
+		Object o = null;
+		if(true){
+			ToIndexColorImageOpDescriptor.register();
+        	PlanarImage surrogateImage = PlanarImage.wrapRenderedImage(image);        	
+            ParameterBlock pb = new ParameterBlock();
+            int w = surrogateImage.getWidth();
+            int h = surrogateImage.getHeight();
+    
+            BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
+    
+            WritableRaster wr = bi.getWritableTile(0, 0);
+            WritableRaster wr3 = wr.createWritableChild(0, 0, w, h, 0, 0, new int[] { 0, 1, 2 });
+    
+            wr3.setRect(surrogateImage.getData());
+            bi.releaseWritableTile(0, 0);
+            surrogateImage = PlanarImage.wrapRenderedImage(bi);
+    
+            pb.removeParameters();
+            pb.removeSources();
+        	
+            if(cm == null){
+            	pb.addSource(surrogateImage).add(ToIndexColorImageOpDescriptor.MEDIANCUT).add(new Integer(32)).add(null).add(null).add(new Integer(6)).add(new Integer(1)).add(imageParams.getInternalVariables().getTransparentColor()).add(colorMap);            	
+            } else {
+            	pb.addSource(surrogateImage).add(ToIndexColorImageOpDescriptor.MEDIANCUT).add(new Integer(32)).add(null).add(null).add(new Integer(6)).add(new Integer(1)).add(imageParams.getInternalVariables().getTransparentColor()).add(colorMap).add(cm);
+            }
+            //p.add(new Integer(210));
+            // Threshold the image with the new operator.
+            PlanarImage output = JAI.create("toIndexColorImage",pb,null);
+            if(cm == null){
+            	o = output.getProperty("colorModel");
+            	if(!(o instanceof IndexColorModel)){
+            		o = output.getColorModel();
+            	}
+            	//System.out.println("O"+o.getClass().getName());
+            	cm = (ColorModel)o;
+            }
+            image = output.getAsBufferedImage();            
+		}
+		//image = ImageEncoder.prepareForConversion(image, imageParams, colorMap);
+		//metaData.localColorTable = null;
+		if(false){
+			image = cropForProgressiveEncoding(image, metaData);
+		}
+		try {                               
+			writer.writeToSequence(new IIOImage(image,null,metaData),writer.getDefaultWriteParam());                                      
+        } catch(IOException e){
+        	closeStreams();
+            throw new ImageConverterException(ImageConverterException.Types.IO_ERROR,"IOException thrown when writing encoded image ",e);
+        }        
+        counter++;
+	}
+	
+	private BufferedImage cropForProgressiveEncoding(BufferedImage image, GIFImageMetadata metaData){
 		if(baseFrame == null){
 			baseFrame = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
 			baseFrame.setData(image.copyData(null));
@@ -89,210 +198,146 @@ public class OptimizingAnimGifWriter implements DexImageWriter{
 	          	 int w = image.getWidth();
 	          	 int h = image.getHeight();
 	          	 int[] pixel = new int[4];
-	          	 int[] opixel = new int[4];
-	          	 int[] marker = new int[]{0,255,0,0};
+	          	 int[] opixel = new int[4];	          	 
 	          	 int count = 0;
-	          	//pixel = current.getPixel(1, 1, pixel);
-	          	//System.out.println("ARGB, A:"+pixel[0]+" R:"+pixel[1]+" G:"+pixel[2]+" B:"+pixel[3]);
-	          	//pixel = base.getPixel(1, 1, pixel);
-	          	//System.out.println("ARGB, A:"+pixel[0]+" R:"+pixel[1]+" G:"+pixel[2]+" B:"+pixel[3]);
-	          	 int x1 = 0, y1 = 0, x2 = w, y2 = h;
-	          	for(int i = 0; i < h; i++){
-	         		 for(int e = 0; e < w; e++){
-	         			pixel = current.getPixel(e, i, pixel);
-	         			opixel = base.getPixel(e, i, opixel);
-	         			if(pixel[0] == opixel[0]
-	         			    && pixel[1] == opixel[1]
-	         			    && pixel[2] == opixel[2]
-	         			    && pixel[3] == opixel[3]){		          				
-	         				//current.setPixel(e, 1, marker);
-	         				count++;
-	         				//current.setPixel(e, i, marker);	          				
-	         			}          			
-	         		 }
-	         		 if(count == w){
-	         			 y1 = i;
-	         		 } else {
-	         			 break;
-	         		 }
-	         	 }
-	          	//System.out.println("changed "+count);
-	          	baseFrame.flush();
-		        baseFrame.setData(tempFrame.copyData(null));
-	          	//baseFrame.setData(baseFrame.copyData(null));
-			}
-			if(false){				
-				 BufferedImage tempFrame = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
-				 tempFrame.setData(image.copyData(null));
-				 WritableRaster base = baseFrame.getRaster();				 
-	        	 WritableRaster current = image.getRaster();
-	          	 int w = image.getWidth();
-	          	 int h = image.getHeight();
-	          	 int[] pixel = new int[4];
-	          	 int[] opixel = new int[4];
-	          	 int[] marker = new int[]{0,255,0,0};
-	          	 int count = 0;
-	          	//pixel = current.getPixel(1, 1, pixel);
-	          	//System.out.println("ARGB, A:"+pixel[0]+" R:"+pixel[1]+" G:"+pixel[2]+" B:"+pixel[3]);
-	          	//pixel = base.getPixel(1, 1, pixel);
-	          	//System.out.println("ARGB, A:"+pixel[0]+" R:"+pixel[1]+" G:"+pixel[2]+" B:"+pixel[3]);
-	          	for(int i = 0; i < h; i++){
-	         		 for(int e = 0; e < w; e++){
-	         			pixel = current.getPixel(e, i, pixel);
-	         			opixel = base.getPixel(e, i, opixel);
-	         			if(pixel[0] == opixel[0]
-	         			    && pixel[1] == opixel[1]
-	         			    && pixel[2] == opixel[2]
-	         			    && pixel[3] == opixel[3]){		          				
-	         				current.setPixel(e, i, marker);
-	         				count++;
-	         				//current.setPixel(e, i, marker);	          				
-	         			}          			
-	         		 }
-	         	 }
-	          	//System.out.println("changed "+count);
-	          	baseFrame.flush();
-		        baseFrame.setData(tempFrame.copyData(null));
-	          	//baseFrame.setData(baseFrame.copyData(null));
-			}
-			if(false){				
-				 BufferedImage tempFrame = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
-				 tempFrame.setData(image.copyData(null));
-				 
-				 WritableRaster base = baseFrame.getRaster();				 
-	        	 WritableRaster current = image.getRaster();
-	        	 
-	        	 IndexColorModel icm = (IndexColorModel)image.getColorModel();
-	        	 int [] RGB2 = new int[icm.getMapSize()];
-		         icm.getRGBs(RGB2);
-	          	 byte [] R = new byte [icm.getMapSize()];
-	          	 byte [] G = new byte [icm.getMapSize()];
-	          	 byte [] B = new byte [icm.getMapSize()];
-	          	 
-	          	IndexColorModel icm2 = (IndexColorModel)baseFrame.getColorModel();
-	          	int [] RGB = new int[icm2.getMapSize()];
-	          	icm2.getRGBs(RGB);
-	          	 byte [] R2 = new byte [icm2.getMapSize()];
-	          	 byte [] G2 = new byte [icm2.getMapSize()];
-	          	 byte [] B2 = new byte [icm2.getMapSize()];
-	          	 
-	          	 int w = image.getWidth();
-	          	 int h = image.getHeight();
-	          	 int[] pixel = new int[4];
-	          	 int[] opixel = new int[4];
-	          	 int[] marker = new int[]{1,0,0,0};
-	          	 int count = 0;
-	          	//pixel = current.getPixel(1, 1, pixel);
-	          	//System.out.println("ARGB, A:"+pixel[0]+" R:"+pixel[1]+" G:"+pixel[2]+" B:"+pixel[3]);
-	          	//pixel = base.getPixel(1, 1, pixel);
-	          	//System.out.println("ARGB, A:"+(R[5] & 0xFF) +" R:"+R2[5]+" G:"+G[5]+" B:"+G2[5]);
-	          	for(int i = 0; i < h; i++){
-	         		 for(int e = 0; e < w; e++){
-	         			pixel = current.getPixel(e, i, pixel);
-	         			opixel = base.getPixel(e, i, opixel);
-	         			if(RGB[pixel[0]] == RGB2[opixel[0]]){
-	         			   //&& G[pixel[0]] == G2[opixel[0]]
-	         			   //&& B[pixel[0]] == B2[opixel[0]]){
-	         				current.setPixel(e, i, marker);
-	         			}	         			      	
-	         		 }
-	         	 }
-	          	//System.out.println("changed "+count);
-	          	baseFrame.flush();
-		        baseFrame.setData(tempFrame.copyData(null));
-	          	//baseFrame.setData(baseFrame.copyData(null));
-			}
-			if(false){
-			 WritableRaster base = baseFrame.getRaster();
-        	 WritableRaster current = image.getRaster();
-          	 int w = image.getWidth();
-          	 int h = image.getHeight();
-          	 
-          	//System.out.println("Trans Pixel: A: "+col.getAlpha()+" R: "+col.getRed()+" G: "+col.getGreen()+" B: "+col.getBlue());
+	          	 int stage = 1;
 
-          	 int[] pixel = new int[4];
-          	 int[] opixel = new int[4];
-          	 int[] marker = new int[]{40,0,0,0};
-          	 IndexColorModel icm = (IndexColorModel)image.getColorModel();
-          	 //int [] RGB = new int[icm.getMapSize()];
-          	byte [] R = new byte [icm.getMapSize()];
-          	byte [] G = new byte [icm.getMapSize()];
-          	byte [] B = new byte [icm.getMapSize()];
-          	 //icm.getRGBs(RGB);
-          	icm.getReds(R);
-          	icm.getGreens(G);
-          	icm.getBlues(B);
-          	
-          	int trans = icm.getTransparentPixel();
-          	//System.out.println("Transparent Pixel Index: "+trans);
-          	int difference = -1;
-          	int tmp = -1;
-          	for(int i = 0; i < R.length-1; i++){
-          		if(difference < 0){
-          			difference = (R[i]+G[i]+B[i])-(R[i+1]+G[i+1]+B[i+1]);
-          			if(difference < 0){
-          				difference = -difference;
-          			}
-          		} else {
-          			tmp = (R[i]+G[i]+B[i])-(R[i+1]+G[i+1]+B[i+1]);
-          			if(tmp < 0){
-          				tmp = -tmp;
-          			}
-          			if(tmp < difference){
-          				difference = tmp;
-          			}
-          		}
-          	}
-          	System.out.println("Smallest Difference: "+difference);
-          	//System.out.println("Transparent Pixel RGB, R:"+(R[trans] & 0xFF)+" G:"+(G[trans] & 0xFF)+" B:"+(B[trans] & 0xFF));
-          	//System.out.println("RGB Size: "+RGB.length);
-          	//System.out.println("ARGB, A:"+RGB[0]+" R:"+RGB[0]+" G:"+RGB[0]+" B:"+RGB[0]);
-          	//System.out.println("RGB, R:"+(R[0] & 0xFF)+" G:"+(G[0] & 0xFF)+" B:"+(B[0] & 0xFF));
-          	
-          	 /*
-          	pixel = current.getPixel(10, 10, pixel);
-          	for(int i = 0; i < pixel.length; i++){
-          		System.out.println("Pixel "+i+":"+pixel[i]);
-          	}
-          	*/
-          	/*
-          	for(int i = 0; i < h; i++){
-        		 for(int e = 0; e < w; e++){
-        			pixel = current.getPixel(e, i, pixel);
-        			opixel = base.getPixel(e, i, opixel);
-        			if(pixel[0] == opixel[0]
-        			    && pixel[1] == opixel[1]
-        			    && pixel[2] == opixel[2]
-        			    && pixel[3] == opixel[3]){		          				
-        				current.setPixel(e, i, marker);
-        				//current.setPixel(e, i, marker);	          				
-        			}          			
-        		 }
-        	 }
-          	 /*
-			for(int i = 0; i < h; i++){
-         		 for(int e = 0; e < w; e++){
-         			pixel = current.getPixel(e, i, pixel);
-         			opixel = base.getPixel(e, i, opixel);
-         			if(pixel[0] == opixel[0]
-         			    && pixel[1] == opixel[1]
-         			    && pixel[2] == opixel[2]
-         			    && pixel[3] == opixel[3]){		          				
-         				current.setPixel(e, i, marker);
-         				//current.setPixel(e, i, marker);	          				
-         			}          			
-         		 }
-         	 }*/
+	          	int x1 = 0, y1 = 0, x2 = w, y2 = h;
+	          	
+	          	int outerStart = 0;
+	          	int outerLimit = h;
+	          	
+	          	int innerStart = 0;	          	
+	          	int innerLimit = w;
+	          	
+	          	boolean xScan = false;
+	          	boolean breakIt = false;
+	          	boolean innerNegative = false, outerNegative = false;
+	          	
+	          	while(stage <= 4){
+		          	for(int x = outerStart; ; ){
+		          		 if(outerNegative){
+		         			 if(x <= outerLimit){
+		         				 breakIt = true;
+		         			 }
+	         			 } else {
+	         				if(x >= outerLimit){
+	         					breakIt = true;
+		         			 } 
+	         			 }
+		         		 for(int y = innerStart; ; ){
+		         			 if(innerNegative){
+			         			 if(y <= innerLimit){
+			         				 break;
+			         			 }
+		         			 } else {
+		         				if(y >= innerLimit){
+			         				 break;
+			         			 } 
+		         			 }		         			
+							if(xScan){
+								pixel = current.getPixel(x, y, pixel);
+								opixel = base.getPixel(x, y, opixel);
+							 } else {
+								pixel = current.getPixel(y, x, pixel);
+								opixel = base.getPixel(y, x, opixel);
+							 }							 
+		         			if(pixel[0] == opixel[0] &&
+		         					pixel[1] == opixel[1] &&
+		         					pixel[2] == opixel[2] &&
+		         					pixel[3] == opixel[3]){		          				
+		         				count++;          				
+		         			} 
+		         			 if(innerNegative){
+		         				 y--;
+		         			 } else {
+		         				 y++;
+		         			 }
+		         		 }
+		         		if(outerNegative){
+	         				 x--;
+	         			 } else {
+	         				 x++;
+	         			 }
+		         		switch(stage){
+			         		case 1:
+				         		if((count-w*y1) == w){
+				         			y1++;
+				   	         	} else {
+				   	         		outerStart = 0;
+				   	         		outerLimit = w;
+				   	         		innerStart = y1;
+				   	         		innerLimit = h;
+				   	         		xScan = true;
+				   	         		count = 0;
+				   	         		stage++;
+				   	         		breakIt = true;
+				   	         	}
+				         		break;
+			         		case 2:
+				         		if(count-((h-y1)*x1) == (h-y1)){
+				         			x1++;
+				   	         	} else {
+					   	         	outerStart = h-1;
+				   	         		outerLimit = y1;
+				   	         		innerStart = x1;
+				   	         		innerLimit = w;
+				   	         		xScan = false;
+				   	         		outerNegative = true;
+				   	         		count = 0;
+				   	         		stage++;
+				   	         		breakIt = true;
+				   	         	}
+				         		break;
+		         			case 3:
+				         		if(count == (w-x1)){				         			
+				         			y2--;
+				         			count = 0;
+				   	         	} else {	
+					   	         	outerStart = w-1;
+				   	         		outerLimit = x1;
+				   	         		innerStart = y1;
+				   	         		innerLimit = y2;
+				   	         		xScan = true;
+				   	         		outerNegative = true;
+				   	         		count = 0;
+				   	         		stage++;
+				   	         		breakIt = true;
+				   	         	}
+				         		break;	
+		         			case 4:
+				         		if(count == h-(y1+(h-y2))){				         			
+				         			x2--;
+				         			count = 0;
+				   	         	} else {	
+				   	         		stage++;
+				   	         		breakIt = true;
+				   	         	}
+				         		break;	
+		         		 	default:
+		         		 		stage++;
+			         		}	         			
+	         			if(breakIt){
+			          		breakIt = false;
+			          		break;		          		
+			          	}
+		          	}	     
+		          
+	         	}
+	          	//System.out.println("changed "+count);
+	          	//System.out.println("first point (X,Y) " + x1 + "," + y1);
+	          	//System.out.println("second point (X,Y) " + x2 + "," + y2);
+	          	baseFrame.flush();
+		        baseFrame.setData(tempFrame.copyData(null));
+		        int width = (w - x1) - (w - x2);
+		        int height = (h - y1) - (h - y2);
+		        image = ImageCropper.cropImage(image, x1, y1, width, height);
+		        metaData.imageLeftPosition = x1;
+		        metaData.imageTopPosition = y1;
+	          	//baseFrame.setData(baseFrame.copyData(null));
 			}
 		}
-		image = ImageEncoder.prepareForConversion(image, imageParams);
-		try {                               
-			writer.writeToSequence(new IIOImage(image,null,metaData),writer.getDefaultWriteParam());                                      
-        } catch(IOException e){
-        	closeStreams();
-            throw new ImageConverterException(ImageConverterException.Types.IO_ERROR,"IOException thrown when writing encoded image ",e);
-        }        
-        counter++;
+		return image;
 	}
 	
 }
