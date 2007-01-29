@@ -98,7 +98,7 @@ public class GIFReader implements DexImageReader{
                         transparentColor.getGreen() == (colorTable[3*e+1] & 0xff) &&
                         transparentColor.getBlue() == (colorTable[3*e+2] & 0xff)){  
                     imageParams.getInternalVariables().setTransparentColor(ImageUtil.getUniqueColor(colorTable,transparentColor));
-                    imageParams.setNumberOfColors(6868);
+                    //imageParams.setNumberOfColors(6868);
                     break;
                 }
             }
