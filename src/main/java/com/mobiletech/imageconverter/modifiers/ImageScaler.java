@@ -1,6 +1,7 @@
 package com.mobiletech.imageconverter.modifiers;
 
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
@@ -10,7 +11,12 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
+import java.awt.image.WritableRaster;
 import java.awt.image.renderable.ParameterBlock;
+
+import javax.media.jai.InterpolationBicubic;
+import javax.media.jai.InterpolationBicubic2;
+import javax.media.jai.InterpolationBilinear;
 import javax.media.jai.InterpolationNearest;
 import javax.media.jai.JAI;
 import javax.media.jai.RenderedOp;
@@ -48,7 +54,7 @@ public class ImageScaler {
     }   
     
     public static BufferedImage resizeImage(BufferedImage inImage,double scale,boolean noEnlargement, boolean hasTransparency, ImageConverterParams params){                  
-        if(noEnlargement){
+    	if(noEnlargement){
             if(scale > 1.0){
                 return null;
             }
@@ -67,17 +73,96 @@ public class ImageScaler {
         } 
 
         if(hasTransparency){
-            if (scale <= 0.8 && params.getInternalVariables().isOkToBlur()){
-    			int bl = (int) Math.floor(1 / scale);
-    	        inImage = blur(bl,inImage);
-            }
-        	if(params.getInternalVariables().getOldFormat().equalsIgnoreCase("png")){
-        		inImage = scaleImageWithGetScaledInstance(inImage,newWidth,newHeight,type);
-        		//inImage = scaleImageWithAfflineTransformOp(inImage,scale,newWidth,newHeight,type);
-        		//inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type);
+        	if (scale <= 0.8){
+        		if(params.getInternalVariables().isOkToBlur()){
+        			int bl = (int) Math.floor(1 / scale);
+        	        inImage = blur(bl,inImage);
+        	        
+        	        if(params.getInternalVariables().getOldFormat().equalsIgnoreCase("png")){
+                		inImage = scaleImageWithGetScaledInstance(inImage,newWidth,newHeight,type);
+                		//inImage = scaleImageWithAfflineTransformOp(inImage,scale,newWidth,newHeight,type);
+                		//inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type);
+                	} else {
+                		inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type, true);
+                	}
+        		} else {
+        			if(params.getInternalVariables().getOldFormat().equalsIgnoreCase("png")){
+                		inImage = scaleImageWithGetScaledInstance(inImage,newWidth,newHeight,type);
+                	} else { // should be transparent gif at this point, if quality mode, attempt back-correction
+                		if(params.isFastMode()){
+                			inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type, false);
+                		} else {
+                			// Get copy for back-correction
+                			BufferedImage copy = new BufferedImage(inImage.getWidth(), inImage.getHeight(), inImage.getType());   
+                			copy.setData(inImage.copyData(null));
+                			int bl = (int) Math.floor(1 / scale);
+                	        inImage = blur(bl,inImage);
+                			// Back-Correction
+                			WritableRaster base = copy.getRaster();
+           	        	 	WritableRaster current = inImage.getRaster();
+           	        	 	int w = inImage.getWidth();
+           	        	 	int h = inImage.getHeight();
+           	        	 	int[] pixel = new int[4];
+           	        	 	int count = 0;
+
+           	        	 	for(int i = 0; i < h; i++){
+           	        	 		for(int e = 0; e < w; e++){
+           	        	 			pixel = current.getPixel(e, i, pixel);
+           	        	 			//System.out.println("pix: "+pixel[3]);
+           	        	 			if(pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0 && pixel[3] == 0){
+           	        	 				count++;
+           	        	 			}
+           	        	 			if(pixel[3] != 0 && pixel[3] != 255){
+           	        	 				pixel = base.getPixel(e, i, pixel);
+           	        	 				current.setPixel(e, i, pixel);          				
+           	        	 			}          			
+           	        	 		}
+           	        	 	}
+           	        	 Graphics2D g = copy.createGraphics(); 
+                         g.setPaintMode(); 
+
+                         if(params.getInternalVariables().getTransparentColor() == null || !params.getFormat().equalsIgnoreCase("gif")){                             
+                             g.setColor(Color.WHITE);
+                             g.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
+                         } else {
+                             g.setColor(params.getInternalVariables().getTransparentColor());
+                             g.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
+                         }
+                         
+                         //g.setColor(new Color(0,255,0)); 
+                         //g.setColor(params.getInternalVariables().getTransparentColor());
+                         //g.fillRect(0,0, w, h);
+                         g.drawImage(inImage, 0, 0, null);
+                         g.dispose();
+                         inImage = copy;
+                         copy = null;
+           	        	 inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type, false);
+                		}
+                	}
+        		}
         	} else {
-        		inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type);
-        	}
+        		if(!params.getInternalVariables().isOkToBlur()){
+        			BufferedImage copy = new BufferedImage(inImage.getWidth(), inImage.getHeight(), inImage.getType());
+        			Graphics2D g = copy.createGraphics(); 
+                    g.setPaintMode(); 
+
+                    if(params.getInternalVariables().getTransparentColor() == null || !params.getFormat().equalsIgnoreCase("gif")){                             
+                        g.setColor(Color.WHITE);
+                        g.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
+                    } else {
+                        g.setColor(params.getInternalVariables().getTransparentColor());
+                        g.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
+                    }
+                    
+                    //g.setColor(params.getInternalVariables().getTransparentColor());
+                    //g.fillRect(0,0, inImage.getWidth(), inImage.getHeight());
+                    g.drawImage(inImage, 0, 0, null);
+                    g.dispose();
+                    inImage = copy;
+                    copy = null;
+        		}
+        		inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type, false);
+        	}    		        
         } else if (scale <= 0.8) {
             int bl = (int) Math.floor(1 / scale);
             inImage = blur(bl,inImage);    
@@ -174,7 +259,7 @@ public class ImageScaler {
         return blurredImg;
     }    
     
-    private static final BufferedImage scaleUsingJAI(BufferedImage image, double scale, int newWidth, int newHeight, int type){
+    private static final BufferedImage scaleUsingJAI(BufferedImage image, double scale, int newWidth, int newHeight, int type, boolean flattened){
         ParameterBlock scalePb = new ParameterBlock();
         scalePb.addSource( image );  
         float hScale = 0.0f, vScale = 0.0f;
@@ -191,7 +276,11 @@ public class ImageScaler {
         scalePb.add( hScale );
         scalePb.add( 0.0F );
         scalePb.add( 0.0F );
-        scalePb.add( new InterpolationNearest() ); // nearest looks ok
+        if(flattened){
+        	scalePb.add( new InterpolationBilinear() ); // nearest looks ok
+        } else {
+        	scalePb.add( new InterpolationNearest() ); // nearest looks ok
+        }
 //
         //InterpolationBilinear
         //InterpolationBicubic2

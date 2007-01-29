@@ -11,10 +11,12 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.awt.image.renderable.ParameterBlock;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
+import javax.media.jai.PlanarImage;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.ColorQuantizerDescriptor;
 
@@ -22,6 +24,27 @@ import com.mobiletech.imageconverter.exception.ImageConverterException;
 
 public class ImageColorModifier {
     public static BufferedImage colorChange(BufferedImage inImage, int inNumColors) throws ImageConverterException{
+		PlanarImage surrogateImage = PlanarImage.wrapRenderedImage(inImage);
+        ParameterBlock pb = new ParameterBlock();
+        int w = surrogateImage.getWidth();
+        int h = surrogateImage.getHeight();
+
+        BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
+       //BufferedImage bi = new BufferedImage(w, h, inImage.getType());
+
+        WritableRaster wr = bi.getWritableTile(0, 0);
+        WritableRaster wr3 = wr.createWritableChild(0, 0, w, h, 0, 0, new int[] { 0, 1, 2 });
+
+        wr3.setRect(surrogateImage.getData());
+        bi.releaseWritableTile(0, 0);
+        surrogateImage = PlanarImage.wrapRenderedImage(bi);
+
+        pb.removeParameters();
+        pb.removeSources();
+
+        pb.addSource(surrogateImage).add(ColorQuantizerDescriptor.MEDIANCUT).add(new Integer(inNumColors));
+        
+        return JAI.create("ColorQuantizer", pb).getAsBufferedImage();
         /*
         ColorReducer reducer = new ColorReducer(inNumColors,true);
         Image redux = null;
@@ -45,7 +68,7 @@ public class ImageColorModifier {
         redux = null;
         
         return reducedImage;*/
-        
+        /*
         RenderedOp l_renderedOp = ColorQuantizerDescriptor.create(inImage,
                 ColorQuantizerDescriptor.MEDIANCUT,
                 inNumColors,
@@ -54,7 +77,8 @@ public class ImageColorModifier {
                 new Integer(1),
                 new Integer(1), null);
         inImage = l_renderedOp.getAsBufferedImage();
-        return inImage;        
+        return inImage;
+        */        
     }            
     
     public static BufferedImage getGrayscale(BufferedImage inImage) throws ImageConverterException{

@@ -45,6 +45,11 @@ public class ImageConverterParams {
     private Vector textWatermarks = null;           
     private boolean no_enlargement = false;
     private int rotationAngle = 0;
+    private int cropLeft = 0;
+    private int cropRight = 0;
+    private int cropTop = 0;
+    private int cropBottom = 0;
+    private boolean fastMode = false;
     
     // Automatic Variables (Set by this class)
     private boolean hasImageWatermarks = false;
@@ -771,6 +776,70 @@ public class ImageConverterParams {
             ImageConverterInternalVariables internalVariables) {
         this.internalVariables = internalVariables;
     }
+
+    /**
+     * @return Returns The amount (in percentage) that the image will be cropped from the bottom
+     */
+	public int getCropBottom() {
+		return cropBottom;
+	}
+
+    /**
+     * @param cropBottom The amount (in percentage) that the image will be cropped from the bottom
+     */
+	public void setCropBottom(int cropBottom) {
+		this.cropBottom = cropBottom;
+	}
+
+    /**
+     * @return Returns The amount (in percentage) that the image will be cropped from the left
+     */
+	public int getCropLeft() {
+		return cropLeft;
+	}
+
+	/**
+     * @param cropLeft The amount (in percentage) that the image will be cropped from the left
+     */
+	public void setCropLeft(int cropLeft) {
+		this.cropLeft = cropLeft;
+	}
+
+    /**
+     * @return Returns The amount (in percentage) that the image will be cropped from the right
+     */
+	public int getCropRight() {
+		return cropRight;
+	}
+
+	/**
+     * @param cropRight The amount (in percentage) that the image will be cropped from the right
+     */
+	public void setCropRight(int cropRight) {
+		this.cropRight = cropRight;
+	}
+
+    /**
+     * @return Returns The amount (in percentage) that the image will be cropped from the top
+     */
+	public int getCropTop() {
+		return cropTop;
+	}
+
+	/**
+     * @param cropTop The amount (in percentage) that the image will be cropped from the top
+     */
+	public void setCropTop(int cropTop) {
+		this.cropTop = cropTop;
+	}
+
+	public boolean isFastMode() {
+		return fastMode;
+	}
+
+	public void setFastMode(boolean fastMode) {
+		this.fastMode = fastMode;
+	}
 
        
 }

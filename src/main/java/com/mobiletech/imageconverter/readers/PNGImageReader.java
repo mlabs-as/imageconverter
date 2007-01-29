@@ -24,7 +24,7 @@ public class PNGImageReader implements DexImageReader{
 		reader.dispose();
 	}
 	public BufferedImage getNext() throws ImageConverterException{
-		imageParams.getInternalVariables().setOkToBlur(false);
+		imageParams.getInternalVariables().setOkToBlur(true);
 		counter++;
 		BufferedImage image = null;
 

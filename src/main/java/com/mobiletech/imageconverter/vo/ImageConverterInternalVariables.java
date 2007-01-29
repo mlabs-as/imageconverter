@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 
+import javax.media.jai.LookupTableJAI;
+
 import com.sun.imageio.plugins.gif.GIFImageMetadata;
 
 public class ImageConverterInternalVariables {
@@ -16,6 +18,9 @@ public class ImageConverterInternalVariables {
     private GIFImageMetadata [] imageMetadata = null;
     private double scale = 0.0;
     private boolean isOkToBlur = true;
+    private int gifNumColors = 0;
+    private LookupTableJAI table = null;
+    private boolean isOkForProgressiveCrop = true;
     
     public ImageConverterInternalVariables(){
         oldFormat = null;
@@ -140,5 +145,30 @@ public class ImageConverterInternalVariables {
      */
     public void setImageMetadata(GIFImageMetadata[] imageMetadata) {
         this.imageMetadata = imageMetadata;
-    }        
+    }
+
+	public int getGifNumColors() {
+		return gifNumColors;
+	}
+
+	public void setGifNumColors(int gifNumColors) {
+		this.gifNumColors = gifNumColors;
+	}
+
+	public LookupTableJAI getTable() {
+		return table;
+	}
+
+	public void setTable(LookupTableJAI table) {
+		this.table = table;
+	}
+
+	public boolean isOkForProgressiveCrop() {
+		return isOkForProgressiveCrop;
+	}
+
+	public void setOkForProgressiveCrop(boolean isOkForProgressiveCrop) {
+		this.isOkForProgressiveCrop = isOkForProgressiveCrop;
+	}    
+    
 }

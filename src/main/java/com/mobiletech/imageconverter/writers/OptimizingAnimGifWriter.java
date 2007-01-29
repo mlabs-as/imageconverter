@@ -34,6 +34,7 @@ public class OptimizingAnimGifWriter implements DexImageWriter{
 	private ImageConverterParams imageParams = null;
 	private int counter = 0;
 	private BufferedImage baseFrame = null;
+	private BufferedImage baseTransFrame = null;
 	private LookupTableJAI colorMap = null;
 	private ColorModel cm = null;
 	
@@ -89,8 +90,12 @@ public class OptimizingAnimGifWriter implements DexImageWriter{
 	public void writeNext(BufferedImage image) throws ImageConverterException{
 		GIFImageMetadata metaData =  imageParams.getInternalVariables().getImageMetadata()[counter];
 		//image = ImageEncoder.prepareForConversion(image, imageParams);
-		if(true){
+		if(imageParams.getInternalVariables().isOkForProgressiveCrop()){
 			image = cropForProgressiveEncoding(image, metaData);
+			if(image == null){
+				// empty or completely transparent frame, not writing it
+				return;
+			}
 		}		
 		BufferedImage buffered = new BufferedImage( image.getWidth( null ), image.getHeight( null ), BufferedImage.TYPE_INT_RGB);
         Graphics2D g2 = buffered.createGraphics();
@@ -108,30 +113,54 @@ public class OptimizingAnimGifWriter implements DexImageWriter{
         g2 = null;
         buffered = null;  
         
-		if(colorMap == null){						
-			PlanarImage surrogateImage = PlanarImage.wrapRenderedImage(image);
-	        ParameterBlock pb = new ParameterBlock();
-	        int w = surrogateImage.getWidth();
-	        int h = surrogateImage.getHeight();
-	
-	        BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
-	
-	        WritableRaster wr = bi.getWritableTile(0, 0);
-	        WritableRaster wr3 = wr.createWritableChild(0, 0, w, h, 0, 0, new int[] { 0, 1, 2 });
-	
-	        wr3.setRect(surrogateImage.getData());
-	        bi.releaseWritableTile(0, 0);
-	        surrogateImage = PlanarImage.wrapRenderedImage(bi);
-	
-	        pb.removeParameters();
-	        pb.removeSources();
-	        
-	        pb.addSource(surrogateImage).add(ColorQuantizerDescriptor.MEDIANCUT).add(new Integer(imageParams.getInternalVariables().getGifNumColors()));
-	       	        
-	        colorMap = (LookupTableJAI)JAI.create("ColorQuantizer", pb).getProperty("LUT");
-	       // image = JAI.create("ColorQuantizer", pb).getAsBufferedImage();
-			//int numEntries = ((IndexColorModel)image.getColorModel()).getMapSize();
-	        //System.out.println("After number of colors in global colortable: "+numEntries);
+		if(colorMap == null){	
+			if(imageParams.getInternalVariables().getTable() != null){
+				colorMap = imageParams.getInternalVariables().getTable();
+			} else {
+				PlanarImage surrogateImage = PlanarImage.wrapRenderedImage(image);
+		        ParameterBlock pb = new ParameterBlock();
+		        int w = surrogateImage.getWidth();
+		        int h = surrogateImage.getHeight();
+		
+		        BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
+		
+		        WritableRaster wr = bi.getWritableTile(0, 0);
+		        WritableRaster wr3 = wr.createWritableChild(0, 0, w, h, 0, 0, new int[] { 0, 1, 2 });
+		
+		        wr3.setRect(surrogateImage.getData());
+		        bi.releaseWritableTile(0, 0);
+		        surrogateImage = PlanarImage.wrapRenderedImage(bi);
+		
+		        pb.removeParameters();
+		        pb.removeSources();
+		        int numColors = imageParams.getInternalVariables().getGifNumColors();
+		        if(numColors > 255){
+		        	numColors--;
+		        }
+		        pb.addSource(surrogateImage).add(ColorQuantizerDescriptor.MEDIANCUT).add(new Integer(numColors));
+		       	        
+		        colorMap = (LookupTableJAI)JAI.create("ColorQuantizer", pb).getProperty("LUT");
+		        /*
+		        byte[] rLUT = colorMap.getByteData(0);
+                byte[] gLUT = colorMap.getByteData(1);
+                byte[] bLUT = colorMap.getByteData(2);
+                System.out.println("jai create results:");
+                for(int i = 0; i < colorMap.getNumEntries(); i++){
+                	System.out.println("Color "+i+": "+(rLUT[i] & 0xff)+","+(gLUT[i] & 0xff)+","+(bLUT[i] & 0xff));
+                }
+                System.out.println("\ncustom create results:");
+		        colorMap = imageParams.getInternalVariables().getTable();
+		        rLUT = colorMap.getByteData(0);
+                gLUT = colorMap.getByteData(1);
+                bLUT = colorMap.getByteData(2);
+                rLUT[214] = 0; 
+    			gLUT[214] = (byte) 255; 
+    			bLUT[214] = 0;
+                for(int i = 0; i < colorMap.getNumEntries(); i++){
+                	System.out.println("Color "+i+": "+(rLUT[i] & 0xff)+","+(gLUT[i] & 0xff)+","+(bLUT[i] & 0xff));
+                }
+                */
+			}
 		} 
 		Object o = null;
 		if(true){
@@ -176,6 +205,62 @@ public class OptimizingAnimGifWriter implements DexImageWriter{
 		if(false){
 			image = cropForProgressiveEncoding(image, metaData);
 		}
+		// attempt transparency optimization
+		if(false){
+			if(baseTransFrame == null){
+				baseTransFrame = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+				baseTransFrame.setData(image.copyData(null));
+			} else if(counter > 0){
+				BufferedImage tempFrame = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+				tempFrame.setData(image.copyData(null));
+				//WritableRaster base = baseFrame.getRaster();				 
+	        	WritableRaster base = baseTransFrame.getRaster();
+	        	WritableRaster current = image.getRaster();
+	          	int w = image.getWidth();
+	          	int h = image.getHeight();
+	          	int[] pixel = new int[4];
+	          	int[] opixel = new int[4];	       
+	          //	int counti = 0;
+	          	//System.out.println("trans: "+metaData.transparentColorIndex);
+	          	int transPixel = ((IndexColorModel)image.getColorModel()).getTransparentPixel();
+	          	System.out.println("trans: "+transPixel);
+	          	for(int x = 0; x < w ; x++){
+	         		 for(int y = 0; y < h; y++){		         			         										
+						pixel = current.getPixel(x, y, pixel);
+						opixel = base.getPixel(x+metaData.imageLeftPosition, y+metaData.imageTopPosition, opixel);														
+	         			if(pixel[0] == opixel[0]){		  
+	         				///counti++;
+	         				pixel[0] = transPixel;//metaData.transparentColorIndex;	         				
+	         				current.setPixel(x, y, pixel);
+	         			} 		         			
+	         		 }
+	          	}
+	          //	System.out.println("counti "+counti);
+	         		 // Create flattened baseFrame
+	         	if(true){
+	         		WritableRaster baseRaster = baseTransFrame.getRaster();
+		        	WritableRaster currentRaster = image.getRaster();
+
+		          	//int[] pixel = new int[4];
+
+		          	for(int i = 0; i < h; i++){
+		          		for(int e = 0; e < w; e++){
+		          			pixel = currentRaster.getPixel(e, i, pixel);
+		          			if(pixel[0] != 128){
+		          				//pixel = base.getPixel(e+metaData.imageLeftPosition, i+metaData.imageTopPosition, pixel);
+		          				//current.setPixel(e, i, pixel);          				
+		          				baseRaster.setPixel(e+metaData.imageLeftPosition, i+metaData.imageTopPosition, pixel);
+		          			}          			
+		          		}
+		          	}
+		          	// baseImage.setData(resultImage.copyData(null));
+	         	} else {
+	         		baseTransFrame.flush();
+	         		baseTransFrame.setData(tempFrame.copyData(null));
+	         	}
+			}
+		
+		}
 		try {                               
 			writer.writeToSequence(new IIOImage(image,null,metaData),writer.getDefaultWriteParam());                                      
         } catch(IOException e){
@@ -189,10 +274,13 @@ public class OptimizingAnimGifWriter implements DexImageWriter{
 		if(baseFrame == null){
 			baseFrame = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
 			baseFrame.setData(image.copyData(null));
+			//baseTransFrame = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+			//baseTransFrame.setData(image.copyData(null));
 		} else {
 			if(true){				
 				 BufferedImage tempFrame = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
 				 tempFrame.setData(image.copyData(null));
+				 
 				 WritableRaster base = baseFrame.getRaster();				 
 	        	 WritableRaster current = image.getRaster();
 	          	 int w = image.getWidth();
@@ -225,6 +313,7 @@ public class OptimizingAnimGifWriter implements DexImageWriter{
 	         					breakIt = true;
 		         			 } 
 	         			 }
+		          		 if(!breakIt){
 		         		 for(int y = innerStart; ; ){
 		         			 if(innerNegative){
 			         			 if(y <= innerLimit){
@@ -254,6 +343,7 @@ public class OptimizingAnimGifWriter implements DexImageWriter{
 		         				 y++;
 		         			 }
 		         		 }
+		          		 }
 		         		if(outerNegative){
 	         				 x--;
 	         			 } else {
@@ -264,6 +354,10 @@ public class OptimizingAnimGifWriter implements DexImageWriter{
 				         		if((count-w*y1) == w){
 				         			y1++;
 				   	         	} else {
+				   	         		if(y1 == h){
+				   	         			// empty frame
+				   	         			return null;
+				   	         		}
 				   	         		outerStart = 0;
 				   	         		outerLimit = w;
 				   	         		innerStart = y1;
