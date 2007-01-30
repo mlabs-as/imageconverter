@@ -18,6 +18,7 @@ import com.mobiletech.imageconverter.io.DexImageWriterFactory;
 import com.mobiletech.imageconverter.io.ImageDecoder;
 import com.mobiletech.imageconverter.io.ImageEncoder;
 import com.mobiletech.imageconverter.modifiers.ImageColorModifier;
+import com.mobiletech.imageconverter.modifiers.ImageCropper;
 import com.mobiletech.imageconverter.modifiers.ImageRotater;
 import com.mobiletech.imageconverter.modifiers.ImageScaler;
 import com.mobiletech.imageconverter.readers.DexImageReader;
@@ -27,6 +28,7 @@ import com.mobiletech.imageconverter.vo.ImageWatermark;
 import com.mobiletech.imageconverter.vo.TextWatermark;
 import com.mobiletech.imageconverter.watermarks.ImageWatermarker;
 import com.mobiletech.imageconverter.writers.DexImageWriter;
+import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
 
 /**
  * This class functions as an Image converter. Taking images and converting them
@@ -40,7 +42,7 @@ import com.mobiletech.imageconverter.writers.DexImageWriter;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.1.2";
+    public static final String version = "ImageConverter version 1.2.0";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -82,7 +84,7 @@ public class ImageConverter {
        // Determine pipeline
     	
     	// run pipeline   	
-       imageParams.setNumberOfColors(-1);
+       //imageParams.setNumberOfColors(-1);
        byte [] returnByte = null;
        
         try{
@@ -105,7 +107,7 @@ public class ImageConverter {
 						
 						// write image
 						temp = imageParams.getInternalVariables().getBufferedImage();
-						temp = ImageEncoder.prepareForConversion(temp, imageParams);	            		            	
+						//temp = ImageEncoder.prepareForConversion(temp, imageParams);
 						if(writer == null){
 				            if(dim != null){
 				            	if(temp != null){
@@ -114,6 +116,9 @@ public class ImageConverter {
 				            	} 
 				            }
 							writer = DexImageWriterFactory.getImageWriter(temp, imageParams);
+						}
+						if(!(writer instanceof OptimizingAnimGifWriter)){
+							temp = ImageEncoder.prepareForConversion(temp, imageParams);
 						}
 						writer.writeNext(temp);
 						if(!writer.canWriteMore()){
@@ -202,7 +207,15 @@ public class ImageConverter {
 		
 		return temp;
     }    
-    private static ImageConverterParams doPipeline(BufferedImage image, ImageConverterParams imageParams) throws ImageConverterException{    	
+    private static ImageConverterParams doPipeline(BufferedImage image, ImageConverterParams imageParams) throws ImageConverterException{    
+    	// perform cropping if requested
+    	if(imageParams.getCropBottom() > 0 ||
+    			imageParams.getCropLeft() > 0 ||
+    			imageParams.getCropRight() > 0 ||
+    			imageParams.getCropTop() > 0){
+    		image = ImageCropper.cropImageByPercentage(image, imageParams.getCropTop(), imageParams.getCropBottom(), imageParams.getCropLeft(), imageParams.getCropRight());
+    		imageParams.getInternalVariables().setChanged(true);
+    	}
         // Perform resize if requested
     	//imageParams.getInternalVariables().setChanged(true);
         if(imageParams.getWidth() > 0 || imageParams.getHeight() > 0){
