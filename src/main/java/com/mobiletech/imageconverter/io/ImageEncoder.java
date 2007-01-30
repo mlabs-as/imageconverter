@@ -65,7 +65,10 @@ public class ImageEncoder {
 		System.out.print(ps);
 		
 	}
-    public static BufferedImage prepareForConversion(BufferedImage inImage, ImageConverterParams params) throws ImageConverterException{
+	public static BufferedImage prepareForConversion(BufferedImage inImage, ImageConverterParams params) throws ImageConverterException{
+		return prepareForConversion(inImage, params, null);
+	}
+    public static BufferedImage prepareForConversion(BufferedImage inImage, ImageConverterParams params, LookupTableJAI table) throws ImageConverterException{
     	String format = params.getFormat();
     	if(format.equalsIgnoreCase("png") && params.getInternalVariables().getOldFormat().equalsIgnoreCase("gif")){
     		return inImage;
@@ -123,7 +126,7 @@ public class ImageEncoder {
             buffered = null;            
         }   
         if(format.compareToIgnoreCase("gif")==0 && inImage.getType() != BufferedImage.TYPE_BYTE_INDEXED && !params.isGrayscale()){   
-            inImage = toIndexColorModel(inImage,params); 
+            inImage = toIndexColorModel(inImage,params, table); 
         } 
         if(params.getFormat().compareToIgnoreCase("wbmp")==0){
             int bwWidth = inImage.getWidth(); 
@@ -266,8 +269,11 @@ public class ImageEncoder {
         params = null;
         return outputImage; 
     }  
-    
-    private static BufferedImage toIndexColorModel(BufferedImage image, ImageConverterParams params) throws ImageConverterException{  
+
+    private static BufferedImage toIndexColorModel(BufferedImage image, ImageConverterParams params) throws ImageConverterException{
+    	return toIndexColorModel(image, params);
+    }
+    private static BufferedImage toIndexColorModel(BufferedImage image, ImageConverterParams params, LookupTableJAI table) throws ImageConverterException{  
     	if(true){
         	ToIndexColorImageOpDescriptor.register();
         	PlanarImage surrogateImage = PlanarImage.wrapRenderedImage(image);        	
@@ -287,6 +293,7 @@ public class ImageEncoder {
             pb.removeParameters();
             pb.removeSources();
         	
+            //pb.addSource(surrogateImage).add(ToIndexColorImageOpDescriptor.MEDIANCUT).add(new Integer(32)).add(null).add(null).add(new Integer(6)).add(new Integer(1)).add(params.getInternalVariables().getTransparentColor()).add(table);
             pb.addSource(surrogateImage).add(ToIndexColorImageOpDescriptor.MEDIANCUT).add(new Integer(256)).add(null).add(null).add(new Integer(6)).add(new Integer(1)).add(params.getInternalVariables().getTransparentColor());
             //p.add(new Integer(210));
             // Threshold the image with the new operator.

@@ -2,10 +2,12 @@ package com.mobiletech.imageconverter.jaiextensions;
 
 import java.awt.Color;
 import java.awt.RenderingHints;
+import java.awt.image.ColorModel;
 import java.awt.image.RenderedImage;
 import java.awt.image.renderable.ParameterBlock;
 
 import javax.media.jai.JAI;
+import javax.media.jai.LookupTableJAI;
 import javax.media.jai.OperationDescriptorImpl;
 import javax.media.jai.OperationRegistry;
 import javax.media.jai.ParameterBlockJAI;
@@ -48,6 +50,8 @@ public class ToIndexColorImageOpDescriptor extends OperationDescriptorImpl {
         {"arg4Desc",    "ColorQuantizerDescriptor5"},
         {"arg5Desc",    "ColorQuantizerDescriptor6"},
         {"arg6Desc",    "ColorQuantizerDescriptor7"},
+        {"arg6Desc",    "ColorQuantizerDescriptor7"},
+        {"arg6Desc",    "ColorQuantizerDescriptor7"},
     };
 
     /** The parameter name list for this operation. */
@@ -58,7 +62,9 @@ public class ToIndexColorImageOpDescriptor extends OperationDescriptorImpl {
         "roi",
         "xPeriod",
         "yPeriod",
-        "transColor"
+        "transColor",
+        "colorMap",
+        "colorModel"
     };
 
     /** The parameter class list for this operation. */
@@ -69,7 +75,9 @@ public class ToIndexColorImageOpDescriptor extends OperationDescriptorImpl {
         javax.media.jai.ROI.class,
         java.lang.Integer.class,
         java.lang.Integer.class,
-        java.awt.Color.class
+        java.awt.Color.class,
+        javax.media.jai.LookupTableJAI.class,
+        java.awt.image.ColorModel.class
     };
 
     /** The parameter default value list for this operation. */
@@ -80,6 +88,8 @@ public class ToIndexColorImageOpDescriptor extends OperationDescriptorImpl {
         null,
         new Integer(1),
         new Integer(1),
+        null,
+        null,
         null
     };
 
@@ -188,6 +198,8 @@ public class ToIndexColorImageOpDescriptor extends OperationDescriptorImpl {
                                     Integer xPeriod,
                                     Integer yPeriod,
                                     Color col,
+                                    LookupTableJAI colorMap,
+                                    ColorModel cm,
                                     RenderingHints hints)  {
         ParameterBlockJAI pb =
             new ParameterBlockJAI("toIndexColorImage",
@@ -202,6 +214,8 @@ public class ToIndexColorImageOpDescriptor extends OperationDescriptorImpl {
         pb.setParameter("xPeriod", xPeriod);
         pb.setParameter("yPeriod", yPeriod);
         pb.setParameter("transColor", col);
+        pb.setParameter("colorMap",colorMap);
+        pb.setParameter("colorModel", cm);
 
         return JAI.create("toIndexColorImage", pb, hints);
     }

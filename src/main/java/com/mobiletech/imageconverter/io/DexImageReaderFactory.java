@@ -9,8 +9,10 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
+import com.mobiletech.imageconverter.readers.AnalyzingAnimGifReader;
 import com.mobiletech.imageconverter.readers.AnimGIFReader;
 import com.mobiletech.imageconverter.readers.DexImageReader;
+import com.mobiletech.imageconverter.readers.FlatteningAnimGifReader;
 import com.mobiletech.imageconverter.readers.GIFReader;
 import com.mobiletech.imageconverter.readers.GeneralImageIOReader;
 import com.mobiletech.imageconverter.readers.JPEGImageReader;
@@ -48,9 +50,13 @@ public class DexImageReaderFactory {
 		        	dexReader = new GeneralImageIOReader(ireader);
 		        } else {
 		        	int numImages = ireader.getNumImages(true);
-		        	if(numImages > 1){
-		        		dexReader = new AnimGIFReader(ireader, imageParams, numImages);
-//		        		dexReader = new FlatteningAnimGifReader(ireader, imageParams, numImages);
+		        	if(numImages > 1 && imageParams.getFormat().equalsIgnoreCase("gif")){
+		        		if(imageParams.isFastMode()){
+		        			dexReader = new AnimGIFReader(ireader, imageParams, numImages);	
+		        		} else {
+		        			dexReader = new FlatteningAnimGifReader(ireader, imageParams, numImages);	
+		        		}		        				        	
+		        		//dexReader = new AnalyzingAnimGifReader(ireader, imageParams, numImages);
 		        	} else {
 		        		dexReader = new GIFReader(ireader, imageParams);
 		        	}

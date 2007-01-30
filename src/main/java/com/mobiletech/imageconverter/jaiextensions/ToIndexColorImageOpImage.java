@@ -133,7 +133,9 @@ public abstract class ToIndexColorImageOpImage extends PointOpImage
                                  ROI roi,
                                  int xPeriod,
                                  int yPeriod,
-                                 Color col) {
+                                 Color col,
+                                 LookupTableJAI table,
+                                 ColorModel cm) {
 	super(source, layoutHelper(layout, source), config, true);
 
         // Get the source sample model.
@@ -149,6 +151,8 @@ public abstract class ToIndexColorImageOpImage extends PointOpImage
         this.col = col;
         this.checkForSkippedTiles =
             xPeriod > tileWidth || yPeriod > tileHeight;
+        this.colorMap = table;
+        this.colorModel = cm;
     }
 
     protected void computeRect(Raster[] sources,

@@ -2,6 +2,7 @@ package com.mobiletech.imageconverter.jaiextensions;
 
 import java.awt.Color;
 import java.awt.RenderingHints;
+import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
+import javax.media.jai.LookupTableJAI;
 import javax.media.jai.ROI;
 import javax.media.jai.operator.ColorQuantizerDescriptor;
 import javax.media.jai.operator.ColorQuantizerType;
@@ -50,6 +52,8 @@ public class ToIndexColorImageOpRIF implements RenderedImageFactory {
         int xPeriod = paramBlock.getIntParameter(4);
         int yPeriod = paramBlock.getIntParameter(5);
         Color col = (Color)paramBlock.getObjectParameter(6);
+        LookupTableJAI colorMap = (LookupTableJAI)paramBlock.getObjectParameter(7);
+        ColorModel cm = (ColorModel)paramBlock.getObjectParameter(8);
 
         // check if 3-band byte-type image
 	SampleModel sm = source.getSampleModel();
@@ -58,9 +62,8 @@ public class ToIndexColorImageOpRIF implements RenderedImageFactory {
      else {
             return new dexMedianCutOpImage(source, (Map)renderHints, layout,
                                         maxColorNum, upperBound, roi,
-                                        xPeriod, yPeriod, col);
+                                        xPeriod, yPeriod, col, colorMap, cm);
 
     } // create
     }
 } // ColorQuantizerRIF
-

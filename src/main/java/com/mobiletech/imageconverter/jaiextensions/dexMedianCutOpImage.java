@@ -2,6 +2,7 @@ package com.mobiletech.imageconverter.jaiextensions;
 
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
@@ -54,10 +55,11 @@ public class dexMedianCutOpImage extends ToIndexColorImageOpImage {
                             ROI roi,
                             int xPeriod,
                             int yPeriod,
-                            Color col) {
-        super(source, config, layout, maxColorNum, roi, xPeriod, yPeriod,col);
-
-        colorMap = null;
+                            Color col,
+                            LookupTableJAI colorMap,
+                            ColorModel cm) {
+        super(source, config, layout, maxColorNum, roi, xPeriod, yPeriod,col, colorMap, cm);
+//        colorMap = null;
         this.histogramSize = upperBound;
     }
 
@@ -562,4 +564,3 @@ class HistogramHash {
 
     }
 }
-

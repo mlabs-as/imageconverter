@@ -6,8 +6,16 @@ import java.awt.image.renderable.ParameterBlock;
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 
+import com.mobiletech.imageconverter.exception.ImageConverterException;
+
 public class ImageCropper {
-	public static BufferedImage cropImageByPercentage(BufferedImage image, int top, int bottom, int left, int right){
+	public static BufferedImage cropImageByPercentage(BufferedImage image, int top, int bottom, int left, int right) throws ImageConverterException{
+		if(top + bottom > 100){
+			throw new ImageConverterException(ImageConverterException.Types.BAD_INPUT_VARIABLE,"Total requested crop for top and bottom is 100 percent or more, cannot crop away the whole image",null);
+		} 
+		if(left + right > 100){
+			throw new ImageConverterException(ImageConverterException.Types.BAD_INPUT_VARIABLE,"Total requested crop for left and right sides is 100 percent or more, cannot crop away the whole image",null);
+		}
 		double w = image.getWidth();
 		double h = image.getHeight();
 		double x = 0, y = 0, width = w, height = h;

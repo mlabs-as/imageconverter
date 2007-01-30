@@ -42,7 +42,7 @@ import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.2.0";
+    public static final String version = "ImageConverter version 1.2.1";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -411,9 +411,34 @@ public class ImageConverter {
             readers = null;
         }        
         return frames;
-    }
+    }       
     
     public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight, boolean noEnlargement){
+    	return calculateConvertedImageDimension(width, height, desiredWidth, desiredHeight, noEnlargement, 0, 0, 0, 0);
+    }
+    
+    public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight, boolean noEnlargement, int cropLeft,int cropRight, int cropTop, int cropBottom){
+    	if(cropLeft > 0 || cropRight > 0 || cropTop > 0 || cropBottom > 0){
+    		double w = width;
+    		double h = height;
+    		double x = 0, y = 0, dwidth = w, dheight = h;
+    		if(cropTop > 0){		
+    			y = (h*(cropTop/100.0));
+    			dheight -= y;
+    		}
+    		if(cropLeft > 0){		
+    			x = (w*(cropLeft/100.0));
+    			dwidth -= x;
+    		}
+    		if(cropRight > 0){		
+    			dwidth -= (dwidth*(cropRight/100.0));
+    		}
+    		if(cropBottom > 0){		
+    			dheight -= (dheight*(cropBottom/100.0));
+    		}
+    		width = (int)dwidth;
+    		height = (int)dheight;
+    	}
     	Dimension dim = new Dimension();
     	double scale = ImageScaler.getResizeScale(width, height, desiredWidth, desiredHeight);
     	if(noEnlargement && scale > 1.0){
