@@ -5,12 +5,45 @@
       <author email="ar@mobiletech.no">Andreas Ryland</author>
    </properties>
    <body>
+      	<release version="1.2.2" description="General Release" date="13.02.2007">    
+ 	       <action dev="Andreas Ryland" type="fix" issue="1088">
+ 				Added the option of disabling aspect ratio preservation through the imageConverterParams settings object. Disabling aspect ratio preservation means the new size will be exactly the requested size even if that means stretching the image.
+ 	       </action>
+    </release>
+   	<release version="1.2.1" description="General Release" date="30.01.2007">    
+ 	       <action dev="Andreas Ryland" type="add">
+ 				Added input variable validation for cropping parameters       
+ 	       </action>
+ 	       <action dev="Andreas Ryland" type="add">
+ 				Added overloaded getImageDimension function to allow the precalculation of resulting image size to take crop factors into account
+ 	       </action>
+    </release>
+  	<release version="1.2.0" description="General Release" date="29.01.2007">    
+   	       <action dev="Andreas Ryland" type="add">
+				Added image cropping. An image can be cropped from any of the 4 sides by a percentile of the image width/height. Image cropping is controlled via the ImageConverterParams object.
+           </action>
+           <action dev="Andreas Ryland" type="add">
+				Enabled blurring for resizeing with a scale of 0.8 or less, for images with transparency and animated gifs. This was previously only available to other formats such as jpeg.
+           </action>
+           <action dev="Andreas Ryland" type="add">
+				Animated gifs are now forced to have only 1, global, colortable as opposed to previous versions where animated gifs would get 1 local colortable per frame. This reduces image size.
+           </action>
+           <action dev="Andreas Ryland" type="add">
+				Added progressive encoding by cropping for applicable animated gifs. Gifs that use resetToBackgroundColor as the frame reset method cannot be cropped, but all other animated gifs are. 
+           </action>
+           <action dev="Andreas Ryland" type="add">
+				Added animated gif transparency optimization. This works by analysing frames and replacing pixels with transparent ones when the previous frame had a pixel of the same color. This can make a row of pixels that had all different colors into a row of pixels of the same, transparent color which helps the runtime encoding algorithm to create a smaller filesize for the gif.
+           </action>
+      </release>  
    	  <release version="1.1.2" description="General Release" date="22.11.2006">    
    	       <action dev="Andreas Ryland" type="add">
 				Added a first version of image rotation, available as an ImageConverterParams setting
            </action>
            <action dev="Andreas Ryland" type="add">
 				Added a method to use the ImageConverter to read a byte into a BufferedImage
+           </action>
+           <action dev="Andreas Ryland" type="fix" issue="954">
+				The imageconverter will scan and crop the frames of animated gifs to create an optimal progressive encoding. This will be done on all images except those using reset to background color frame disposal method. 
            </action>
       </release>   
    	  <release version="1.1.1" description="General Release" date="22.11.2006">    
