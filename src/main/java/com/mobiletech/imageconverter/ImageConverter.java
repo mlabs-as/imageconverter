@@ -42,7 +42,7 @@ import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.2.1";
+    public static final String version = "ImageConverter version 1.2.2";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -82,7 +82,7 @@ public class ImageConverter {
      */
     public static byte[] convertImage(ImageConverterParams imageParams, Dimension dim) throws ImageConverterException{     
        // Determine pipeline
-    	
+    	imageParams.setFastMode(false);
     	// run pipeline   	
        //imageParams.setNumberOfColors(-1);
        byte [] returnByte = null;
@@ -220,11 +220,8 @@ public class ImageConverter {
     	//imageParams.getInternalVariables().setChanged(true);
         if(imageParams.getWidth() > 0 || imageParams.getHeight() > 0){
         	BufferedImage temp = null;
-        	if(imageParams.getInternalVariables().getScale() != 0.0){
-        		temp = ImageScaler.resizeImage(image, imageParams.getInternalVariables().getScale(),imageParams.isNoEnlargement(),(imageParams.getInternalVariables().getTransparentColor() != null ? true : false),imageParams);
-        	} else {
-        		temp = ImageScaler.resizeImage(image, imageParams.getHeight(),imageParams.getWidth(),imageParams.isNoEnlargement(),(imageParams.getInternalVariables().getTransparentColor() != null ? true : false),imageParams);
-        	}
+        	temp = ImageScaler.resizeImage(image, imageParams.getHeight(),imageParams.getWidth(),imageParams.isNoEnlargement(),(imageParams.getInternalVariables().getTransparentColor() != null ? true : false),imageParams);
+        	
             if(temp != null){
                 image = null;
                 image = temp;

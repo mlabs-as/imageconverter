@@ -50,6 +50,7 @@ public class ImageConverterParams {
     private int cropTop = 0;
     private int cropBottom = 0;
     private boolean fastMode = false;
+    private boolean keepAspectRatio = true;
     
     // Automatic Variables (Set by this class)
     private boolean hasImageWatermarks = false;
@@ -837,8 +838,28 @@ public class ImageConverterParams {
 		return fastMode;
 	}
 
+	/**
+	 * Set this to true to enable fast mode, this will priorities speed over quality and resulting image size. 
+	 * Fast equals lower quality and bigger files. Fast mode only affects animated gif images. 
+	 * @param fastMode true to enable fast mode, false to disable fast mode.
+	 */
 	public void setFastMode(boolean fastMode) {
 		this.fastMode = fastMode;
+	}
+
+	public boolean isKeepAspectRatio() {
+		return keepAspectRatio;
+	}
+
+	/**
+	 * Set this to true if the aspect ratio of the original image should be preserved. 
+	 * Setting this to false means the resulting size will be exactly as specified, even though 
+	 * that may mean that the image will be stretched to fit the desired size. 
+	 * 
+	 * @param keepAspectRatio true to protect aspect ratio, false to resize to the exact specified target size. 
+	 */
+	public void setKeepAspectRatio(boolean keepAspectRatio) {
+		this.keepAspectRatio = keepAspectRatio;
 	}
 
        

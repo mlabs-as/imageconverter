@@ -50,10 +50,6 @@ public class ImageScaler {
             scale = (double) height / oldHeight;
         }   
         
-        return resizeImage(inImage,scale,noEnlargement,hasTransparency,params);
-    }   
-    
-    public static BufferedImage resizeImage(BufferedImage inImage,double scale,boolean noEnlargement, boolean hasTransparency, ImageConverterParams params){                  
     	if(noEnlargement){
             if(scale > 1.0){
                 return null;
@@ -62,9 +58,17 @@ public class ImageScaler {
         if(scale == 0){
         	return null;
         }
-        int newWidth = (int) (inImage.getWidth() * scale); 
-        int newHeight = (int) (inImage.getHeight() * scale); 
+        int newWidth = 0;
+        int newHeight = 0;
                
+        if(params.isKeepAspectRatio()){
+        	newWidth = (int) (inImage.getWidth() * scale); 
+        	newHeight = (int) (inImage.getHeight() * scale); 
+        } else {
+        	newWidth = width;
+        	newHeight = height;
+        }
+        
         inImage = ImageUtil.toBuffImageRGBorARGB(inImage);
         int type = inImage.getType();
         
@@ -83,14 +87,14 @@ public class ImageScaler {
                 		//inImage = scaleImageWithAfflineTransformOp(inImage,scale,newWidth,newHeight,type);
                 		//inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type);
                 	} else {
-                		inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type, true);
+                		inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type, true,params.isKeepAspectRatio());
                 	}
         		} else {
         			if(params.getInternalVariables().getOldFormat().equalsIgnoreCase("png")){
                 		inImage = scaleImageWithGetScaledInstance(inImage,newWidth,newHeight,type);
                 	} else { // should be transparent gif at this point, if quality mode, attempt back-correction
                 		if(params.isFastMode()){
-                			inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type, false);
+                			inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type, false,params.isKeepAspectRatio());
                 		} else {
                 			// Get copy for back-correction
                 			BufferedImage copy = new BufferedImage(inImage.getWidth(), inImage.getHeight(), inImage.getType());   
@@ -136,7 +140,7 @@ public class ImageScaler {
                          g.dispose();
                          inImage = copy;
                          copy = null;
-           	        	 inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type, false);
+           	        	 inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type, false,params.isKeepAspectRatio());
                 		}
                 	}
         		}
@@ -161,12 +165,12 @@ public class ImageScaler {
                     inImage = copy;
                     copy = null;
         		}
-        		inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type, false);
+        		inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type, false,params.isKeepAspectRatio());
         	}    		        
         } else if (scale <= 0.8) {
             int bl = (int) Math.floor(1 / scale);
             inImage = blur(bl,inImage);    
-            inImage = scaleImageWithAfflineTransformOp(inImage,scale,newWidth,newHeight,type);            
+            inImage = scaleImageWithAfflineTransformOp(inImage,scale,newWidth,newHeight,type,params.isKeepAspectRatio());            
         } else {
             inImage = scaleImageWithGetScaledInstance(inImage,newWidth,newHeight,type);
         }                         
@@ -202,7 +206,7 @@ public class ImageScaler {
         return theNewImage2;
     }
     
-    private static BufferedImage scaleImageWithAfflineTransformOp(BufferedImage inImage,double scale, int newWidth, int newHeight, int type){
+    private static BufferedImage scaleImageWithAfflineTransformOp(BufferedImage inImage,double scale, int newWidth, int newHeight, int type, boolean keepAspect){
         RenderingHints renderHint = new RenderingHints(null); 
         renderHint.put(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         renderHint.put(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
@@ -211,16 +215,22 @@ public class ImageScaler {
         
         AffineTransformOp scaleOp = null;
         
-        if(newHeight == 0){
-        	double hScale = 1.0 / inImage.getHeight();
-        	newHeight = 1;
-        	scaleOp = new AffineTransformOp(AffineTransform.getScaleInstance(scale, hScale), renderHint);
-        } else if(newWidth == 0){
-        	double vScale = 1.0 / inImage.getWidth();
-        	newWidth = 1;
-        	scaleOp = new AffineTransformOp(AffineTransform.getScaleInstance(vScale, scale), renderHint);
+        if(keepAspect){
+	        if(newHeight == 0){
+	        	double hScale = 1.0 / inImage.getHeight();
+	        	newHeight = 1;
+	        	scaleOp = new AffineTransformOp(AffineTransform.getScaleInstance(scale, hScale), renderHint);
+	        } else if(newWidth == 0){
+	        	double vScale = 1.0 / inImage.getWidth();
+	        	newWidth = 1;
+	        	scaleOp = new AffineTransformOp(AffineTransform.getScaleInstance(vScale, scale), renderHint);
+	        } else {
+	        	scaleOp = new AffineTransformOp(AffineTransform.getScaleInstance(scale, scale), renderHint);
+	        }
         } else {
-        	scaleOp = new AffineTransformOp(AffineTransform.getScaleInstance(scale, scale), renderHint);
+        	double vScale = (double)newWidth / (double)inImage.getWidth();
+        	double hScale = (double)newHeight / (double)inImage.getHeight();
+        	scaleOp = new AffineTransformOp(AffineTransform.getScaleInstance(vScale, hScale), renderHint);
         }
         BufferedImage scaledImg = new BufferedImage( newWidth, newHeight, inImage.getType() );
  
@@ -259,19 +269,26 @@ public class ImageScaler {
         return blurredImg;
     }    
     
-    private static final BufferedImage scaleUsingJAI(BufferedImage image, double scale, int newWidth, int newHeight, int type, boolean flattened){
+    private static final BufferedImage scaleUsingJAI(BufferedImage image, double scale, int newWidth, int newHeight, int type, boolean flattened, boolean keepAspect){
         ParameterBlock scalePb = new ParameterBlock();
         scalePb.addSource( image );  
         float hScale = 0.0f, vScale = 0.0f;
-        if(newHeight == 0){
-        	hScale = 1.0f / image.getHeight();
-        	vScale = (float)scale;
-        } else if(newWidth == 0){
-        	vScale = 1.0f / image.getWidth();
-        	hScale = (float)scale;
+        
+        if(keepAspect){
+	        if(newHeight == 0){
+	        	hScale = 1.0f / image.getHeight();
+	        	vScale = (float)scale;
+	        } else if(newWidth == 0){
+	        	vScale = 1.0f / image.getWidth();
+	        	hScale = (float)scale;
+	        } else {
+	        	hScale = vScale = (float)scale;
+	        }
         } else {
-        	hScale = vScale = (float)scale;
+        	vScale = (float)newWidth / (float)image.getWidth();
+        	hScale = (float)newHeight / (float)image.getHeight();
         }
+        
         scalePb.add( vScale );
         scalePb.add( hScale );
         scalePb.add( 0.0F );

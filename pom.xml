@@ -5,7 +5,7 @@
   <artifactId>imageconverter</artifactId>
   <name>ImageConverter</name>
   <description>The ImageConverter is a component that provides functions to convert images between different formats. It also provides scaling, color modification and watermarking.</description>
-  <version>1.2.1</version>
+  <version>1.2.2</version>
   <inceptionYear>2005</inceptionYear>
   <url></url>
   <organization>
@@ -217,7 +217,39 @@
       <artifactId>jai_imageio</artifactId>
       <version>1.1-beta</version>
       <type>jar</type>
-    </dependency>      
+    </dependency>   
+    <!--
+    <dependency>
+      <groupId>batik</groupId>
+      <artifactId>batik-svggen</artifactId>
+      <version>1.6</version>
+      <type>jar</type>
+    </dependency>    
+    <dependency>
+      <groupId>batik</groupId>
+      <artifactId>batik-dom</artifactId>
+      <version>1.6</version>
+      <type>jar</type>
+    </dependency>       
+    <dependency>
+      <groupId>batik</groupId>
+      <artifactId>batik-awt-util</artifactId>
+      <version>1.6</version>
+      <type>jar</type>
+    </dependency>        
+    <dependency>
+      <groupId>batik</groupId>
+      <artifactId>batik-util</artifactId>
+      <version>1.6</version>
+      <type>jar</type>
+    </dependency>       
+    <dependency>
+      <groupId>batik</groupId>
+      <artifactId>batik-xml</artifactId>
+      <version>1.6</version>
+      <type>jar</type>
+    </dependency>       
+    -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

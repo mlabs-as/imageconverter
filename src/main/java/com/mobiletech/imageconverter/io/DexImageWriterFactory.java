@@ -10,6 +10,7 @@ import javax.imageio.ImageWriter;
 import com.mobiletech.imageconverter.exception.ImageConverterException;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.mobiletech.imageconverter.writers.AnimGifWriter;
+import com.mobiletech.imageconverter.writers.BatikSVGWriter;
 import com.mobiletech.imageconverter.writers.DexImageWriter;
 import com.mobiletech.imageconverter.writers.GeneralImageIOWriter;
 import com.mobiletech.imageconverter.writers.JPEGImageWriter;
@@ -19,7 +20,9 @@ public class DexImageWriterFactory {
 	
 	public static DexImageWriter getImageWriter(BufferedImage image, ImageConverterParams imageParams) throws ImageConverterException{
 		DexImageWriter writer = null;
-		if(imageParams.getFormat().compareToIgnoreCase("jpg")==0 || imageParams.getFormat().compareToIgnoreCase("jpeg")==0){
+		if(imageParams.getFormat().equalsIgnoreCase("svg")){
+			writer = new BatikSVGWriter();
+		} else if(imageParams.getFormat().compareToIgnoreCase("jpg")==0 || imageParams.getFormat().compareToIgnoreCase("jpeg")==0){
 			writer = new JPEGImageWriter(imageParams);
 		} else {
 			Iterator writers = ImageIO.getImageWriters(new ImageTypeSpecifier(image),imageParams.getFormat());       
