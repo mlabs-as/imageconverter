@@ -8,8 +8,8 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
+import com.mobiletech.imageconverter.ImageConverter;
 import com.mobiletech.imageconverter.exception.ImageConverterException;
-import com.mobiletech.imageconverter.readers.AnalyzingAnimGifReader;
 import com.mobiletech.imageconverter.readers.AnimGIFReader;
 import com.mobiletech.imageconverter.readers.DexImageReader;
 import com.mobiletech.imageconverter.readers.FlatteningAnimGifReader;
@@ -21,16 +21,32 @@ import com.mobiletech.imageconverter.vo.ImageConverterParams;
 
 public class DexImageReaderFactory {
 	public static DexImageReader getImageReader(ImageConverterParams imageParams) throws ImageConverterException{
+		return getImageReaderInternal(imageParams,false);
+	}
+	public static DexImageReader getImageOverlayReader(ImageConverterParams imageParams) throws ImageConverterException{
+		return getImageReaderInternal(imageParams,true);
+	}
+	private static DexImageReader getImageReaderInternal(ImageConverterParams imageParams, boolean isOverlay) throws ImageConverterException{
 		DexImageReader dexReader = null;
+		byte [] image = null;
+		String oldFormat = null;
 		
-		if(imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpg") || imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpeg")){
-			dexReader = new JPEGImageReader(imageParams.getImage());
+		if(isOverlay){
+			image = imageParams.getOverlay();
+			oldFormat = ImageConverter.getImageFormatName(image);
+		} else {
+			image = imageParams.getImage();
+			oldFormat = imageParams.getInternalVariables().getOldFormat();
+		}
+				
+		if(oldFormat.equalsIgnoreCase("jpg") || oldFormat.equalsIgnoreCase("jpeg")){
+			dexReader = new JPEGImageReader(image);
 		} else {
 			ByteArrayInputStream imageStream = null;                
 	        ImageInputStream iis = null;        
 	        ImageReader ireader = null;		       
 	                              
-	        imageStream = new ByteArrayInputStream(imageParams.getImage());
+	        imageStream = new ByteArrayInputStream(image);
 	        
 	        try {
 				iis = ImageIO.createImageInputStream(imageStream);
