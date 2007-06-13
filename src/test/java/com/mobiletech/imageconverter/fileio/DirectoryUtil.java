@@ -159,18 +159,20 @@ public class DirectoryUtil {
         TsScenario tmpScn = null;
         while(ite.hasNext()){
             tmpScn = ite.next();
-            temp = new File(directory.getAbsolutePath() + "/" + tmpScn.getName());
-            int unique = 0;
-            while(temp.exists()){
-                temp = null;
-                temp = new File(directory.getAbsolutePath() + "/" + tmpScn.getName() + "(" + ++unique + ")");                
+            if(tmpScn != null){
+	            temp = new File(directory.getAbsolutePath() + "/" + tmpScn.getName());
+	            int unique = 0;
+	            while(temp.exists()){
+	                temp = null;
+	                temp = new File(directory.getAbsolutePath() + "/" + tmpScn.getName() + "(" + ++unique + ")");                
+	            }
+	            if(unique > 0){
+	                tmpScn.setName(tmpScn.getName()+"("+unique+")");
+	            }
+	            temp.mkdirs();
+	            temp = null;
+	            tmpScn = null;
             }
-            if(unique > 0){
-                tmpScn.setName(tmpScn.getName()+"("+unique+")");
-            }
-            temp.mkdirs();
-            temp = null;
-            tmpScn = null;
         }
     }
     public boolean writeImage(byte [] image, String scenarioName, String fileName){
