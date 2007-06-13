@@ -19,6 +19,7 @@ import com.mobiletech.imageconverter.io.ImageDecoder;
 import com.mobiletech.imageconverter.io.ImageEncoder;
 import com.mobiletech.imageconverter.modifiers.ImageColorModifier;
 import com.mobiletech.imageconverter.modifiers.ImageCropper;
+import com.mobiletech.imageconverter.modifiers.ImageOverlayWriter;
 import com.mobiletech.imageconverter.modifiers.ImageRotater;
 import com.mobiletech.imageconverter.modifiers.ImageScaler;
 import com.mobiletech.imageconverter.readers.DexImageReader;
@@ -42,7 +43,7 @@ import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.2.2";
+    public static final String version = "ImageConverter version 1.2.6";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -82,7 +83,7 @@ public class ImageConverter {
      */
     public static byte[] convertImage(ImageConverterParams imageParams, Dimension dim) throws ImageConverterException{     
        // Determine pipeline
-    	imageParams.setFastMode(false);
+    	//imageParams.setFastMode(false);
     	// run pipeline   	
        //imageParams.setNumberOfColors(-1);
        byte [] returnByte = null;
@@ -207,7 +208,19 @@ public class ImageConverter {
 		
 		return temp;
     }    
-    private static ImageConverterParams doPipeline(BufferedImage image, ImageConverterParams imageParams) throws ImageConverterException{    
+    private static ImageConverterParams doPipeline(BufferedImage image, ImageConverterParams imageParams) throws ImageConverterException{
+    	// add overlay if one was provided
+    	if(imageParams.getOverlay() != null){
+			BufferedImage temp = null;
+        	temp = ImageOverlayWriter.addOverlay(image, imageParams);
+        	
+            if(temp != null){
+                image = null;
+                image = temp;
+                temp = null;
+                imageParams.getInternalVariables().setChanged(true);
+            }
+    	}
     	// perform cropping if requested
     	if(imageParams.getCropBottom() > 0 ||
     			imageParams.getCropLeft() > 0 ||
@@ -300,7 +313,7 @@ public class ImageConverter {
         return inParams;
     }                                 
     
-    private static String getImageFormatName(byte [] inImage) throws ImageConverterException{
+    public static String getImageFormatName(byte [] inImage) throws ImageConverterException{
         ByteArrayInputStream imageStream = null;
         String format = null;
         

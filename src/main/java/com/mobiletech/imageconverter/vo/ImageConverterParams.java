@@ -35,6 +35,7 @@ public class ImageConverterParams {
 
     // User set Variables
     private byte[] image = null;
+    private byte[] overlay = null;
     private String format = null;
     private int width = 0;
     private int height = 0;
@@ -49,7 +50,7 @@ public class ImageConverterParams {
     private int cropRight = 0;
     private int cropTop = 0;
     private int cropBottom = 0;
-    private boolean fastMode = false;
+    private boolean fastMode = true;
     private boolean keepAspectRatio = true;
     
     // Automatic Variables (Set by this class)
@@ -862,5 +863,17 @@ public class ImageConverterParams {
 		this.keepAspectRatio = keepAspectRatio;
 	}
 
+	/**
+	 * If a second image is provided via the overlay parameter, that image will be painted on top of the supplied image.
+	 * 
+	 * @param overlay The image that will be used as an overlay>
+	 */
+	public void setOverlay(byte[] overlay) {
+		this.overlay = overlay;
+	}
+
+	public byte[] getOverlay() {
+		return overlay;
+	}
        
 }
