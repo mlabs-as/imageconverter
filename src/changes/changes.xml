@@ -5,7 +5,17 @@
       <author email="ar@mobiletech.no">Andreas Ryland</author>
    </properties>
    <body>
-      	<release version="1.2.2" description="General Release" date="13.02.2007">    
+   		<release version="1.2.4" description="Bugfix Release" date="09.03.2007">    
+	 	       <action dev="Andreas Ryland" type="fix">
+	 				Fixed bug in overlay function where the image format of the overlay image could be mistaken and cause errors. 
+	 	       </action>
+	    </release>
+	   <release version="1.2.3" description="Bugfix Release" date="09.03.2007">    
+	 	       <action dev="Andreas Ryland" type="add">
+	 				Added image overlay option, this allows for writing a second image on top of the provided image. Normally the overlay image would have transparency in it so that it becomes an overlay on top of the image.
+	 	       </action>
+	    </release>
+      	<release version="1.2.2" description="Bugfix Release" date="13.02.2007">    
  	       <action dev="Andreas Ryland" type="fix" issue="1088">
  				Added the option of disabling aspect ratio preservation through the imageConverterParams settings object. Disabling aspect ratio preservation means the new size will be exactly the requested size even if that means stretching the image.
  	       </action>
