@@ -1,25 +1,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+	<parent>
+            <groupId>mobiletech</groupId>
+            <artifactId>mother</artifactId>
+            <version>1.1.0</version>
+        </parent>
   <groupId>mobiletech</groupId>
   <artifactId>imageconverter</artifactId>
   <name>ImageConverter</name>
   <description>The ImageConverter is a component that provides functions to convert images between different formats. It also provides scaling, color modification and watermarking.</description>
-  <version>1.2.2</version>
+  <version>1.2.3-SNAPSHOT</version>
   <inceptionYear>2005</inceptionYear>
   <url></url>
-  <organization>
-    <name>Mobiletech</name>
-    <url>http://www.mobiletech.no</url>
-  </organization>  
   <packaging>jar</packaging>
-  <issueManagement>
-    <system>BugZilla</system>
-    <url>http://bugs.mobiletech.no</url>
-  </issueManagement>
   <ciManagement>
-    <system>continuum</system>
-    <url>http://build.mobiletech.no</url>
     <notifiers>
       <notifier>
         <type>Mail</type>
@@ -48,7 +43,7 @@
 
   <scm>
     <connection>scm:cvs|local|/mobiletech|dextella/imageconverter</connection>
-    <developerConnection>scm:cvs|pserver|${maven.username}@cvs.mobiletech.no|/mobiletech|/dextella/imageconverter</developerConnection>
+    <developerConnection>scm:cvs|ext${maven.username}@cvs.mobiletech.no|/mobiletech|/dextella/imageconverter</developerConnection>
     <url></url>
   </scm>
   <distributionManagement>
@@ -250,11 +245,5 @@
       <type>jar</type>
     </dependency>       
     -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 </project>
