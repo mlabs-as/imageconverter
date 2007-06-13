@@ -5,6 +5,14 @@
       <author email="ar@mobiletech.no">Andreas Ryland</author>
    </properties>
    <body>
+   		<release version="1.3.0" description="Feature Release" date="13.06.2007">    
+		       <action dev="Andreas Ryland" type="add">
+					Added rotation capability with a different interface, free angle rotation is not possible. This fixes a bug in the previous rotation implementation that caused white lines in the images when rotated 90 or 270 degrees.
+		       </action>
+      		   <action dev="Andreas Ryland" type="add">
+					Added an ignore height attribute in the ImageConverterParams, this can be used to tell the ImageConverter to set the height to whatever will achieve the set width within the aspect ratio constraints.
+		       </action>
+		  </release>
    		<release version="1.2.4" description="Bugfix Release" date="09.03.2007">    
 	 	       <action dev="Andreas Ryland" type="fix">
 	 				Fixed bug in overlay function where the image format of the overlay image could be mistaken and cause errors. 

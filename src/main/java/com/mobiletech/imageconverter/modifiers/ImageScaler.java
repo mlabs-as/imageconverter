@@ -44,11 +44,15 @@ public class ImageScaler {
 
         double scale = 0.0; 
 
-        if (((double) width / oldWidth ) < ((double) height / oldHeight)) {
-            scale = (double) width / oldWidth; 
-        } else { 
-            scale = (double) height / oldHeight;
-        }   
+        if(params.ignoreHeight()){
+            scale = (double) width / oldWidth;             
+        } else {
+        	if (((double) width / oldWidth ) < ((double) height / oldHeight)) {
+                scale = (double) width / oldWidth; 
+            } else { 
+                scale = (double) height / oldHeight;
+            }   	
+        }
         
     	if(noEnlargement){
             if(scale > 1.0){

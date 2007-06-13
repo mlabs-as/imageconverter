@@ -45,13 +45,14 @@ public class ImageConverterParams {
     private Vector imageWatermarks = null;
     private Vector textWatermarks = null;           
     private boolean no_enlargement = false;
-    private int rotationAngle = 0;
     private int cropLeft = 0;
     private int cropRight = 0;
     private int cropTop = 0;
     private int cropBottom = 0;
     private boolean fastMode = true;
     private boolean keepAspectRatio = true;
+    private boolean ignoreHeight = false;
+    private RotationType rotation = null;
     
     // Automatic Variables (Set by this class)
     private boolean hasImageWatermarks = false;
@@ -74,7 +75,7 @@ public class ImageConverterParams {
         hasTextWatermarks = false;
         no_enlargement = false;
         internalVariables = null;
-        rotationAngle = 0;
+        rotation = null;
     }    
     
     /**
@@ -83,15 +84,7 @@ public class ImageConverterParams {
      */
     public void resetInternal(){
         internalVariables = null;
-    }
-    
-    public int getRotationAngle() {
-		return rotationAngle;
-	}
-
-	public void setRotationAngle(int rotationAngle) {
-		this.rotationAngle = rotationAngle;
-	}
+    }   
 
 	public String toString(){
     	return toXML();
@@ -124,11 +117,6 @@ public class ImageConverterParams {
               xml.append("<NumberOfColors>");
               xml.append(this.getNumberOfColors());
               xml.append("</NumberOfColors>");
-          }
-          if(this.getRotationAngle() > 0){
-        	  xml.append("<RotationAngle>");
-              xml.append(this.getRotationAngle());
-              xml.append("</RotationAngle>");
           }
           xml.append("<Grayscale>");
           xml.append((this.isGrayscale() ? "true" : "false"));
@@ -875,5 +863,57 @@ public class ImageConverterParams {
 	public byte[] getOverlay() {
 		return overlay;
 	}
+
+	public boolean ignoreHeight() {
+		return this.ignoreHeight;
+	}
+
+	/**
+	 * Setting this to true will ignore the height variable, thus setting the height to whatever
+	 *  that will allow for the set width to be achieved within aspect ratio constraints.
+	 * @param ignoreHeight
+	 */
+	public void setIgnoreHeight(boolean ignoreHeight) {
+		this.ignoreHeight = ignoreHeight;
+	}
        
+	public enum RotationType {
+		CLOCKWISE_90(1), ANTI_CLOCKWISE_90(2), FLIP(3);
+
+		private final int type;
+
+		RotationType(int value) {
+			this.type = value;
+		}
+
+		public int getType() {
+			return type;
+		}
+
+		public static RotationType convert(int value) {
+			RotationType[] values = RotationType.values();
+			for (RotationType current : values) {
+				if (current.getType() == value) {
+					return current;
+				}
+			}
+
+			throw new EnumConstantNotPresentException(Enum.class,
+					"Unknown ratation type: " + value);
+		}
+	}
+
+	public RotationType getRotation() {
+		return this.rotation;
+	}
+
+	/**
+	 * Use this to rotate the image in one of the predefined ways that are available throught
+	 *  the RotationType enum.
+	 *  
+	 * @param rotation
+	 */
+	public void setRotation(RotationType rotation) {
+		this.rotation = rotation;
+	}
 }

@@ -43,7 +43,7 @@ import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.2.6";
+    public static final String version = "ImageConverter version 1.3.0";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -229,6 +229,10 @@ public class ImageConverter {
     		image = ImageCropper.cropImageByPercentage(image, imageParams.getCropTop(), imageParams.getCropBottom(), imageParams.getCropLeft(), imageParams.getCropRight());
     		imageParams.getInternalVariables().setChanged(true);
     	}
+        // Rotate if requested
+        if(imageParams.getRotation() != null){
+        	image = ImageRotater.rotate(image, imageParams);
+        }
         // Perform resize if requested
     	//imageParams.getInternalVariables().setChanged(true);
         if(imageParams.getWidth() > 0 || imageParams.getHeight() > 0){
@@ -268,10 +272,6 @@ public class ImageConverter {
         	image = ImageUtil.toBuffImageRGBorARGB(image);
             image = ImageColorModifier.getGrayscale(image);
             imageParams.getInternalVariables().setChanged(true);
-        }
-        // Rotate if requested
-        if(imageParams.getRotationAngle() > 0){
-        	image = ImageRotater.rotate(image, imageParams.getRotationAngle());
         }
         imageParams.getInternalVariables().setBufferedImage(image);
         // Return converted image
