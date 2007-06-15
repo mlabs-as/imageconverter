@@ -27,6 +27,7 @@ import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.mobiletech.imageconverter.vo.ImageWatermark;
 import com.mobiletech.imageconverter.vo.TextWatermark;
+import com.mobiletech.imageconverter.vo.ImageConverterParams.RotationType;
 import com.mobiletech.imageconverter.watermarks.ImageWatermarker;
 import com.mobiletech.imageconverter.writers.DexImageWriter;
 import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
@@ -43,7 +44,7 @@ import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.3.0";
+    public static final String version = "ImageConverter version 1.3.1";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -424,10 +425,14 @@ public class ImageConverter {
     }       
     
     public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight, boolean noEnlargement){
-    	return calculateConvertedImageDimension(width, height, desiredWidth, desiredHeight, noEnlargement, 0, 0, 0, 0);
+    	return calculateConvertedImageDimension(width, height, desiredWidth, desiredHeight, noEnlargement, 0, 0, 0, 0, false, null);
+    }
+
+    public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight, boolean noEnlargement, int cropLeft,int cropRight, int cropTop, int cropBottom){
+    	return calculateConvertedImageDimension(width, height, desiredWidth, desiredHeight, noEnlargement, 0, 0, 0, 0, false, null);
     }
     
-    public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight, boolean noEnlargement, int cropLeft,int cropRight, int cropTop, int cropBottom){
+    public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight, boolean noEnlargement, int cropLeft,int cropRight, int cropTop, int cropBottom, boolean ignoreHeight, RotationType rotate){
     	if(cropLeft > 0 || cropRight > 0 || cropTop > 0 || cropBottom > 0){
     		double w = width;
     		double h = height;
@@ -450,7 +455,7 @@ public class ImageConverter {
     		height = (int)dheight;
     	}
     	Dimension dim = new Dimension();
-    	double scale = ImageScaler.getResizeScale(width, height, desiredWidth, desiredHeight);
+    	double scale = ImageScaler.getResizeScale(width, height, desiredWidth, desiredHeight, ignoreHeight, rotate);
     	if(noEnlargement && scale > 1.0){
     		dim.height = height;
             dim.width = width;

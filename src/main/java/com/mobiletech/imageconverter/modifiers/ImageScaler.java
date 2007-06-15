@@ -23,18 +23,30 @@ import javax.media.jai.RenderedOp;
 
 import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
+import com.mobiletech.imageconverter.vo.ImageConverterParams.RotationType;
 
 public class ImageScaler {
 	
-	public static double getResizeScale(int inWidth, int inHeight, int inNewWidth, int inNewHeight){
+	public static double getResizeScale(int inWidth, int inHeight, int inNewWidth, int inNewHeight, boolean ignoreHeight, RotationType rotate){
 	    double scale = 0.0; 
 
-        if (((double) inNewWidth / inWidth ) < ((double) inNewHeight / inHeight)) {
-            scale = (double) inNewWidth / inWidth; 
-        } else { 
-            scale = (double) inNewHeight / inHeight;
-        }   
-
+	    if(rotate != null){
+	    	if(rotate == RotationType.CLOCKWISE_90 || rotate == RotationType.ANTI_CLOCKWISE_90){
+	    		int tempW = inWidth;
+	    		inWidth = inHeight;
+	    		inHeight = tempW;
+	    	}
+	    }
+	    if(ignoreHeight){
+            scale = (double) inNewWidth / inWidth;             
+        } else {
+	        if (((double) inNewWidth / inWidth ) < ((double) inNewHeight / inHeight)) {
+	            scale = (double) inNewWidth / inWidth; 
+	        } else { 
+	            scale = (double) inNewHeight / inHeight;
+	        }   
+        }
+        
         return scale;
 	}
 	
