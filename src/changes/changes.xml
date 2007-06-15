@@ -5,7 +5,12 @@
       <author email="ar@mobiletech.no">Andreas Ryland</author>
    </properties>
    <body>
-	   <release version="1.3.1" description="Feature Release" date="15.06.2007">    
+	    <release version="1.3.2" description="Bugfix Release" date="15.06.2007">    
+		       <action dev="Andreas Ryland" type="add">
+					Bugfix in calculateConverterImageDimension method
+		       </action>
+		  </release>
+	   <release version="1.3.1" description="Minor change Release" date="15.06.2007">    
 		       <action dev="Andreas Ryland" type="add">
 					Updated calculateConvertedImageDimension methods to take rotation and ignoreHeight parameters into account.
 		       </action>

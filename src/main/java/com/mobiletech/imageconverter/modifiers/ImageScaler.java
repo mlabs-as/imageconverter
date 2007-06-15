@@ -29,7 +29,6 @@ public class ImageScaler {
 	
 	public static double getResizeScale(int inWidth, int inHeight, int inNewWidth, int inNewHeight, boolean ignoreHeight, RotationType rotate){
 	    double scale = 0.0; 
-
 	    if(rotate != null){
 	    	if(rotate == RotationType.CLOCKWISE_90 || rotate == RotationType.ANTI_CLOCKWISE_90){
 	    		int tempW = inWidth;

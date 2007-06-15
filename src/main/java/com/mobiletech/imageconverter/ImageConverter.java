@@ -44,7 +44,7 @@ import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.3.1";
+    public static final String version = "ImageConverter version 1.3.2";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -470,6 +470,12 @@ public class ImageConverter {
             }                      
             dim.height = newHeight;
             dim.width = newWidth;
+    	    if(rotate != null){
+    	    	if(rotate == RotationType.CLOCKWISE_90 || rotate == RotationType.ANTI_CLOCKWISE_90){
+    	    		dim.height = newWidth;
+    	            dim.width = newHeight;
+    	    	}
+    	    }
     	}
     	
         return dim;
