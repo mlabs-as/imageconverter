@@ -5,6 +5,11 @@
       <author email="ar@mobiletech.no">Andreas Ryland</author>
    </properties>
    <body>
+	   <release version="1.3.3" description="Bugfix Release" date="29.06.2007">    
+		       <action dev="Andreas Ryland" type="fix">
+					Attempting to fix problems with resources not being properly disposed of in certain scenarios.
+		       </action>
+		  </release>
 	    <release version="1.3.2" description="Bugfix Release" date="15.06.2007">    
 		       <action dev="Andreas Ryland" type="add">
 					Bugfix in calculateConverterImageDimension method

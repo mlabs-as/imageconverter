@@ -95,81 +95,47 @@ public class ImageConverter {
             //Validate input parameters
             imageParams = validateParams(imageParams);
             
-            if(true){ // Use 1.1 logic
-//            	 Enhanced Special Nice Test(r) (tm) (c)
-            	DexImageReader reader = DexImageReaderFactory.getImageReader(imageParams);
-            	DexImageWriter writer = null;
-            	BufferedImage temp = null;
-            	
- 	            try {
-					while(reader.hasMore()){
-						temp = reader.getNext();
-						
-						doPipeline(temp,imageParams);
-						
-						// write image
-						temp = imageParams.getInternalVariables().getBufferedImage();
-						//temp = ImageEncoder.prepareForConversion(temp, imageParams);
-						if(writer == null){
-				            if(dim != null){
-				            	if(temp != null){
-					            	dim.height = temp.getHeight();
-					            	dim.width = temp.getWidth();
-				            	} 
-				            }
-							writer = DexImageWriterFactory.getImageWriter(temp, imageParams);
-						}
-						if(!(writer instanceof OptimizingAnimGifWriter)){
-							temp = ImageEncoder.prepareForConversion(temp, imageParams);
-						}
-						writer.writeNext(temp);
-						if(!writer.canWriteMore()){
-							break;
-						}
+        	DexImageReader reader = DexImageReaderFactory.getImageReader(imageParams);
+        	DexImageWriter writer = null;
+        	BufferedImage temp = null;
+        	
+            try {
+				while(reader.hasMore()){
+					temp = reader.getNext();
+					
+					doPipeline(temp,imageParams);
+					
+					// write image
+					temp = imageParams.getInternalVariables().getBufferedImage();
+					//temp = ImageEncoder.prepareForConversion(temp, imageParams);
+					if(writer == null){
+			            if(dim != null){
+			            	if(temp != null){
+				            	dim.height = temp.getHeight();
+				            	dim.width = temp.getWidth();
+			            	} 
+			            }
+						writer = DexImageWriterFactory.getImageWriter(temp, imageParams);
 					}
-					returnByte = writer.getByte();
-				} finally {
-					if(reader != null){
-						reader.dispose();
-						reader = null;						
-					} 
-					if(writer != null){
-						writer.dispose();
-						writer = null;
+					if(!(writer instanceof OptimizingAnimGifWriter)){
+						temp = ImageEncoder.prepareForConversion(temp, imageParams);
 					}
-				}  
-	            // If the image has not been changed, check if the image format was to be converted, or, in case of jpeg to jpeg conversion, if the
-	            // compression factor should be changed (thus needing the jpeg to be re-encoded with the new compression setting) if neither of these
-	            // cases are true, then just return the original image
-	            if(!imageParams.getInternalVariables().isChanged()){
-	                // if there was no change in jpeg compression quality...
-	                if(imageParams.getJPEGCompressionQuality() <= 0.0){                         
-	                        if(imageParams.getFormat().equalsIgnoreCase( imageParams.getInternalVariables().getOldFormat() ) ){
-	                            return imageParams.getImage();
-	                        }else if((imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpg") ||
-	                                            imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpeg")) && 
-	                                                (imageParams.getFormat().equalsIgnoreCase("jpg") || imageParams.getFormat().equalsIgnoreCase("jpeg"))){
-	                                                    return imageParams.getImage();
-	                                                }
-	                }
-	            } 
-	            return returnByte;
-            }
-            
-           
-            // Read all images into BufferedImage objects for processing           
-            BufferedImage [] images  = ImageDecoder.readImages(imageParams.getImage(),imageParams);            
-            // Run the processing pipeline for each image and retrieve the processed image            
-            for(int i = 0; i<images.length ;i++){
-                imageParams = doPipeline(images[i],imageParams);
-                images[i] = imageParams.getInternalVariables().getBufferedImage();
-            }
-            if(dim != null){
-            	if(images[0] != null){
-	            	dim.height = images[0].getHeight();
-	            	dim.width = images[0].getWidth();
-            	} 
-            }            
+					writer.writeNext(temp);
+					if(!writer.canWriteMore()){
+						break;
+					}
+				}
+				returnByte = writer.getByte();
+			} finally {
+				if(reader != null){
+					reader.dispose();
+					reader = null;						
+				} 
+				if(writer != null){
+					writer.dispose();
+					writer = null;
+				}
+			}  
             // If the image has not been changed, check if the image format was to be converted, or, in case of jpeg to jpeg conversion, if the
             // compression factor should be changed (thus needing the jpeg to be re-encoded with the new compression setting) if neither of these
             // cases are true, then just return the original image
@@ -184,9 +150,7 @@ public class ImageConverter {
                                                     return imageParams.getImage();
                                                 }
                 }
-            }                      
-            // code the bufferedImage(s) back to an encoded byteStream in the requested format
-            returnByte = ImageEncoder.getByteArray(images,imageParams);
+            }      
         } catch(ImageConverterException e){
             imageParams.resetInternal(); // (Paranoia aka Just-In-Case)
             throw e;            

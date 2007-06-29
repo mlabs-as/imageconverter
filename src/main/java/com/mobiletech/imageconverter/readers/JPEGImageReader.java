@@ -97,19 +97,42 @@ public class JPEGImageReader implements DexImageReader{
              } finally {
                  if(reader != null){
                      reader.dispose();
-                 }          
-                 reader = null;
-                 try {
-                     iis.close();            
-                     imageStream.close();            
-                 } catch (IOException ignored){}
-                 iis = null;
-                 imageStream = null;
+                     reader = null;
+                 }                           
+                 if(iis != null){
+	                 try {
+	                     iis.close();                        
+	                 } catch (IOException ignored){}
+	                 iis = null;
+                 }
+                 if(imageStream != null){
+	                 try {
+	                	 imageStream.close();                        
+	                 } catch (IOException ignored){}
+	                 imageStream = null;
+                 }                 
               }     
 	        }      	        
 	    } catch(IOException ioe){
 	        throw new ImageConverterException(ImageConverterException.Types.IO_ERROR,"IOException thrown when reading from InputByteStream",ioe);
-	    }
+	    } finally {
+            if(reader != null){
+                reader.dispose();
+                reader = null;
+            }                           
+            if(iis != null){
+                try {
+                    iis.close();                        
+                } catch (IOException ignored){}
+                iis = null;
+            }
+            if(imageStream != null){
+                try {
+               	 imageStream.close();                        
+                } catch (IOException ignored){}
+                imageStream = null;
+            }                 
+         } 
 	    // this is for some known problem images that have been processed in photoshop
 	    // they will cause crashes and/or get wrong colors unless they are converted to
 	    // have a known image type, this conversion can be quite time consuming for some of these
