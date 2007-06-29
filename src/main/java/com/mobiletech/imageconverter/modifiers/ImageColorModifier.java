@@ -97,8 +97,10 @@ public class ImageColorModifier {
                 graphics2D = bi.createGraphics();
                 graphics2D.drawImage(inImage, null, 0, 0);
             } finally {
-                if (graphics2D != null)
+                if (graphics2D != null) {
                     graphics2D.dispose();
+                	graphics2D = null;
+                }
             }
             inImage = bi;
         }

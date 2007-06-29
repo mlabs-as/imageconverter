@@ -137,22 +137,29 @@ public class ImageScaler {
            	        	 			}          			
            	        	 		}
            	        	 	}
-           	        	 Graphics2D g = copy.createGraphics(); 
-                         g.setPaintMode(); 
-
-                         if(params.getInternalVariables().getTransparentColor() == null || !params.getFormat().equalsIgnoreCase("gif")){                             
-                             g.setColor(Color.WHITE);
-                             g.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
-                         } else {
-                             g.setColor(params.getInternalVariables().getTransparentColor());
-                             g.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
-                         }
-                         
-                         //g.setColor(new Color(0,255,0)); 
-                         //g.setColor(params.getInternalVariables().getTransparentColor());
-                         //g.fillRect(0,0, w, h);
-                         g.drawImage(inImage, 0, 0, null);
-                         g.dispose();
+           	        	 Graphics2D g = null;
+           	        	 try {
+	           	        	 g = copy.createGraphics(); 
+	                         g.setPaintMode(); 
+	
+	                         if(params.getInternalVariables().getTransparentColor() == null || !params.getFormat().equalsIgnoreCase("gif")){                             
+	                             g.setColor(Color.WHITE);
+	                             g.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
+	                         } else {
+	                             g.setColor(params.getInternalVariables().getTransparentColor());
+	                             g.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
+	                         }
+	                         
+	                         //g.setColor(new Color(0,255,0)); 
+	                         //g.setColor(params.getInternalVariables().getTransparentColor());
+	                         //g.fillRect(0,0, w, h);
+	                         g.drawImage(inImage, 0, 0, null);
+           	        	 } finally {
+           	        		 if(g != null){
+           	        			 g.dispose();
+           	        			 g = null;
+           	        		 }
+           	        	 }
                          inImage = copy;
                          copy = null;
            	        	 inImage = scaleUsingJAI(inImage,scale,newWidth,newHeight,type, false,params.isKeepAspectRatio());
@@ -162,21 +169,28 @@ public class ImageScaler {
         	} else {
         		if(!params.getInternalVariables().isOkToBlur()){
         			BufferedImage copy = new BufferedImage(inImage.getWidth(), inImage.getHeight(), inImage.getType());
-        			Graphics2D g = copy.createGraphics(); 
-                    g.setPaintMode(); 
-
-                    if(params.getInternalVariables().getTransparentColor() == null || !params.getFormat().equalsIgnoreCase("gif")){                             
-                        g.setColor(Color.WHITE);
-                        g.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
-                    } else {
-                        g.setColor(params.getInternalVariables().getTransparentColor());
-                        g.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
-                    }
-                    
-                    //g.setColor(params.getInternalVariables().getTransparentColor());
-                    //g.fillRect(0,0, inImage.getWidth(), inImage.getHeight());
-                    g.drawImage(inImage, 0, 0, null);
-                    g.dispose();
+        			Graphics2D g = null;
+        			try {
+        				g = copy.createGraphics(); 
+	                    g.setPaintMode(); 
+	
+	                    if(params.getInternalVariables().getTransparentColor() == null || !params.getFormat().equalsIgnoreCase("gif")){                             
+	                        g.setColor(Color.WHITE);
+	                        g.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
+	                    } else {
+	                        g.setColor(params.getInternalVariables().getTransparentColor());
+	                        g.fillRect(0,0,inImage.getWidth( null ),inImage.getHeight( null ));
+	                    }
+	                    
+	                    //g.setColor(params.getInternalVariables().getTransparentColor());
+	                    //g.fillRect(0,0, inImage.getWidth(), inImage.getHeight());
+	                    g.drawImage(inImage, 0, 0, null);
+        			} finally {
+        				if(g != null){
+		                    g.dispose();
+		                    g = null;
+        				}
+        			}
                     inImage = copy;
                     copy = null;
         		}
@@ -202,16 +216,21 @@ public class ImageScaler {
         	newHeight = 1;
         }
         BufferedImage theNewImage2 = new BufferedImage( newWidth, newHeight, type ); 
-        Graphics2D g2 = theNewImage2.createGraphics(); 
-        
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);         
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
-        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-        g2.setComposite(AlphaComposite.Src);
-        g2.drawImage(image3, 0, 0, null); 
-        g2.dispose();
-        g2 = null;
+        Graphics2D g2 = null;
+        try {
+	        g2 = theNewImage2.createGraphics(); 	        
+	        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);         
+	        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+	        g2.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
+	        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+	        g2.setComposite(AlphaComposite.Src);
+	        g2.drawImage(image3, 0, 0, null);
+        } finally {
+        	if(g2 != null){
+		        g2.dispose();
+		        g2 = null;
+        	}
+        }
         
         inImage = null;
         //inImage = theNewImage2;

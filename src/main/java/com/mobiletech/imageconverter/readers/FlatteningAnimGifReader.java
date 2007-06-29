@@ -247,10 +247,15 @@ public class FlatteningAnimGifReader implements DexImageReader{
          resultImage = new BufferedImage(streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight, BufferedImage.TYPE_INT_ARGB);
          
          if(counter == 0){
-        	 resG = resultImage.createGraphics();                          
-             resG.drawRenderedImage(r,null);                         
-             resG.dispose();
-             resG = null;
+        	 try {
+	        	 resG = resultImage.createGraphics();                          
+	             resG.drawRenderedImage(r,null);
+        	 } finally {
+        		 if(resG != null){
+		             resG.dispose();
+		             resG = null;
+        		 }
+        	 }
       		// Check for transparency in the first frame
       		WritableRaster current = resultImage.getRaster();
          	 
@@ -296,17 +301,25 @@ public class FlatteningAnimGifReader implements DexImageReader{
             	 okToFlattenTemp = false;
             	 //okToFlatten = false;
             	 //imageParams.getInternalVariables().setOkToBlur(false);
-                 Graphics2D g = resultImage.createGraphics(); 
-                 g.setPaintMode(); 
-
-                 if(metaData.transparentColorFlag){    
-                     //g.setColor(transparentColor);
-                     g.setColor(new Color(0,255,0,0)); 
-                 } else {                      
-                     g.setColor(backgroundColor); 
-                     //g.setColor(transparentColor); 
+                 Graphics2D g = null;
+                 try {
+	                 g = resultImage.createGraphics(); 
+	                 g.setPaintMode(); 
+	
+	                 if(metaData.transparentColorFlag){    
+	                     //g.setColor(transparentColor);
+	                     g.setColor(new Color(0,255,0,0)); 
+	                 } else {                      
+	                     g.setColor(backgroundColor); 
+	                     //g.setColor(transparentColor); 
+	                 }
+	                 g.fillRect(0,0, streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight);
+                 } finally {
+                	 if(g != null){
+                		 g.dispose();
+                		 g = null;
+                	 }
                  }
-                 g.fillRect(0,0, streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight);
                  break;
              case 3: // "restoreToPrevious"
             	 okToFlattenTemp = false;
@@ -314,16 +327,21 @@ public class FlatteningAnimGifReader implements DexImageReader{
                  break;                             
          }
                      
-         resG = resultImage.createGraphics();
-                      
-         if(metaData.imageLeftPosition != 0 || metaData.imageTopPosition != 0){
-             resG.drawRenderedImage(r, AffineTransform.getTranslateInstance(metaData.imageLeftPosition, metaData.imageTopPosition));
-         } else {
-             resG.drawRenderedImage(r,null);
+         resG = null;
+         try {
+	         resG = resultImage.createGraphics();
+	                      
+	         if(metaData.imageLeftPosition != 0 || metaData.imageTopPosition != 0){
+	             resG.drawRenderedImage(r, AffineTransform.getTranslateInstance(metaData.imageLeftPosition, metaData.imageTopPosition));
+	         } else {
+	             resG.drawRenderedImage(r,null);
+	         }
+         } finally {
+        	 if(resG != null){
+		         resG.dispose();
+		         resG = null;
+        	 }
          }
-         
-         resG.dispose();
-         resG = null;                     
                               
          resultImage.flush();
          

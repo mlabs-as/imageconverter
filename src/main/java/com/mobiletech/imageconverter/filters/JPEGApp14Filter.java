@@ -64,8 +64,7 @@ public class JPEGApp14Filter {
             
             JPEGFilter filter = new JPEGFilter(input);
             setFilterLevel(filterLevel);
-            filter.filter(input,output, defaultMarkers);
-            return output.toByteArray();
+            filter.filter(input,output, defaultMarkers);            
         } catch (IOException e) {
             throw new ImageConverterException(ImageConverterException.Types.IO_ERROR,"IOException thrown when filtering JPEG Image",e);
         } finally {
@@ -82,5 +81,9 @@ public class JPEGApp14Filter {
             }
             output = null;
         }        
+        if(output != null){
+        	return output.toByteArray();
+        } 
+        return null;
     }
 }

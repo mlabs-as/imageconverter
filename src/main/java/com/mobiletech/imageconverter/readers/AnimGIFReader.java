@@ -151,32 +151,45 @@ public class AnimGIFReader implements DexImageReader{
                  previousImage.setData(resultImage.copyData(null));
                  break;
              case 2: // "restoreToBackgroundColor"                                                  
-                 Graphics2D g = resultImage.createGraphics(); 
-                 g.setPaintMode(); 
-
-                 if(metaData.transparentColorFlag){    
-                     g.setColor(transparentColor); 
-                 } else {                      
-                     g.setColor(backgroundColor); 
-                     //g.setColor(transparentColor); 
+                 Graphics2D g = null;
+                 try {
+	                 g = resultImage.createGraphics(); 
+	                 g.setPaintMode(); 
+	
+	                 if(metaData.transparentColorFlag){    
+	                     g.setColor(transparentColor); 
+	                 } else {                      
+	                     g.setColor(backgroundColor); 
+	                     //g.setColor(transparentColor); 
+	                 }
+	                 g.fillRect(0,0, streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight);
+                 } finally {
+                	 if(g != null){
+                		 g.dispose();
+                		 g = null;
+                	 }
                  }
-                 g.fillRect(0,0, streamMetaData.logicalScreenWidth, streamMetaData.logicalScreenHeight);
                  break;
              case 3: // "restoreToPrevious"
                  resultImage.setData(previousImage.copyData(null));
                  break;                             
          }
                      
-         resG = resultImage.createGraphics();
-                      
-         if(metaData.imageLeftPosition != 0 || metaData.imageTopPosition != 0){
-             resG.drawRenderedImage(r, AffineTransform.getTranslateInstance(metaData.imageLeftPosition, metaData.imageTopPosition));
-         } else {
-             resG.drawRenderedImage(r,null);
+         resG = null;
+         try {
+	         resG = resultImage.createGraphics();
+	                      
+	         if(metaData.imageLeftPosition != 0 || metaData.imageTopPosition != 0){
+	             resG.drawRenderedImage(r, AffineTransform.getTranslateInstance(metaData.imageLeftPosition, metaData.imageTopPosition));
+	         } else {
+	             resG.drawRenderedImage(r,null);
+	         }
+         } finally {
+        	 if(resG != null){
+		         resG.dispose();
+		         resG = null;
+        	 }
          }
-         
-         resG.dispose();
-         resG = null;                     
                               
          resultImage.flush();
          metaData.imageTopPosition = 0;
