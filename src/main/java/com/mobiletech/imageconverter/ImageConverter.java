@@ -44,7 +44,7 @@ import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.3.2";
+    public static final String version = "ImageConverter version 1.3.3";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -316,11 +316,12 @@ public class ImageConverter {
     
     public static String getImageFormatName(byte [] inImage) throws ImageConverterException{
         ByteArrayInputStream imageStream = null;
+        ImageInputStream iis = null;
         String format = null;
         
         try {
             imageStream = new ByteArrayInputStream(inImage);            
-            ImageInputStream iis = ImageIO.createImageInputStream(imageStream);
+            iis = ImageIO.createImageInputStream(imageStream);
             Iterator readers = ImageIO.getImageReaders(iis);
             
             if(readers.hasNext()){              
@@ -332,9 +333,18 @@ public class ImageConverter {
         } catch (IOException iox){
             throw new ImageConverterException(ImageConverterException.Types.IO_ERROR,"IOException caught when attempting to get imagereader for ByteArray: " + iox.getMessage(),iox);
         } finally {
-            try {
-                imageStream.close();
-            } catch(IOException ignored){}
+        	if(iis != null){
+        		try {
+        			iis.close();
+        		} catch(IOException ignored){}
+        		iis = null;
+        	}
+        	if(imageStream != null){
+	            try {
+	                imageStream.close();
+	            } catch(IOException ignored){}
+	            imageStream = null;
+        	}
         }
         
         return format;
