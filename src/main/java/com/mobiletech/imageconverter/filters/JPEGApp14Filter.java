@@ -57,14 +57,15 @@ public class JPEGApp14Filter {
     public byte[] filter(byte [] inArray, int filterLevel) throws ImageConverterException {
         ByteArrayInputStream input = null;
         ByteArrayOutputStream output = null;
-
+        byte[] result = null;
         try {
             input = new ByteArrayInputStream(inArray);
             output = new ByteArrayOutputStream();
             
             JPEGFilter filter = new JPEGFilter(input);
             setFilterLevel(filterLevel);
-            filter.filter(input,output, defaultMarkers);            
+            filter.filter(input,output, defaultMarkers);     
+            result = output.toByteArray();
         } catch (IOException e) {
             throw new ImageConverterException(ImageConverterException.Types.IO_ERROR,"IOException thrown when filtering JPEG Image",e);
         } finally {
@@ -81,9 +82,6 @@ public class JPEGApp14Filter {
             }
             output = null;
         }        
-        if(output != null){
-        	return output.toByteArray();
-        } 
-        return null;
+        return result;
     }
 }
