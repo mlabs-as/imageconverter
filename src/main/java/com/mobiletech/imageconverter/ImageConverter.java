@@ -44,7 +44,7 @@ import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.3.4";
+    public static final String version = "ImageConverter version 1.3.5";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -403,7 +403,7 @@ public class ImageConverter {
     }
 
     public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight, boolean noEnlargement, int cropLeft,int cropRight, int cropTop, int cropBottom){
-    	return calculateConvertedImageDimension(width, height, desiredWidth, desiredHeight, noEnlargement, 0, 0, 0, 0, false, null);
+    	return calculateConvertedImageDimension(width, height, desiredWidth, desiredHeight, noEnlargement, cropLeft, cropRight, cropTop, cropBottom, false, null);
     }
     
     public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight, boolean noEnlargement, int cropLeft,int cropRight, int cropTop, int cropBottom, boolean ignoreHeight, RotationType rotate){
