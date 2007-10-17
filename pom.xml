@@ -17,7 +17,7 @@
   <ciManagement>
     <notifiers>
       <notifier>
-        <type>Mail</type>
+        <type>mail</type>
         <sendOnError>true</sendOnError>
         <sendOnFailure>true</sendOnFailure>
         <sendOnSuccess>false</sendOnSuccess>
