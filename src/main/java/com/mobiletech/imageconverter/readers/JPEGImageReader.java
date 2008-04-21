@@ -56,8 +56,8 @@ public class JPEGImageReader implements DexImageReader{
         byte [] temp = null; //incrimental filtering not working, need to save the original
         try{        	
 	        while(filterLevel <= maxFilterLevel && !success){
-	        	 temp = null;
-	           	 temp = jpegFilter.filter(inByteArray, filterLevel);
+                     temp = null;
+                     temp = jpegFilter.filter(inByteArray, filterLevel);
                  imageStream = new ByteArrayInputStream(temp);
                  iis = ImageIO.createImageInputStream(imageStream);
                  
@@ -73,7 +73,7 @@ public class JPEGImageReader implements DexImageReader{
              try{            
             	result = reader.read(0);
              	success = true;
-             } catch (IOException e){
+             } catch (Throwable e){
                 // If this was an unsupported jpeg image, it could have been CMYK or YCCK, these are not supported by
              	// ImageIO, we can try to load the image using thrid party code.
              	if(e.getMessage().equalsIgnoreCase("Unsupported Image Type")){
@@ -93,7 +93,7 @@ public class JPEGImageReader implements DexImageReader{
             		 // If the filtering level has exceeded the max, then we have already tried to 
             		 // strip the entire metadata and it makes no difference increasing the filter level any higher
             		 throw e;
-            	 }
+            	 }                 
              } finally {
                  if(reader != null){
                      reader.dispose();
@@ -113,7 +113,7 @@ public class JPEGImageReader implements DexImageReader{
                  }                 
               }     
 	        }      	        
-	    } catch(IOException ioe){
+	    } catch(Throwable ioe){
 	        throw new ImageConverterException(ImageConverterException.Types.IO_ERROR,"IOException thrown when reading from InputByteStream",ioe);
 	    } finally {
             if(reader != null){

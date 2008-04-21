@@ -44,7 +44,7 @@ import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.3.5";
+    public static final String version = "ImageConverter version 1.3.6";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -95,47 +95,47 @@ public class ImageConverter {
             //Validate input parameters
             imageParams = validateParams(imageParams);
             
-        	DexImageReader reader = DexImageReaderFactory.getImageReader(imageParams);
-        	DexImageWriter writer = null;
-        	BufferedImage temp = null;
-        	
+            DexImageReader reader = DexImageReaderFactory.getImageReader(imageParams);
+            DexImageWriter writer = null;
+            BufferedImage temp = null;            
+            
             try {
-				while(reader.hasMore()){
-					temp = reader.getNext();
-					
-					doPipeline(temp,imageParams);
-					
-					// write image
-					temp = imageParams.getInternalVariables().getBufferedImage();
-					//temp = ImageEncoder.prepareForConversion(temp, imageParams);
-					if(writer == null){
-			            if(dim != null){
-			            	if(temp != null){
-				            	dim.height = temp.getHeight();
-				            	dim.width = temp.getWidth();
-			            	} 
-			            }
-						writer = DexImageWriterFactory.getImageWriter(temp, imageParams);
-					}
-					if(!(writer instanceof OptimizingAnimGifWriter)){
-						temp = ImageEncoder.prepareForConversion(temp, imageParams);
-					}
-					writer.writeNext(temp);
-					if(!writer.canWriteMore()){
-						break;
-					}
-				}
-				returnByte = writer.getByte();
-			} finally {
-				if(reader != null){
-					reader.dispose();
-					reader = null;						
-				} 
-				if(writer != null){
-					writer.dispose();
-					writer = null;
-				}
-			}  
+                    while(reader.hasMore()){
+                            temp = reader.getNext();
+
+                            doPipeline(temp,imageParams);
+
+                            // write image
+                            temp = imageParams.getInternalVariables().getBufferedImage();
+                            //temp = ImageEncoder.prepareForConversion(temp, imageParams);
+                            if(writer == null){
+                        if(dim != null){
+                            if(temp != null){
+                                    dim.height = temp.getHeight();
+                                    dim.width = temp.getWidth();
+                            } 
+                        }
+                                    writer = DexImageWriterFactory.getImageWriter(temp, imageParams);
+                            }
+                            if(!(writer instanceof OptimizingAnimGifWriter)){
+                                    temp = ImageEncoder.prepareForConversion(temp, imageParams);
+                            }
+                            writer.writeNext(temp);
+                            if(!writer.canWriteMore()){
+                                    break;
+                            }
+                    }
+                    returnByte = writer.getByte();
+            } finally {
+                    if(reader != null){
+                            reader.dispose();
+                            reader = null;						
+                    } 
+                    if(writer != null){
+                            writer.dispose();
+                            writer = null;
+                    }
+            }  
             // If the image has not been changed, check if the image format was to be converted, or, in case of jpeg to jpeg conversion, if the
             // compression factor should be changed (thus needing the jpeg to be re-encoded with the new compression setting) if neither of these
             // cases are true, then just return the original image
