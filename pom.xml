@@ -43,9 +43,9 @@
     </developers>
     <scm>
         <connection>scm:cvs|local|/mobiletech|dextella|imageconverter</connection>
-        <developerConnection>scm:cvs|ext${maven.username}@cvs.mobiletech.no|/mobiletech|dextella|imageconverter</developerConnection>
-        <url>http://intra.mobiletech.no/cvs/dextella/imageconverter</url>
-    </scm>
+        <developerConnection>scm:cvs|ext|continuum@cvs.mobiletech.no|/mobiletech|dextella|imageconverter</developerConnection>
+        <url>http://cvs.mobiletech.no/viewcvs/viewcvs.cgi/imageconverter</url>
+  </scm>   
     <distributionManagement>
         <repository>
             <id>ssh-repository</id>
