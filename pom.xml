@@ -42,8 +42,8 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:cvs|local|/mobiletech|dextella|imageconverter</connection>
-        <developerConnection>scm:cvs|ext|continuum@cvs.mobiletech.no|/mobiletech|dextella|imageconverter</developerConnection>
+        <connection>scm:cvs|local|/mobiletech|dextella/imageconverter</connection>
+        <developerConnection>scm:cvs|ext|continuum@cvs.mobiletech.no|/mobiletech|dextella/imageconverter</developerConnection>
         <url>http://cvs.mobiletech.no/viewcvs/viewcvs.cgi/imageconverter</url>
   </scm>   
     <distributionManagement>
