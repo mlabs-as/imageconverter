@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>mobiletech</groupId>
@@ -11,9 +9,9 @@
     <artifactId>imageconverter</artifactId>
     <name>Dextella ImageConverter</name>
     <description>The ImageConverter is a component that provides functions to convert images between different formats. It also provides scaling, color modification and watermarking.</description>
-    <version>1.3.7-SNAPSHOT</version>
+    <version>1.3.7</version>
     <inceptionYear>2005</inceptionYear>
-    <url></url>
+    <url />
     <packaging>jar</packaging>
     <ciManagement>
         <notifiers>
@@ -45,6 +43,7 @@
         <connection>scm:cvs|local|/mobiletech|dextella/imageconverter</connection>
         <developerConnection>scm:cvs|ext|continuum@cvs.mobiletech.no|/mobiletech|dextella/imageconverter</developerConnection>
         <url>http://cvs.mobiletech.no/viewcvs/viewcvs.cgi/imageconverter</url>
+    <tag>imageconverter-1_3_7</tag>
   </scm>   
     <distributionManagement>
         <repository>
@@ -58,7 +57,7 @@
     </distributionManagement>
     <reporting>
         <excludeDefaults>false</excludeDefaults>
-        <outputDirectory/>
+        <outputDirectory />
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
