@@ -14,6 +14,10 @@ public class PNGImageReader implements DexImageReader{
 	private ImageConverterParams imageParams = null; // NEEDED
 	private int counter = 0;
 	
+        public String getFormat(){
+            return "png";
+        }
+        
 	private PNGImageReader(){}
 	
 	public PNGImageReader(ImageReader reader, ImageConverterParams imageParams){

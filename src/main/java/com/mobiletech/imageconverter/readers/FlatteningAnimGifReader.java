@@ -34,6 +34,10 @@ public class FlatteningAnimGifReader implements DexImageReader{
 	private ImageConverterParams imageParams = null;
 	private boolean okToFlatten = true;
 	
+        public String getFormat(){
+            return "gif";
+        }
+        
 	private FlatteningAnimGifReader(){}
 	
 	public FlatteningAnimGifReader(ImageReader reader, ImageConverterParams imageParams){

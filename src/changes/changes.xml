@@ -5,6 +5,11 @@
       <author email="ar@mobiletech.no">Andreas Ryland</author>
    </properties>
    <body>
+       <release version="1.3.7" description="Minor Release" date="07.07.2008">    
+		       <action dev="Andreas Ryland" type="add">
+				Added new method for retrieving both the image dimensions and fomrat at the same time. Also updated the get dimensions method to use the newer code
+		       </action>
+		  </release>
        <release version="1.3.6" description="Bugfix Release" date="21.04.2008">    
 		       <action dev="Andreas Ryland" type="fix">
 				Certain JPEG Images fail, the exception throwed by ImageIO as not an IOException so it wasnt caught by the JPEG Reader, changed so that it is now caught so the ImageConverter JPEGReader filter cleaning algorithm can continue and on its max setting it will clean those imges so that ImageIO reads them.

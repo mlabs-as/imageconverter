@@ -13,6 +13,18 @@ public class GeneralImageIOReader implements DexImageReader{
 	private ImageReader reader = null; // NEEDED 
 	private int counter = 0;
 	
+        public String getFormat(){
+            String format = null;
+            if(reader != null){
+                try {
+                format =  reader.getFormatName();
+                } catch(IOException io){
+                    // Ignoring this
+                }
+            } 
+            return format;
+        }
+        
 	private GeneralImageIOReader(){}
 	
 	public GeneralImageIOReader(ImageReader reader){

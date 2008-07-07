@@ -21,6 +21,10 @@ public class GIFReader implements DexImageReader{
 	private ImageConverterParams imageParams = null;
 	private int counter = 0;
 	
+        public String getFormat(){
+            return "gif";
+        }
+        
 	private GIFReader(){}
 	
 	public GIFReader(ImageReader reader, ImageConverterParams imageParams){

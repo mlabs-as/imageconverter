@@ -44,7 +44,7 @@ import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.3.6";
+    public static final String version = "ImageConverter version 1.3.7";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -487,17 +487,30 @@ public class ImageConverter {
     }
     
     public static Dimension getImageDimension(byte [] image) throws ImageConverterException{ 
-    	Dimension dim = new Dimension();
-    	try {
-        ImageConverterParams params = new ImageConverterParams(image);
-        validateParams(params);
-        //params.getInternalVariables().setOldFormat(getImageFormatName(image));
-        params.setFormat(params.getInternalVariables().getOldFormat());
-        BufferedImage [] imgs = ImageDecoder.readImages(image, params);
-        dim.setSize(imgs[0].getWidth(), imgs[0].getHeight());
-    	} catch (Throwable t){
-    		throw new ImageConverterException(ImageConverterException.Types.EMBEDDED_EXCEPTION,t.getClass().getName() + " thrown: " + t.getMessage(),t);
-    	}
+        Dimension dim = new Dimension();
+        getImageDimensionAndFormat(image, dim);
         return dim;
+    }
+    public static String getImageDimensionAndFormat(byte [] image, Dimension dim) throws ImageConverterException{   
+        String format = null;        
+        DexImageReader reader = null;
+        BufferedImage img = null;
+        ImageConverterParams params = new ImageConverterParams(image);        
+        validateParams(params);
+                
+        try {
+            reader = DexImageReaderFactory.getImageReader(params);        
+            img = reader.getNext();
+            format = reader.getFormat();
+            if(dim != null && img != null){
+                dim.setSize(img.getWidth(), img.getHeight());
+            }
+        } catch(ImageConverterException i){
+            throw i;
+        } catch (Throwable t){
+            throw new ImageConverterException(ImageConverterException.Types.EMBEDDED_EXCEPTION,t.getClass().getName() + " thrown: " + t.getMessage(),t);
+    	}
+                
+        return format;
     }
 }

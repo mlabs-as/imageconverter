@@ -35,6 +35,10 @@ public class JPEGImageReader implements DexImageReader{
 	private byte [] inByteArray = null;
 	private int counter = 0;
 	
+        public String getFormat(){
+            return "jpg";
+        }
+        
 	private JPEGImageReader(){}
 	
 	public JPEGImageReader(byte [] inByteArray){

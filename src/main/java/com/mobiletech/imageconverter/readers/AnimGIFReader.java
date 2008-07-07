@@ -23,10 +23,13 @@ public class AnimGIFReader implements DexImageReader{
 	private GIFStreamMetadata streamMetaData = null;
 	private int counter = 0;
 	private int numImages = 0;
-    private Color backgroundColor = Color.white; 
-    private Color transparentColor = null;
+        private Color backgroundColor = Color.white; 
+        private Color transparentColor = null;
 	private ImageConverterParams imageParams = null;
 	
+        public String getFormat(){
+            return "gif";
+        }
 	private AnimGIFReader(){}
 	
 	public AnimGIFReader(ImageReader reader, ImageConverterParams imageParams){
