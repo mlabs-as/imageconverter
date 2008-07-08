@@ -15,7 +15,6 @@ import javax.imageio.stream.*;
 import com.mobiletech.imageconverter.exception.ImageConverterException;
 import com.mobiletech.imageconverter.io.DexImageReaderFactory;
 import com.mobiletech.imageconverter.io.DexImageWriterFactory;
-import com.mobiletech.imageconverter.io.ImageDecoder;
 import com.mobiletech.imageconverter.io.ImageEncoder;
 import com.mobiletech.imageconverter.modifiers.ImageColorModifier;
 import com.mobiletech.imageconverter.modifiers.ImageCropper;
@@ -44,7 +43,7 @@ import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
  *  
  */
 public class ImageConverter {
-    public static final String version = "ImageConverter version 1.3.7";
+    public static final String version = "ImageConverter version 1.3.8";
     
     public static final int WMARK_POS_TOPLEFT = 1;
     public static final int WMARK_POS_TOPRIGHT = 2;
@@ -509,7 +508,11 @@ public class ImageConverter {
             throw i;
         } catch (Throwable t){
             throw new ImageConverterException(ImageConverterException.Types.EMBEDDED_EXCEPTION,t.getClass().getName() + " thrown: " + t.getMessage(),t);
-    	}
+    	} finally {
+            if(reader != null){
+                reader.dispose();
+            }
+        }
                 
         return format;
     }
