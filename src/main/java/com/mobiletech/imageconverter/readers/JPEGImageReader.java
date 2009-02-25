@@ -29,6 +29,8 @@ import com.mobiletech.imageconverter.filters.JPEGApp14Filter;
 import com.mobiletech.imageconverter.io.ImageDecoder;
 import com.mobiletech.imageconverter.jaiextensions.ByteArrayLoadOpDescriptor;
 import com.mobiletech.imageconverter.util.ImageUtil;
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGImageDecoder;
 import com.sun.media.jai.codec.ByteArraySeekableStream;
 
 public class JPEGImageReader implements DexImageReader{
@@ -56,6 +58,8 @@ public class JPEGImageReader implements DexImageReader{
         int filterLevel = 1;
         int maxFilterLevel = JPEGApp14Filter.getMaxFilterLevel();        
         boolean success = false;
+        boolean isfirst = true;
+
 
         byte [] temp = null; //incrimental filtering not working, need to save the original
         try{        	
@@ -63,6 +67,32 @@ public class JPEGImageReader implements DexImageReader{
                      temp = null;
                      temp = jpegFilter.filter(inByteArray, filterLevel);
                  imageStream = new ByteArrayInputStream(temp);
+
+                if(isfirst){
+                    isfirst = false;
+                    String startdefinition = Integer.toHexString(imageStream.read())+Integer.toHexString(imageStream.read())+Integer.toHexString(imageStream.read())+Integer.toHexString(imageStream.read());
+                    if(startdefinition != null && !startdefinition.equalsIgnoreCase("ffd8ffe0")){
+                        // was not JFIF image
+                        String signature = startdefinition+this.getJPEGHeaderSignature(imageStream);                       
+                        if(signature.equalsIgnoreCase("ffd8ffdbffdbffc0ffc4ffc4ffc4ffc4")){
+                            // Trying to match troublesome images from Washington Post                            
+                            imageStream = null;
+                            imageStream = new ByteArrayInputStream(temp);
+                            try{
+                                JPEGImageDecoder dec = JPEGCodec.createJPEGDecoder(imageStream);
+                                result = dec.decodeAsBufferedImage();
+                                success = true;
+                            } catch (Throwable t){
+                                // proceed with alternative process at filterlevel 2
+                                continue;
+                            }
+                            break;
+                        } 
+                    } 
+                    imageStream = null;
+                    imageStream = new ByteArrayInputStream(temp);
+                    isfirst = false;
+                }
                  iis = ImageIO.createImageInputStream(imageStream);
                  
                  Iterator readers = ImageIO.getImageReaders(iis);
@@ -207,5 +237,28 @@ public class JPEGImageReader implements DexImageReader{
          RenderedOp dst = JAI.create("colorconvert", pbjai, hints);
 
          return dst;
-    } 
+    }
+    private String getJPEGHeaderSignature(ByteArrayInputStream in){
+        String sign = "";
+        String temp = null;
+        do{
+            temp = getNextSegment(in);
+            if(temp != null && !temp.equalsIgnoreCase("ffda")){
+                sign += temp;
+            }
+        } while(temp != null && !temp.equalsIgnoreCase("ffda"));
+        return sign;
+    }
+
+    private String getNextSegment(ByteArrayInputStream in){
+        int i = 0;
+        while(i != -1){
+            i = in.read();
+            if(i == 0xff){
+                i = in.read();
+                return "ff"+Integer.toHexString(i);
+            }
+        }
+        return null;
+    }
 }
