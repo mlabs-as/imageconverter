@@ -66,6 +66,7 @@ public class JPEGImageReader implements DexImageReader{
 	        while(filterLevel <= maxFilterLevel && !success){
                      temp = null;
                      temp = jpegFilter.filter(inByteArray, filterLevel);
+                     imageStream = null;
                  imageStream = new ByteArrayInputStream(temp);
 
                 if(isfirst){
