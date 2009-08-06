@@ -13,6 +13,7 @@ import javax.imageio.*;
 import javax.imageio.stream.*;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
+import com.mobiletech.imageconverter.fx.FXProcessor;
 import com.mobiletech.imageconverter.io.DexImageReaderFactory;
 import com.mobiletech.imageconverter.io.DexImageWriterFactory;
 import com.mobiletech.imageconverter.io.ImageEncoder;
@@ -99,41 +100,41 @@ public class ImageConverter {
             BufferedImage temp = null;            
             
             try {
-                    while(reader.hasMore()){
-                            temp = reader.getNext();
+                while(reader.hasMore()){
+                    temp = reader.getNext();
 
-                            doPipeline(temp,imageParams);
+                    doPipeline(temp,imageParams);
 
-                            // write image
-                            temp = imageParams.getInternalVariables().getBufferedImage();
-                            //temp = ImageEncoder.prepareForConversion(temp, imageParams);
-                            if(writer == null){
+                    // write image
+                    temp = imageParams.getInternalVariables().getBufferedImage();
+                    //temp = ImageEncoder.prepareForConversion(temp, imageParams);
+                    if(writer == null){
                         if(dim != null){
                             if(temp != null){
-                                    dim.height = temp.getHeight();
-                                    dim.width = temp.getWidth();
-                            } 
+                                dim.height = temp.getHeight();
+                                dim.width = temp.getWidth();
+                            }
                         }
-                                    writer = DexImageWriterFactory.getImageWriter(temp, imageParams);
-                            }
-                            if(!(writer instanceof OptimizingAnimGifWriter)){
-                                    temp = ImageEncoder.prepareForConversion(temp, imageParams);
-                            }
-                            writer.writeNext(temp);
-                            if(!writer.canWriteMore()){
-                                    break;
-                            }
+                        writer = DexImageWriterFactory.getImageWriter(temp, imageParams);
                     }
-                    returnByte = writer.getByte();
+                    if(!(writer instanceof OptimizingAnimGifWriter)){
+                        temp = ImageEncoder.prepareForConversion(temp, imageParams);
+                    }
+                    writer.writeNext(temp);
+                    if(!writer.canWriteMore()){
+                        break;
+                    }
+                }
+                returnByte = writer.getByte();
             } finally {
-                    if(reader != null){
-                            reader.dispose();
-                            reader = null;						
-                    } 
-                    if(writer != null){
-                            writer.dispose();
-                            writer = null;
-                    }
+                if(reader != null){
+                    reader.dispose();
+                    reader = null;
+                }
+                if(writer != null){
+                    writer.dispose();
+                    writer = null;
+                }
             }  
             // If the image has not been changed, check if the image format was to be converted, or, in case of jpeg to jpeg conversion, if the
             // compression factor should be changed (thus needing the jpeg to be re-encoded with the new compression setting) if neither of these
@@ -141,13 +142,13 @@ public class ImageConverter {
             if(!imageParams.getInternalVariables().isChanged()){
                 // if there was no change in jpeg compression quality...
                 if(imageParams.getJPEGCompressionQuality() <= 0.0){                         
-                        if(imageParams.getFormat().equalsIgnoreCase( imageParams.getInternalVariables().getOldFormat() ) ){
+                    if(imageParams.getFormat().equalsIgnoreCase( imageParams.getInternalVariables().getOldFormat() ) ){
+                        return imageParams.getImage();
+                    }else if((imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpg") ||
+                        imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpeg")) &&
+                        (imageParams.getFormat().equalsIgnoreCase("jpg") || imageParams.getFormat().equalsIgnoreCase("jpeg"))){
                             return imageParams.getImage();
-                        }else if((imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpg") ||
-                                            imageParams.getInternalVariables().getOldFormat().equalsIgnoreCase("jpeg")) && 
-                                                (imageParams.getFormat().equalsIgnoreCase("jpg") || imageParams.getFormat().equalsIgnoreCase("jpeg"))){
-                                                    return imageParams.getImage();
-                                                }
+                    }
                 }
             }      
         } catch(ImageConverterException e){
@@ -235,6 +236,11 @@ public class ImageConverter {
         if(imageParams.isGrayscale()){
         	image = ImageUtil.toBuffImageRGBorARGB(image);
             image = ImageColorModifier.getGrayscale(image);
+            imageParams.getInternalVariables().setChanged(true);
+        }
+        // do ImageFX
+        if(imageParams.getEffects() != null){
+            image = FXProcessor.processEffects(imageParams, image);
             imageParams.getInternalVariables().setChanged(true);
         }
         imageParams.getInternalVariables().setBufferedImage(image);

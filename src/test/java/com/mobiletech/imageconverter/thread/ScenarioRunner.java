@@ -1,6 +1,5 @@
 package com.mobiletech.imageconverter.thread;
 
-import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -12,6 +11,7 @@ import com.mobiletech.imageconverter.fileio.FileUtil;
 import com.mobiletech.imageconverter.fileio.DirectoryUtil;
 import com.mobiletech.imageconverter.vo.TsScenario;
 import com.mobiletech.imageconverter.vo.ScenarioRunStatistics;
+import com.mobiletech.imageconverter.vo.fx.RoundedCornersFX;
 
 public class ScenarioRunner implements Runnable{
     private int imagesDone = 0;
@@ -71,6 +71,7 @@ public class ScenarioRunner implements Runnable{
     private void runTest(String fil, String format){
         byte [] image = FileUtil.readFileAsByte(fil);
         ts.getParams().setImage(image);
+        ts.getParams().addEffect(new RoundedCornersFX());
         long endTime = 0;
         long startTime = System.currentTimeMillis();
         boolean write = false;
@@ -87,8 +88,18 @@ public class ScenarioRunner implements Runnable{
             write = false;            
         }        
         if(write){
+            String name = "file.";
+
+            if(fil.indexOf("\\") != -1) {
+                // windows
+                name = fil.substring(fil.lastIndexOf("\\")+1, fil.lastIndexOf(".")+1);
+            } else if(fil.indexOf("/") != -1) {
+                // linux
+                name = fil.substring(fil.lastIndexOf("/")+1, fil.lastIndexOf(".")+1);
+            }
+
             try {
-                out.writeImage(image,ts.getName(),fil.substring(fil.lastIndexOf("\\")+1, fil.lastIndexOf(".")+1)+ts.getParams().getFormat());
+                out.writeImage(image,ts.getName(),name+ts.getParams().getFormat());
             } catch (RuntimeException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

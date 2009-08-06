@@ -12,6 +12,8 @@ import java.util.Vector;
 import com.mobiletech.imageconverter.vo.ImageConverterInternalVariables;
 import com.mobiletech.imageconverter.vo.ImageWatermark;
 import com.mobiletech.imageconverter.vo.TextWatermark;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * This class is used to pass all desired parameters to the ImageConverter in a
@@ -53,6 +55,7 @@ public class ImageConverterParams {
     private boolean keepAspectRatio = true;
     private boolean ignoreHeight = false;
     private RotationType rotation = null;
+    private Collection<ImageFXVO> effects = null;
     
     // Automatic Variables (Set by this class)
     private boolean hasImageWatermarks = false;
@@ -916,4 +919,20 @@ public class ImageConverterParams {
 	public void setRotation(RotationType rotation) {
 		this.rotation = rotation;
 	}
+
+    public Collection<ImageFXVO> getEffects() {
+        return effects;
+    }
+
+    public void addEffect(ImageFXVO effect){
+        if(effects == null){
+            effects = new ArrayList<ImageFXVO>();
+        }
+        effects.add(effect);
+    }
+
+    public void setEffects(Collection<ImageFXVO> effects) {
+        this.effects = effects;
+    }
+    
 }

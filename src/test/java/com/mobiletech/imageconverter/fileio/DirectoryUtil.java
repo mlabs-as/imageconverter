@@ -153,6 +153,12 @@ public class DirectoryUtil {
             }
         }                                  
     }
+    public void createDirectory(String name){
+        File temp = new File(directory.getAbsolutePath() + "/" + name);
+        temp.mkdirs();
+        temp = null;
+    }
+
     public void createDirectoriesForScenarioNames(Vector<TsScenario> scenarios){
         Iterator<TsScenario> ite = scenarios.iterator();
         File temp = null;
