@@ -10,7 +10,7 @@
     <artifactId>imageconverter</artifactId>
     <name>Dextella ImageConverter</name>
     <description>The ImageConverter is a component that provides functions to convert images between different formats. It also provides scaling, color modification and watermarking.</description>
-    <version>1.3.10-SNAPSHOT</version>
+    <version>1.3.10</version>
     <inceptionYear>2005</inceptionYear>
     <packaging>jar</packaging>
     <ciManagement>
@@ -41,6 +41,7 @@
         <connection>scm:cvs|local|/mobiletech|dextella/imageconverter</connection>
         <developerConnection>scm:cvs|ext|continuum@cvs.mobiletech.no|/mobiletech|dextella/imageconverter</developerConnection>
         <url>http://cvs.mobiletech.no/viewcvs/viewcvs.cgi/imageconverter</url>
+    <tag>imageconverter-1_3_10</tag>
   </scm>   
     <distributionManagement>
         <repository>
