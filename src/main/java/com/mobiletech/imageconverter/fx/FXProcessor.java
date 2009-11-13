@@ -54,7 +54,7 @@ public class FXProcessor {
         int aWidth = base / 100 * 100;
         int aHeight = base / 100 * 100;
 
-        System.out.println("Base: "+base);        
+        //System.out.println("Base: "+base);
 
         gfx.fillRoundRect(0, 0, image.getWidth(), image.getHeight(), 20, 20);
         gfx.setComposite(ac);

@@ -71,7 +71,7 @@ public class ScenarioRunner implements Runnable{
     private void runTest(String fil, String format){
         byte [] image = FileUtil.readFileAsByte(fil);
         ts.getParams().setImage(image);
-        ts.getParams().addEffect(new RoundedCornersFX());
+        //ts.getParams().addEffect(new RoundedCornersFX());
         long endTime = 0;
         long startTime = System.currentTimeMillis();
         boolean write = false;
