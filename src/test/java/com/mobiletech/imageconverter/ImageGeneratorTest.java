@@ -4,9 +4,8 @@ package com.mobiletech.imageconverter;
 import com.mobiletech.imageconverter.fileio.DirectoryUtil;
 
 import com.mobiletech.imageconverter.vo.ImageGeneratorParams;
-import com.mobiletech.imageconverter.vo.fx.RoundedCornersFX;
-import com.mobiletech.imageconverter.vo.templates.GradientGeneratorTemplate;
 import com.mobiletech.imageconverter.vo.templates.IphoneButtonTemplate;
+import com.mobiletech.imageconverter.vo.templates.RoundedCornerGeneratorTemplate;
 import java.awt.Color;
 import junit.framework.TestCase;
 
@@ -21,7 +20,7 @@ public class ImageGeneratorTest extends TestCase{
         testScenarioSourceDirectory = new DirectoryUtil("src/test/resources/testdata/routine");
         
         // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
-        targetDirectory = new DirectoryUtil("/tmp/generatortest"); // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
+        targetDirectory = new DirectoryUtil("/tmp/generatortestz"); // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)
         // WARNING! TARGET DIRECTORY WILL BE EMPTIED! (ALL FILES DELETED)        
     }
     
@@ -32,7 +31,7 @@ public class ImageGeneratorTest extends TestCase{
      
     public void testMain(){                            
         long start = System.currentTimeMillis();
-        outp("\nEmptying Target Directory...");
+        outp("\nEmptying Target Directory yo...");
         targetDirectory.deleteAllFilesAndDirectories();
         out(" done!");        
 
@@ -86,14 +85,48 @@ public class ImageGeneratorTest extends TestCase{
         **/
 
         // Test iPhone button
-        targetDirectory.createDirectory("iphoneButton");
+        targetDirectory.createDirectory("iphoneButtonz");
         params = new ImageGeneratorParams();
         params.setHeight(46);
         params.setWidth(29);
         IphoneButtonTemplate iphoneButton = new IphoneButtonTemplate();
         params.addTemplate(iphoneButton);
         image = ImageGenerator.generateImage(params);
-        targetDirectory.writeImage(image, "iphoneButton", "80x40_iphone.png");
+        targetDirectory.writeImage(image, "iphoneButtonz", "80x40_iphone.png");
+
+        RoundedCornerGeneratorTemplate rounded = new RoundedCornerGeneratorTemplate();
+        params = new ImageGeneratorParams();
+        params.setHeight(10);
+        params.setWidth(10);
+        rounded = new RoundedCornerGeneratorTemplate();
+        rounded.setColor(new Color(40,60,80));
+        rounded.setRadius(10);
+        rounded.setBackgroundColor(new Color(255,255,255));
+        params.addTemplate(rounded);
+        
+        // Test iPhone button
+        targetDirectory.createDirectory("roundedCorner");       
+        rounded.setType(RoundedCornerGeneratorTemplate.TOPLEFT);
+        image = ImageGenerator.generateImage(params);
+        targetDirectory.writeImage(image, "roundedCorner", "topleft.png");        
+
+        // Test iPhone button
+        targetDirectory.createDirectory("roundedCorner");                        
+        rounded.setType(RoundedCornerGeneratorTemplate.TOPRIGHT);
+        image = ImageGenerator.generateImage(params);
+        targetDirectory.writeImage(image, "roundedCorner", "topright.png");
+
+        // Test iPhone button
+        targetDirectory.createDirectory("roundedCorner");        
+        rounded.setType(RoundedCornerGeneratorTemplate.BOTTOMLEFT);
+        image = ImageGenerator.generateImage(params);
+        targetDirectory.writeImage(image, "roundedCorner", "bottomleft.png");
+
+        // Test iPhone button
+        targetDirectory.createDirectory("roundedCorner");         
+        rounded.setType(RoundedCornerGeneratorTemplate.BOTTOMRIGHT);
+        image = ImageGenerator.generateImage(params);
+        targetDirectory.writeImage(image, "roundedCorner", "bottomright.png");
         
         System.out.println("Total time: " + (System.currentTimeMillis()-start)/1000 + " seconds");       
     }

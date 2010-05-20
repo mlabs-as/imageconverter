@@ -8,13 +8,14 @@ package com.mobiletech.imageconverter;
 import com.mobiletech.imageconverter.exception.ImageConverterException;
 import com.mobiletech.imageconverter.fx.FXProcessor;
 import com.mobiletech.imageconverter.io.DexImageWriterFactory;
-import com.mobiletech.imageconverter.io.ImageEncoder;
+import com.mobiletech.imageconverter.modifiers.ImageCropper;
 import com.mobiletech.imageconverter.vo.GeneratorTemplate;
 import com.mobiletech.imageconverter.vo.ImageConverterInternalVariables;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.mobiletech.imageconverter.vo.ImageGeneratorParams;
 import com.mobiletech.imageconverter.vo.templates.GradientGeneratorTemplate;
 import com.mobiletech.imageconverter.vo.templates.IphoneButtonTemplate;
+import com.mobiletech.imageconverter.vo.templates.RoundedCornerGeneratorTemplate;
 import com.mobiletech.imageconverter.writers.DexImageWriter;
 import com.mobiletech.imageconverter.writers.OptimizingAnimGifWriter;
 import java.awt.AlphaComposite;
@@ -47,6 +48,8 @@ public class ImageGenerator {
                     image = doGradient(image, (GradientGeneratorTemplate)template);
                 } else if(template instanceof IphoneButtonTemplate){
                     image = doIphoneButton(image, (IphoneButtonTemplate)template);
+                }else if(template instanceof RoundedCornerGeneratorTemplate){
+                    image = doRoundedCorner(image, (RoundedCornerGeneratorTemplate)template);
                 }
             }
 
@@ -105,6 +108,51 @@ public class ImageGenerator {
         return image;
     }
 
+    private static BufferedImage doRoundedCorner(BufferedImage image, RoundedCornerGeneratorTemplate template){
+        if(template.getColor() != null){
+            image = new BufferedImage(image.getWidth()*2, image.getHeight()*2, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = image.createGraphics();
+            g2d.setPaint(template.getColor());
+            g2d.fillRect(0, 0, image.getHeight(), image.getWidth());
+            g2d.dispose();
+        
+            AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_IN, 1.0f);
+            BufferedImage mask = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+            Graphics2D gfx = mask.createGraphics();
+            gfx.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            gfx.setColor(Color.WHITE);
+            gfx.fillRoundRect(0, 0, image.getWidth(), image.getHeight(), template.getRadius()*2, template.getRadius()*2);
+            gfx.setComposite(ac);
+            gfx.drawImage(image, 0, 0, null);
+            gfx.dispose();
+            switch(template.getType()){
+                case RoundedCornerGeneratorTemplate.TOPLEFT:
+                    mask = ImageCropper.cropImage(mask, 0, 0, image.getHeight()/2, image.getWidth()/2);
+                    break;
+                case RoundedCornerGeneratorTemplate.TOPRIGHT:
+                    mask = ImageCropper.cropImage(mask, image.getWidth()/2, 0, image.getHeight()/2, image.getWidth()/2);
+                    break;
+                case RoundedCornerGeneratorTemplate.BOTTOMLEFT:
+                    mask = ImageCropper.cropImage(mask, 0, image.getHeight()/2, image.getHeight()/2, image.getWidth()/2);
+                    break;
+                case RoundedCornerGeneratorTemplate.BOTTOMRIGHT:
+                    mask = ImageCropper.cropImage(mask, image.getWidth()/2, image.getHeight()/2, image.getHeight()/2, image.getWidth()/2);
+                    break;
+            }
+            if(template.getBackgroundColor() != null){
+                image = new BufferedImage(mask.getWidth(), mask.getHeight(), mask.getType());
+                Graphics2D g22 = image.createGraphics();
+                g22.setColor(template.getBackgroundColor());
+                g22.fillRect(0, 0, image.getHeight(), image.getWidth());
+                g22.drawImage(mask, 0, 0, null);
+                g22.dispose();
+                mask = image;
+            }
+            return mask;
+        }
+        return null;
+    }
+
     private static BufferedImage doIphoneButton(BufferedImage image, IphoneButtonTemplate template){
         GradientPaint gradient = null;
         int height = image.getHeight();
@@ -124,7 +172,7 @@ public class ImageGenerator {
         gradient = new GradientPaint(end+1, border, new Color(255,0,0), 0, height-3, new Color(0,255,0));
         g2d.setPaint(gradient);
         g2d.fillRect(border, end+1, width-border-border, end-border);
-g2d.dispose();
+        g2d.dispose();
         // Border
         AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_IN, 1.0f);
         BufferedImage mask = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
