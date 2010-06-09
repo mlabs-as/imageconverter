@@ -14,6 +14,7 @@ import com.mobiletech.imageconverter.io.ImageDecoder;
 import com.mobiletech.imageconverter.modifiers.ImageScaler;
 import com.mobiletech.imageconverter.vo.ImageWatermark;
 import com.mobiletech.imageconverter.vo.TextWatermark;
+import java.awt.RenderingHints;
 
 
 public class ImageWatermarker {
@@ -82,9 +83,14 @@ public class ImageWatermarker {
         inMark = null;
         return inImage;
     }
-        
+
     public static BufferedImage applyTextWatermark(BufferedImage inImage, TextWatermark watermark) throws ImageConverterException{
-        Graphics2D g2 = inImage.createGraphics(); 
+        Graphics2D g2 = inImage.createGraphics();
+        //Add AlphaComposite with 50% alpha level
+        AlphaComposite alpha = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
+        g2.setComposite(alpha);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         int x = 0;
         int y = 0;
         
