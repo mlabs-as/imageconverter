@@ -15,6 +15,8 @@ import com.mobiletech.imageconverter.modifiers.ImageScaler;
 import com.mobiletech.imageconverter.vo.ImageWatermark;
 import com.mobiletech.imageconverter.vo.TextWatermark;
 import java.awt.RenderingHints;
+import java.awt.font.FontRenderContext;
+import java.awt.font.LineMetrics;
 
 
 public class ImageWatermarker {
@@ -109,14 +111,28 @@ public class ImageWatermarker {
         if(watermark.getWatermarkPosition() != ImageConverter.WMARK_POS_DIAGONAL_CENTER){
             resizeTarget = inImage.getWidth();
         } else {
-            resizeTarget = (int)(Math.sqrt(inImage.getWidth()*inImage.getWidth()+inImage.getHeight()*inImage.getHeight()));
+            resizeTarget = (int)(Math.sqrt((inImage.getWidth()*inImage.getWidth()+inImage.getHeight()*inImage.getHeight())*0.85));
         }
-        while(textlength>resizeTarget && g2.getFont().getSize()>1){
-            Font font = g2.getFont();
-            g2.setFont(font.deriveFont(font.getSize2D()-1));
-            fM = g2.getFontMetrics();
-            textlength = fM.stringWidth(watermark.getText())+2;
+        //System.out.println("ResizeTarget = "+resizeTarget+", TextLength = "+textlength);
+        if (textlength>=resizeTarget) {
+            //System.out.println("Sizing down...");
+            while(textlength>resizeTarget && g2.getFont().getSize()>1){
+                Font font = g2.getFont();
+                g2.setFont(font.deriveFont(font.getSize2D()-1));
+                fM = g2.getFontMetrics();
+                textlength = fM.stringWidth(watermark.getText())+2;
+            }
+            //Resize up
+        } else {
+            //System.out.println("Sizing up...");
+            while (textlength < resizeTarget) {
+                Font font = g2.getFont();
+                g2.setFont(font.deriveFont(font.getSize2D() + 1));
+                fM = g2.getFontMetrics();
+                textlength = fM.stringWidth(watermark.getText())+2;
+            }
         }
+        //System.out.println("ResizeTarget = "+resizeTarget+", TextLength = "+textlength);
         int textheight = fM.getAscent();
         
         switch(watermark.getWatermarkPosition()){
@@ -141,15 +157,34 @@ public class ImageWatermarker {
                 break;
             }           
             case ImageConverter.WMARK_POS_DIAGONAL_CENTER:{
-                AffineTransform oldAT = g2.getTransform(); 
-                AffineTransform newAT = new AffineTransform(); 
+                // Keep shapes centered on panel.
+                AffineTransform at = AffineTransform.getTranslateInstance(inImage.getWidth() / 2, inImage.getHeight() / 2);
+                // Get exact Font Metrics before we draw text
+                FontRenderContext frc = g2.getFontRenderContext();
+                float width = (float) g2.getFont().getStringBounds(watermark.getText(), frc).getWidth();
+                LineMetrics lm = g2.getFont().getLineMetrics(watermark.getText(), frc);
+                float height = lm.getHeight();
+                float descent = lm.getDescent();
+                // Translate to origin of centered text.
+                float px = (inImage.getWidth() - width) / 2;
+                float py = (inImage.getHeight() + height) / 2 - descent;
+                //System.out.printf("imgWidth=%d  imgHeight=%d  strWidth=%.1f  strHeight=%.1f  strDescent=%.1f  pointX=%.1f  pointY=%.1f%n",inImage.getWidth(),inImage.getHeight(),width,height,descent,px,py);
+                // We have finished using at above for the spatial transform
+                // work so we can refit/reuse it for the text rendering.
+                at.setToTranslation(px, py);
 
-                newAT.rotate(Math.toRadians(-45),inImage.getWidth()/2,inImage.getHeight()/2);
-                g2.setTransform(newAT); 
-                y = inImage.getHeight()/2;
-                x = inImage.getWidth()/2-textlength/2;          
-                g2.drawString(watermark.getText(),x,y);
-                g2.setTransform(oldAT);
+                // Rotate text to align with sw - ne diagonal.
+                // Determine the angle of rotation.
+                double theta = Math.atan2(-inImage.getHeight(), inImage.getWidth());
+                // In java, positive angles are measured clockwise from 3 o'clock
+                // except in arc measure which is reversed.
+                //System.out.printf("theta (angle) = %.1f%n", Math.toDegrees(theta));
+
+                AffineTransform xfRotate = AffineTransform.getRotateInstance(theta, inImage.getWidth() / 2, inImage.getHeight() / 2);
+                xfRotate.concatenate(at); // The order is important (matrix math).
+                g2.setFont(g2.getFont().deriveFont(xfRotate));
+                // Since we did all the work in the transform, draw text at (0,0)
+                g2.drawString(watermark.getText(), 0, 0);
                 g2.dispose();
                 return inImage;
             }               
