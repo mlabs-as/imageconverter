@@ -88,7 +88,7 @@ public class ImageWatermarker {
 
     public static BufferedImage applyTextWatermark(BufferedImage inImage, TextWatermark watermark) throws ImageConverterException{
         Graphics2D g2 = inImage.createGraphics();
-        //Add AlphaComposite with 50% alpha level
+        //Add AlphaComposite with 60% alpha level
         AlphaComposite alpha = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f);
         g2.setComposite(alpha);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
