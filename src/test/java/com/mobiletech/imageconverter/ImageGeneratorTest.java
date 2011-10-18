@@ -111,23 +111,23 @@ public class ImageGeneratorTest extends TestCase{
         targetDirectory.writeImage(image, "roundedCorner", "topleft.png");        
 
         // Test iPhone button
-        targetDirectory.createDirectory("roundedCorner");                        
+      /*  targetDirectory.createDirectory("roundedCorner");
         rounded.setType(RoundedCornerGeneratorTemplate.TOPRIGHT);
         image = ImageGenerator.generateImage(params);
         targetDirectory.writeImage(image, "roundedCorner", "topright.png");
-
+        */
         // Test iPhone button
-        targetDirectory.createDirectory("roundedCorner");        
+     /*   targetDirectory.createDirectory("roundedCorner");
         rounded.setType(RoundedCornerGeneratorTemplate.BOTTOMLEFT);
         image = ImageGenerator.generateImage(params);
         targetDirectory.writeImage(image, "roundedCorner", "bottomleft.png");
-
+       */
         // Test iPhone button
-        targetDirectory.createDirectory("roundedCorner");         
+     /*   targetDirectory.createDirectory("roundedCorner");
         rounded.setType(RoundedCornerGeneratorTemplate.BOTTOMRIGHT);
         image = ImageGenerator.generateImage(params);
         targetDirectory.writeImage(image, "roundedCorner", "bottomright.png");
-        
+       */
         System.out.println("Total time: " + (System.currentTimeMillis()-start)/1000 + " seconds");       
     }
     

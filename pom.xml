@@ -8,7 +8,7 @@
     </parent>
     <groupId>mobiletech</groupId>
     <artifactId>imageconverter</artifactId>
-    <name>Dextella ImageConverter</name>
+    <name>Mobiletech ImageConverter</name>
     <description>The ImageConverter is a component that provides functions to convert images between different formats. It also provides scaling, color modification and watermarking.</description>
     <version>1.3.12-SNAPSHOT</version>
     <inceptionYear>2005</inceptionYear>
@@ -37,11 +37,7 @@
             <timezone>+8</timezone>
         </developer>
     </developers>
-    <scm>
-        <connection>scm:cvs|local|/mobiletech|dextella/imageconverter</connection>
-        <developerConnection>scm:cvs|ext|continuum@cvs.mobiletech.no|/mobiletech|dextella/imageconverter</developerConnection>
-        <url>http://cvs.mobiletech.no/viewcvs/viewcvs.cgi/imageconverter</url>
-  </scm>   
+
     <distributionManagement>
         <repository>
             <id>ssh-repository</id>
@@ -82,63 +78,7 @@
                     <minimumTokens>100</minimumTokens>
                 </configuration>
             </plugin>
-      <!-- Manual Changelist -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-changes-plugin</artifactId>
-                <configuration>
-                    <link_template>http://bugs.mobiletech.no/show_bug.cgi?id=%ISSUE%</link_template>
-                </configuration>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>changes-report</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-      <!-- ToDos -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>taglist-maven-plugin</artifactId>
-                <configuration>
-                    <tags>
-                        <tag>todo</tag>
-                        <tag>TODO</tag>
-                        <tag>@todo</tag>
-                        <tag>@TODO</tag>
-                    </tags>
-                </configuration>
-            </plugin>
-      <!-- This does not work before cvs setup is done for it 
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>changelog-maven-plugin</artifactId>
-        </plugin> -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>taglist-maven-plugin</artifactId>
-            </plugin>
-      <!-- XRef report -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jxr-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <configuration>
-                    <configLocation>config/sun_checks.xml</configLocation>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
+
         </plugins>
     </reporting>
     <build>
@@ -155,7 +95,7 @@
         <outputDirectory>${basedir}/target/classes/src</outputDirectory>
         <testOutputDirectory>${basedir}/target/classes/test</testOutputDirectory>
     <!-- <directory>${basedir}/target/bin</directory> -->
-        <finalName>ImageConverter-${version}</finalName>
+        <finalName>imageconverter-${version}</finalName>
    
 
     <!--  COMPILE FOR JAVA 1.5 -->
@@ -206,39 +146,7 @@
             <artifactId>jai_imageio</artifactId>
             <version>1.1</version>
             <type>jar</type>
-        </dependency>   
-    <!--
-    <dependency>
-      <groupId>batik</groupId>
-      <artifactId>batik-svggen</artifactId>
-      <version>1.6</version>
-      <type>jar</type>
-    </dependency>    
-    <dependency>
-      <groupId>batik</groupId>
-      <artifactId>batik-dom</artifactId>
-      <version>1.6</version>
-      <type>jar</type>
-    </dependency>       
-    <dependency>
-      <groupId>batik</groupId>
-      <artifactId>batik-awt-util</artifactId>
-      <version>1.6</version>
-      <type>jar</type>
-    </dependency>        
-    <dependency>
-      <groupId>batik</groupId>
-      <artifactId>batik-util</artifactId>
-      <version>1.6</version>
-      <type>jar</type>
-    </dependency>       
-    <dependency>
-      <groupId>batik</groupId>
-      <artifactId>batik-xml</artifactId>
-      <version>1.6</version>
-      <type>jar</type>
-    </dependency>       
-    -->
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
