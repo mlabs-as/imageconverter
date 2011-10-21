@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>mobiletech</groupId>
@@ -9,125 +10,37 @@
     <groupId>mobiletech</groupId>
     <artifactId>imageconverter</artifactId>
     <name>Mobiletech ImageConverter</name>
-    <description>The ImageConverter is a component that provides functions to convert images between different formats. It also provides scaling, color modification and watermarking.</description>
+    <description>The ImageConverter is a component that provides functions to convert images between different formats.
+        It also provides scaling, color modification and watermarking.
+    </description>
     <version>1.3.12-SNAPSHOT</version>
     <inceptionYear>2005</inceptionYear>
     <packaging>jar</packaging>
-    <ciManagement>
-        <notifiers>
-            <notifier>
-                <type>mail</type>
-                <sendOnSuccess>false</sendOnSuccess>
-                <sendOnWarning>false</sendOnWarning>
-                <configuration>
-                    <address>ar@mobiletech.no</address>
-                </configuration>
-            </notifier>
-        </notifiers>
-    </ciManagement>
-    <developers>
-        <developer>
-            <id>nc9005ar</id>
-            <name>Andreas Ryland</name>
-            <email>ar@mobiletech.no</email>
-            <organization>Mobiletech AS</organization>
-            <roles>
-                <role>Developer</role>
-            </roles>
-            <timezone>+8</timezone>
-        </developer>
-    </developers>
-<!--
-    <distributionManagement>
-        <repository>
-            <id>ssh-repository</id>
-            <url>scp://maven.mobiletech.no/home/maven/repo</url>
-        </repository>
-        <site>
-            <id>ssh-repository</id>
-            <url>scp://maven.mobiletech.no/home/maven/projects/imageconverter/</url>
-        </site>
-    </distributionManagement>-->
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>surefire-report-maven-plugin</artifactId>
-        <!-- <configuration>
-          <skip>true</skip>
-        </configuration> -->
-            </plugin>
-      <!-- Need to buy Cenqua Clover for this test coverage report -->
-      <!-- <plugin>
-        <artifactId>maven-clover-plugin</artifactId>
-      </plugin> -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <version>2.0</version>
-                <configuration>
-                    <sourceJdk>1.5</sourceJdk>
-                    <targetJdk>1.5</targetJdk>
-                    <rulesets>
-                        <ruleset>/rulesets/basic.xml</ruleset>
-                        <ruleset>/rulesets/controversial.xml</ruleset>
-                    </rulesets>
-                    <format>xml</format>
-                    <linkXref>true</linkXref>
-                    <sourceEncoding>ISO-8859-1</sourceEncoding>
-                    <minimumTokens>100</minimumTokens>
-                </configuration>
-            </plugin>
 
-        </plugins>
-    </reporting>
+    <scm>
+        <connection>scm:cvs|local|/mobiletech|dextella/imageconverter</connection>
+        <developerConnection>scm:cvs|local|/mobiletech|dextella/imageconverter</developerConnection>
+        <url>http://cvs.mobiletech.no/cvs/dextella/imageconverter</url>
+    </scm>
     <build>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh-external</artifactId>
-                <version>1.0-alpha-5</version>
-            </extension>
-        </extensions>
-    <!-- <defaultGoal>compile war:manifest war:war</defaultGoal> -->
-        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
-        <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
-        <outputDirectory>${basedir}/target/classes/src</outputDirectory>
-        <testOutputDirectory>${basedir}/target/classes/test</testOutputDirectory>
-    <!-- <directory>${basedir}/target/bin</directory> -->
-        <finalName>imageconverter-${version}</finalName>
-   
-
-    <!--  COMPILE FOR JAVA 1.5 -->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
-                    <encoding>UTF-8</encoding>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.2</version>
                 <configuration>
-                    <encoding>UTF-8</encoding>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>${basedir}/src/main/java</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*.properties</include>
-                    <include>**/*.xml</include>
-                </includes>
-            </resource>
-        </resources>
     </build>
+
     <dependencies>
         <dependency>
             <groupId>jai</groupId>
