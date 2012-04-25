@@ -17,8 +17,8 @@
     <packaging>jar</packaging>
 
     <scm>
-        <connection>scm:cvs|local|/mobiletech|dextella/imageconverter</connection>
-        <developerConnection>scm:cvs|local|/mobiletech|dextella/imageconverter</developerConnection>
+        <connection>scm:git:ssh://git@bruno.mobiletech.no/imageconverter.git</connection>
+        <developerConnection>scm:git:ssh://git@bruno.mobiletech.no/imageconverter.git</developerConnection>
         <url>http://cvs.mobiletech.no/cvs/dextella/imageconverter</url>
   </scm>
     <build>
