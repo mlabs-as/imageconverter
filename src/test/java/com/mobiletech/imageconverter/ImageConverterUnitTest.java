@@ -21,7 +21,7 @@ public class ImageConverterUnitTest {
     
     @Test
     public void testHydroImage() {
-        byte[] imgBytes = FileUtil.readFileAsByte("src/test/resources/testdata/IMG_8133_Oyvind_100x150.jpg");
+        byte[] imgBytes = FileUtil.readFileAsByte("testdata/IMG_8133_Oyvind_100x150.jpg");
         try {
             Dimension dim = ImageConverter.getImageDimension(imgBytes);
             assertEquals(150, (int)dim.getHeight());
@@ -35,7 +35,7 @@ public class ImageConverterUnitTest {
     
     @Test
     public void testEdweekImage() {
-        byte[] imgBytes = FileUtil.readFileAsByte("src/test/resources/testdata/indianatesting_600.jpg");
+        byte[] imgBytes = FileUtil.readFileAsByte("testdata/indianatesting_600.jpg");
         try {
             Dimension dim = ImageConverter.getImageDimension(imgBytes);
             //assertEquals(150, (int)dim.getHeight());
