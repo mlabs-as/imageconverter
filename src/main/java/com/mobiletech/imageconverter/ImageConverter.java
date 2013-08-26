@@ -526,29 +526,44 @@ public class ImageConverter {
     }
 
     public static String getImageDimensionAndFormat(byte[] image, Dimension dim) throws ImageConverterException {
+        ByteArrayInputStream imageStream = null;
+        ImageInputStream iis = null;
         String format = null;
-        DexImageReader reader = null;
-        BufferedImage img = null;
-        ImageConverterParams params = new ImageConverterParams(image);
-        validateParams(params);
 
         try {
-            reader = DexImageReaderFactory.getImageReader(params);
-            img = reader.getNext();
-            format = reader.getFormat();
-            if (dim != null && img != null) {
-                dim.setSize(img.getWidth(), img.getHeight());
+            imageStream = new ByteArrayInputStream(image);
+            iis = ImageIO.createImageInputStream(imageStream);
+            Iterator readers = ImageIO.getImageReaders(iis);
+
+            if (readers.hasNext()) {
+                ImageReader reader = (ImageReader) readers.next();
+                reader.setInput(iis);
+                format = reader.getFormatName();
+                if (dim!=null) {
+                    dim.setSize(reader.getWidth(reader.getMinIndex()), reader.getHeight(reader.getMinIndex()));
+                }
+            } else {
+                throw new ImageConverterException(ImageConverterException.Types.READ_CODEC_NOT_FOUND, "No image readers found for the image type of the supplied image", null);
             }
         } catch (ImageConverterException i) {
             throw i;
-        } catch (Throwable t) {
-            throw new ImageConverterException(ImageConverterException.Types.EMBEDDED_EXCEPTION, t.getClass().getName() + " thrown: " + t.getMessage(), t);
+        } catch (IOException iox) {
+            throw new ImageConverterException(ImageConverterException.Types.IO_ERROR, "IOException caught when attempting to get imagereader for ByteArray: " + iox.getMessage(), iox);
         } finally {
-            if (reader != null) {
-                reader.dispose();
+            if (iis != null) {
+                try {
+                    iis.close();
+                } catch (IOException ignored) {
+                }
+            }
+            if (imageStream != null) {
+                try {
+                    imageStream.close();
+                } catch (IOException ignored) {
+                }
             }
         }
 
-        return format;
+        return format;        
     }
 }

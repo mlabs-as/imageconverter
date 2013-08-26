@@ -23,6 +23,7 @@ public class ImageConverterUnitTest {
     public void testHydroImage() {
         byte[] imgBytes = FileUtil.readFileAsByte("testdata/IMG_8133_Oyvind_100x150.jpg");
         try {
+            assertEquals("JPEG", ImageConverter.getImageFormatName(imgBytes));
             Dimension dim = ImageConverter.getImageDimension(imgBytes);
             assertEquals(150, (int)dim.getHeight());
             assertEquals(100, (int)dim.getWidth());
@@ -37,8 +38,9 @@ public class ImageConverterUnitTest {
     public void testEdweekImage() {
         byte[] imgBytes = FileUtil.readFileAsByte("testdata/indianatesting_600.jpg");
         try {
+            assertEquals("JPEG", ImageConverter.getImageFormatName(imgBytes));
             Dimension dim = ImageConverter.getImageDimension(imgBytes);
-            //assertEquals(150, (int)dim.getHeight());
+            assertEquals(399, (int)dim.getHeight());
             assertEquals(600, (int)dim.getWidth());
         } catch (ImageConverterException ex) {
             fail(ex.getMessage());
