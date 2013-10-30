@@ -47,4 +47,19 @@ public class ImageConverterUnitTest {
         }
         
     }
+    @Test
+    public void testEdweekImage2() {
+        byte[] imgBytes = FileUtil.readFileAsByte("src/test/resources/testdata/service_600-2.jpg");
+        try {
+            assertEquals("JPEG", ImageConverter.getImageFormatName(imgBytes));
+            Dimension dim = ImageConverter.getImageDimension(imgBytes);
+            System.out.println("Height : "+dim.getHeight());
+            System.out.println("Width : "+dim.getWidth());
+            assertEquals(400, (int)dim.getHeight());
+            assertEquals(600, (int)dim.getWidth());
+        } catch (ImageConverterException ex) {
+            fail(ex.getMessage());
+        }
+        
+    }
 }
