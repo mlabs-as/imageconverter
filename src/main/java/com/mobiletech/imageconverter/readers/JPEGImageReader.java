@@ -32,6 +32,8 @@ import com.mobiletech.imageconverter.util.ImageUtil;
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageDecoder;
 import com.sun.media.jai.codec.ByteArraySeekableStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JPEGImageReader implements DexImageReader {
 
@@ -47,9 +49,29 @@ public class JPEGImageReader implements DexImageReader {
 
     public JPEGImageReader(byte[] inByteArray) {
         this.inByteArray = inByteArray;
+        if (inByteArray==null) {
+            System.out.println("inByteArray was null");
+        }
     }
 
     public BufferedImage getNext() throws ImageConverterException {
+        ByteArrayInputStream image = null;
+        try {
+            image = new ByteArrayInputStream(inByteArray);
+            return ImageIO.read(image);
+        } catch (IOException ioe) {
+            Logger.getLogger(JPEGImageReader.class.getName()).log(Level.SEVERE, "Got an exception when trying to read the JPEG image.", ioe);
+            throw new ImageConverterException(ImageConverterException.Types.READ_CODEC_NOT_FOUND, "No image readers found for the image type of the supplied image", ioe);
+        } finally {
+                if (image != null) {
+                    try {
+                        image.close();
+                    } catch (IOException ex) {
+                        //Logger.getLogger(JPEGImageReader.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+        }
+        /*
         counter++;
         BufferedImage result = null;
 
@@ -184,6 +206,7 @@ public class JPEGImageReader implements DexImageReader {
             result = ImageUtil.toBuffImageRGBorARGB(result);
         }
         return result;
+        */
     }
 
     public boolean hasMore() {
