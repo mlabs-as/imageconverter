@@ -128,55 +128,61 @@ public class JPEGImageReader implements DexImageReader {
                     throw new ImageConverterException(ImageConverterException.Types.READ_CODEC_NOT_FOUND, "No image readers found for the image type of the supplied image", null);
                 }
 
-                reader.setInput(iis, false);
-                try {
-                    result = reader.read(0);
-                    success = true;
-                } catch (Throwable e) {
-                    // If this was an unsupported jpeg image, it could have been CMYK or YCCK, these are not supported by
-                    // ImageIO, we can try to load the image using thrid party code.
-                    if (e.getMessage().equalsIgnoreCase("Unsupported Image Type")) {
-                        IIOMetadata metadata = reader.getImageMetadata(0);
-                        if (null != metadata) {
-                            String metadataFormat = metadata.getNativeMetadataFormatName();
-                            IIOMetadataNode iioNode = (IIOMetadataNode) metadata.getAsTree(metadataFormat);
+                        reader.setInput(iis, false);
+                        try {
+                            result = reader.read(0);
+                            success = true;
+                        } catch (Throwable e) {
+                            Logger.getLogger(JPEGImageReader.class.getName()).log(Level.SEVERE, "Got an exception when trying to read the JPEG image.", e);
+                            // If this was an unsupported jpeg image, it could have been CMYK or YCCK, these are not supported by
+                            // ImageIO, we can try to load the image using thrid party code.
+                            if (e.getMessage().equalsIgnoreCase("Unsupported Image Type")) {
+                                try {
+                                    IIOMetadata metadata = reader.getImageMetadata(0);
+                                    if (null != metadata) {
+                                        String metadataFormat = metadata.getNativeMetadataFormatName();
+                                        IIOMetadataNode iioNode = (IIOMetadataNode) metadata.getAsTree(metadataFormat);
 
-                            NodeList children = iioNode.getElementsByTagName("app14Adobe");
-                            if (children.getLength() > 0) {
-                                result = createJPEG4(inByteArray);
-                                success = true;
+                                        NodeList children = iioNode.getElementsByTagName("app14Adobe");
+                                        if (children.getLength() > 0) {
+                                            result = createJPEG4(inByteArray);
+                                            success = true;
+                                        }
+                                    }
+                                } catch (IOException ioe) {
+                                    Logger.getLogger(JPEGImageReader.class.getName()).log(Level.SEVERE, "Got an exception when trying to read MetaData of the JPEG image.", ioe);
+                                }
                             }
-                        }
-                    }
-                    // We got an io exception, attempt to increase level of filtering to make the image readable
-                    filterLevel++;
-                    if (filterLevel > maxFilterLevel) {
-                        // If the filtering level has exceeded the max, then we have already tried to 
-                        // strip the entire metadata and it makes no difference increasing the filter level any higher
-                        throw e;
-                    }
-                } finally {
+                            // We got an io exception, attempt to increase level of filtering to make the image readable
+                            filterLevel++;
+                            if (filterLevel > maxFilterLevel) {
+                                // If the filtering level has exceeded the max, then we have already tried to 
+                                // strip the entire metadata and it makes no difference increasing the filter level any higher
+                                throw e;
+                            }
+                        } finally {
                     if (reader != null) {
-                        reader.dispose();
-                        reader = null;
+                                reader.dispose();
+                                reader = null;
+                                }
+                if (iis != null) {
+                    try {
+                        iis.close();
+                    } catch (IOException ignored) {
                     }
-                    if (iis != null) {
-                        try {
-                            iis.close();
-                        } catch (IOException ignored) {
-                        }
-                        iis = null;
+                    iis = null;
+                }
+                if (imageStream != null) {
+                    try {
+                        imageStream.close();
+                    } catch (IOException ignored) {
                     }
-                    if (imageStream != null) {
-                        try {
-                            imageStream.close();
-                        } catch (IOException ignored) {
-                        }
-                        imageStream = null;
-                    }
+                    imageStream = null;
                 }
             }
+            }
         } catch (Throwable ioe) {
+            Logger.getLogger(JPEGImageReader.class.getName()).log(Level.WARNING, "Throwable caught when reading JPEG image", ioe);
             throw new ImageConverterException(ImageConverterException.Types.IO_ERROR, "IOException thrown when reading from InputByteStream", ioe);
         } finally {
             if (reader != null) {

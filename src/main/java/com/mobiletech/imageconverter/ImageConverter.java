@@ -51,6 +51,7 @@ public class ImageConverter {
     public static final int WMARK_POS_BOTTOMRIGHT = 4;
     public static final int WMARK_POS_CENTER = 5;
     public static final int WMARK_POS_DIAGONAL_CENTER = 6;
+    public static boolean HAS_SCANNED = false;
 
     /**
      * Takes an original image and performs conversion on it to produce a
@@ -64,6 +65,10 @@ public class ImageConverter {
      * @throws ImageConverterException
      */
     public static byte[] convertImage(ImageConverterParams imageParams) throws ImageConverterException {
+        if (!HAS_SCANNED) {
+            ImageIO.scanForPlugins();
+            HAS_SCANNED=true;
+        }
         return convertImage(imageParams, null);
     }
 
@@ -80,6 +85,10 @@ public class ImageConverter {
      * @throws ImageConverterException
      */
     public static byte[] convertImage(ImageConverterParams imageParams, Dimension dim) throws ImageConverterException {
+        if (!HAS_SCANNED) {
+            ImageIO.scanForPlugins();
+            HAS_SCANNED=true;
+        }
         // Determine pipeline
         //imageParams.setFastMode(false);
         // run pipeline
@@ -160,6 +169,10 @@ public class ImageConverter {
     }
 
     public static BufferedImage getBufferedImage(byte[] image) throws ImageConverterException {
+        if (!HAS_SCANNED) {
+            ImageIO.scanForPlugins();
+            HAS_SCANNED=true;
+        }
         ImageConverterParams params = new ImageConverterParams(image);
         BufferedImage temp = null;
         params = validateParams(params);
@@ -283,6 +296,10 @@ public class ImageConverter {
     }
 
     public static String getImageFormatName(byte[] inImage) throws ImageConverterException {
+        if (!HAS_SCANNED) {
+            ImageIO.scanForPlugins();
+            HAS_SCANNED=true;
+        }
         ByteArrayInputStream imageStream = null;
         ImageInputStream iis = null;
         String format = null;
@@ -321,6 +338,10 @@ public class ImageConverter {
     }
 
     public static boolean isSupportedImage(File image) {
+        if (!HAS_SCANNED) {
+            ImageIO.scanForPlugins();
+            HAS_SCANNED=true;
+        }
         boolean result = false;
 
         if (null == image) {
@@ -349,6 +370,10 @@ public class ImageConverter {
     }
 
     public static String getFormatOfSupportedImage(File image) {
+        if (!HAS_SCANNED) {
+            ImageIO.scanForPlugins();
+            HAS_SCANNED=true;
+        }
         String format = null;
 
         if (null == image) {
@@ -379,6 +404,10 @@ public class ImageConverter {
     }
 
     public static int getNumberOfFramesInImage(File image) {
+        if (!HAS_SCANNED) {
+            ImageIO.scanForPlugins();
+            HAS_SCANNED=true;
+        }
         int frames = 1;
 
         if (null == image) {
@@ -408,10 +437,18 @@ public class ImageConverter {
     }
 
     public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight, boolean noEnlargement) {
+        if (!HAS_SCANNED) {
+            ImageIO.scanForPlugins();
+            HAS_SCANNED=true;
+        }
         return calculateConvertedImageDimension(width, height, desiredWidth, desiredHeight, noEnlargement, null, null, null, null, false, null);
     }
 
     public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight, boolean noEnlargement, String cropLeft, String cropRight, String cropTop, String cropBottom) {
+        if (!HAS_SCANNED) {
+            ImageIO.scanForPlugins();
+            HAS_SCANNED=true;
+        }
         return calculateConvertedImageDimension(width, height, desiredWidth, desiredHeight, noEnlargement, cropLeft, cropRight, cropTop, cropBottom, false, null);
     }
 
@@ -439,6 +476,10 @@ public class ImageConverter {
     }
 
     public static Dimension calculateConvertedImageDimension(int width, int height, int desiredWidth, int desiredHeight, boolean noEnlargement, String cropLeft, String cropRight, String cropTop, String cropBottom, boolean ignoreHeight, RotationType rotate) {
+        if (!HAS_SCANNED) {
+            ImageIO.scanForPlugins();
+            HAS_SCANNED=true;
+        }
         if (cropLeft != null || cropRight != null || cropTop != null || cropBottom != null) {
             double w = width;
             double h = height;
@@ -489,6 +530,10 @@ public class ImageConverter {
     }
 
     public static boolean isSupportedImageFormat(String format) {
+        if (!HAS_SCANNED) {
+            ImageIO.scanForPlugins();
+            HAS_SCANNED=true;
+        }
         boolean returnvalue = false;
         if (null == format) {
             return false;
@@ -520,12 +565,20 @@ public class ImageConverter {
     }
 
     public static Dimension getImageDimension(byte[] image) throws ImageConverterException {
+        if (!HAS_SCANNED) {
+            ImageIO.scanForPlugins();
+            HAS_SCANNED=true;
+        }
         Dimension dim = new Dimension();
         getImageDimensionAndFormat(image, dim);
         return dim;
     }
 
     public static String getImageDimensionAndFormat(byte[] image, Dimension dim) throws ImageConverterException {
+        if (!HAS_SCANNED) {
+            ImageIO.scanForPlugins();
+            HAS_SCANNED=true;
+        }
         ByteArrayInputStream imageStream = null;
         ImageInputStream iis = null;
         String format = null;
