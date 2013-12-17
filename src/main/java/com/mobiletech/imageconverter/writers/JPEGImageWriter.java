@@ -6,9 +6,9 @@ import java.io.IOException;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import com.sun.media.jai.codec.JPEGEncodeParam;
+import com.sun.media.jai.codecimpl.JPEGCodec;
+import com.sun.media.jai.codecimpl.JPEGImageEncoder;
 
 public class JPEGImageWriter implements DexImageWriter {
 	private byte[] result= null;
@@ -46,7 +46,7 @@ public class JPEGImageWriter implements DexImageWriter {
         if(params.getJPEGCompressionQuality() != 0){                
             JPEGEncodeParam param = JPEGCodec.getDefaultJPEGEncodeParam(image);
             if(params.getJPEGCompressionQuality() > 0){
-                param.setQuality(params.getJPEGCompressionQuality(),true);
+                param.setQuality(params.getJPEGCompressionQuality());
             }
             //if(params.useSubsampling()){
                 param.setHorizontalSubsampling(0, 1); 

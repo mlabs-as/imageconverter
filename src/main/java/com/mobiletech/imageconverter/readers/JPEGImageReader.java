@@ -10,27 +10,17 @@ import java.awt.image.DataBuffer;
 import java.awt.image.renderable.ParameterBlock;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Iterator;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.metadata.IIOMetadataNode;
-import javax.imageio.stream.ImageInputStream;
 import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
 import javax.media.jai.ParameterBlockJAI;
 import javax.media.jai.RenderedOp;
 
-import org.w3c.dom.NodeList;
 
 import com.mobiletech.imageconverter.exception.ImageConverterException;
-import com.mobiletech.imageconverter.filters.JPEGApp14Filter;
 import com.mobiletech.imageconverter.io.ImageDecoder;
 import com.mobiletech.imageconverter.jaiextensions.ByteArrayLoadOpDescriptor;
-import com.mobiletech.imageconverter.util.ImageUtil;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageDecoder;
 import com.sun.media.jai.codec.ByteArraySeekableStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
