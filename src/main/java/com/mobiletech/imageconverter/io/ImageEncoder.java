@@ -188,7 +188,7 @@ public class ImageEncoder {
                 if (writers != null) {
                     imgWriter = writers.next();
                 }
-
+                imgWriter.setOutput(ios);
                 ImageWriteParam writeParam = imgWriter.getDefaultWriteParam();
                 writeParam = new JPEGImageWriteParam(Locale.US);
                 ((JPEGImageWriteParam) writeParam).setOptimizeHuffmanTables(true);
