@@ -30,8 +30,6 @@ import com.mobiletech.imageconverter.jaiextensions.ToIndexColorImageOpDescriptor
 import com.mobiletech.imageconverter.util.ImageUtil;
 import com.mobiletech.imageconverter.vo.ImageConverterParams;
 import com.sun.imageio.plugins.gif.GIFImageMetadata;
-import com.sun.media.jai.codec.JPEGEncodeParam;
-import com.sun.media.jai.codecimpl.JPEGCodec;
 import com.sun.media.jai.codecimpl.JPEGImageEncoder;
 import java.util.Locale;
 import javax.imageio.ImageWriteParam;
