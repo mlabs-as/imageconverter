@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8"?><TestScenarios><TestScenario><ScenarioName>400x400 JPEG</ScenarioName><ScenarioFormat>All</ScenarioFormat><OnlyMultiframe>false</OnlyMultiframe><ImageParams><Format>jpg</Format><Height>176</Height><Width>176</Width><Grayscale>false</Grayscale><NoEnlargment>false</NoEnlargment></ImageParams></TestScenario></TestScenarios>
