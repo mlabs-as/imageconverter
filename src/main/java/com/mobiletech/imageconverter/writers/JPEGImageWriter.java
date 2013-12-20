@@ -57,13 +57,13 @@ public class JPEGImageWriter implements DexImageWriter {
         ImageWriter imgWriter = null;
         try {
             ImageOutputStream ios = ImageIO.createImageOutputStream(output);
-            JPEGImageEncoder enc;
 
             Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
             if (writers != null) {
                 imgWriter = writers.next();
             }
 
+            imgWriter.setOutput(ios);
             ImageWriteParam writeParam = imgWriter.getDefaultWriteParam();
             writeParam = new JPEGImageWriteParam(Locale.US);
             ((JPEGImageWriteParam) writeParam).setOptimizeHuffmanTables(true);
